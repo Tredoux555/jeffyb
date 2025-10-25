@@ -6,7 +6,7 @@ import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
 import { Modal } from '@/components/Modal'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import { DeliveryRequest } from '@/types/database'
 import { 
   Search, 
@@ -86,6 +86,7 @@ export default function AdminDeliveriesPage() {
   const fetchDeliveries = async () => {
     try {
       setLoading(true)
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('delivery_requests')
         .select('*')
@@ -132,6 +133,7 @@ export default function AdminDeliveriesPage() {
         updateData.estimated_arrival = etaInput
       }
       
+      const supabase = createClient()
       const { error } = await supabase
         .from('delivery_requests')
         .update(updateData)

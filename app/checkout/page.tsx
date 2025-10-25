@@ -6,7 +6,7 @@ import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
 import { CartItem } from '@/types/database'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import { CheckCircle, CreditCard, Truck } from 'lucide-react'
 
 export default function CheckoutPage() {
@@ -56,6 +56,7 @@ export default function CheckoutPage() {
     
     try {
       // Create order in Supabase
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('orders')
         .insert({

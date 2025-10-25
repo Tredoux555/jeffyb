@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import { 
   Package, 
   ShoppingCart, 
@@ -44,6 +44,7 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     try {
       setLoading(true)
+      const supabase = createClient()
       
       // Fetch products count
       const { count: productsCount } = await supabase

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import { User, Lock, Package } from 'lucide-react'
 
 export default function AdminLoginPage() {

@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import { Package, Truck, MapPin, User, Phone } from 'lucide-react'
 
 export default function DeliveryPage() {
@@ -38,6 +38,7 @@ export default function DeliveryPage() {
     setLoading(true)
     
     try {
+      const supabase = createClient()
       const { error } = await supabase
         .from('delivery_requests')
         .insert({
@@ -73,6 +74,7 @@ export default function DeliveryPage() {
     setLoading(true)
     
     try {
+      const supabase = createClient()
       const { error } = await supabase
         .from('delivery_requests')
         .insert({

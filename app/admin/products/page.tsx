@@ -7,7 +7,7 @@ import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
 import { Modal } from '@/components/Modal'
 import { ImageUpload } from '@/components/ImageUpload'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import { Product } from '@/types/database'
 import { 
   Plus, 
@@ -67,6 +67,7 @@ export default function AdminProductsPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true)
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -101,6 +102,7 @@ export default function AdminProductsPage() {
   const handleImageUpload = async (file: File) => {
     setUploading(true)
     try {
+      const supabase = createClient()
       // Upload to Supabase Storage
       const fileExt = file.name.split('.').pop()
       const fileName = `${Date.now()}.${fileExt}`
@@ -129,6 +131,7 @@ export default function AdminProductsPage() {
     e.preventDefault()
     
     try {
+      const supabase = createClient()
       const productData = {
         name: formData.name,
         description: formData.description,
@@ -190,6 +193,7 @@ export default function AdminProductsPage() {
     if (!confirm('Are you sure you want to delete this product?')) return
     
     try {
+      const supabase = createClient()
       const { error } = await supabase
         .from('products')
         .delete()

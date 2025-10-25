@@ -6,7 +6,7 @@ import { ProductCard } from '@/components/ProductCard'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
 import { Product, CartItem } from '@/types/database'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import { Search, Filter, Grid, List } from 'lucide-react'
 
 export default function ProductsPage() {
@@ -38,6 +38,7 @@ export default function ProductsPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true)
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('products')
         .select('*')

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { CheckCircle, Package, Truck, Mail } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import { Order } from '@/types/database'
 
 function CheckoutSuccessContent() {
@@ -26,6 +26,7 @@ function CheckoutSuccessContent() {
   
   const fetchOrder = async () => {
     try {
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('orders')
         .select('*')
