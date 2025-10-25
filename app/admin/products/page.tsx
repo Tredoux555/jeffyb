@@ -103,6 +103,20 @@ export default function AdminProductsPage() {
     setUploading(true)
     try {
       const supabase = createClient()
+      
+      // Check if storage bucket exists
+      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets()
+      if (bucketError) {
+        console.error('Error checking buckets:', bucketError)
+        throw new Error('Unable to access storage')
+      }
+      
+      const productImagesBucket = buckets?.find(bucket => bucket.name === 'product-images')
+      if (!productImagesBucket) {
+        console.error('product-images bucket not found')
+        throw new Error('Storage bucket not configured. Please contact administrator.')
+      }
+      
       // Upload to Supabase Storage
       const fileExt = file.name.split('.').pop()
       const fileName = `${Date.now()}.${fileExt}`
@@ -111,17 +125,21 @@ export default function AdminProductsPage() {
         .from('product-images')
         .upload(fileName, file)
       
-      if (error) throw error
+      if (error) {
+        console.error('Upload error:', error)
+        throw error
+      }
       
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('product-images')
         .getPublicUrl(fileName)
       
+      console.log('Image uploaded successfully:', publicUrl)
       setFormData({ ...formData, image_url: publicUrl })
     } catch (error) {
       console.error('Error uploading image:', error)
-      alert('Error uploading image')
+      alert(`Error uploading image: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setUploading(false)
     }
@@ -233,36 +251,36 @@ export default function AdminProductsPage() {
   
   return (
     <div className="min-h-screen bg-jeffy-yellow">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Product Management</h1>
-            <p className="text-gray-600">Manage your product catalog</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Product Management</h1>
+            <p className="text-sm sm:text-base text-gray-600">Manage your product catalog</p>
           </div>
-          <Button onClick={openAddModal}>
+          <Button onClick={openAddModal} className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             Add Product
           </Button>
         </div>
         
         {/* Filters */}
-        <Card className="mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
+        <Card className="mb-6 sm:mb-8 p-3 sm:p-4">
+          <div className="flex flex-col gap-3 sm:gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 placeholder="Search products..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 text-sm sm:text-base"
               />
             </div>
             
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-jeffy-yellow focus:border-transparent"
+              className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-jeffy-yellow focus:border-transparent text-sm sm:text-base"
             >
               <option value="all">All Categories</option>
               {categories.map((category) => (
@@ -274,8 +292,8 @@ export default function AdminProductsPage() {
           </div>
           
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Filter className="w-4 h-4" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+              <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>{filteredProducts.length} products found</span>
             </div>
           </div>
@@ -295,11 +313,11 @@ export default function AdminProductsPage() {
             </div>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {filteredProducts.map((product) => (
-              <Card key={product.id} className="group hover:shadow-jeffy-lg transition-all duration-300">
+              <Card key={product.id} className="group hover:shadow-jeffy-lg transition-all duration-300 p-3 sm:p-4">
                 {/* Product Image */}
-                <div className="relative w-full h-48 mb-4 overflow-hidden rounded-lg">
+                <div className="relative w-full h-40 sm:h-48 mb-3 sm:mb-4 overflow-hidden rounded-lg">
                   {product.image_url ? (
                     <img
                       src={product.image_url}
@@ -308,7 +326,7 @@ export default function AdminProductsPage() {
                     />
                   ) : (
                     <div className="w-full h-full bg-jeffy-yellow-light flex items-center justify-center">
-                      <span className="text-gray-500 text-sm">No Image</span>
+                      <span className="text-gray-500 text-xs sm:text-sm">No Image</span>
                     </div>
                   )}
                   
@@ -321,48 +339,49 @@ export default function AdminProductsPage() {
                 </div>
                 
                 {/* Product Info */}
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   <div>
-                    <h3 className="font-semibold text-gray-900 text-lg mb-1">
+                    <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-1">
                       {product.name}
                     </h3>
-                    <p className="text-gray-600 text-sm line-clamp-2">
+                    <p className="text-gray-600 text-xs sm:text-sm line-clamp-2">
                       {product.description}
                     </p>
                   </div>
                   
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
-                      <span className="text-xl font-bold text-gray-900">
+                      <span className="text-lg sm:text-xl font-bold text-gray-900">
                         ${product.price.toFixed(2)}
                       </span>
-                      <span className="text-sm text-gray-500 ml-2">
+                      <span className="text-xs sm:text-sm text-gray-500 ml-1 sm:ml-2">
                         ({product.stock} in stock)
                       </span>
                     </div>
-                    <span className="text-xs bg-jeffy-yellow-light text-gray-700 px-2 py-1 rounded-full">
+                    <span className="text-xs bg-jeffy-yellow-light text-gray-700 px-2 py-1 rounded-full self-start sm:self-auto">
                       {product.category}
                     </span>
                   </div>
                   
                   {/* Action Buttons */}
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 pt-2">
                     <Button
                       variant="outline"
                       onClick={() => handleEdit(product)}
                       size="sm"
-                      className="flex-1"
+                      className="flex-1 text-xs sm:text-sm"
                     >
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit
+                      <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      <span className="hidden sm:inline">Edit</span>
                     </Button>
                     <Button
                       variant="outline"
                       onClick={() => handleDelete(product.id)}
                       size="sm"
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 px-2 sm:px-3"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="sr-only">Delete</span>
                     </Button>
                   </div>
                 </div>
@@ -388,6 +407,7 @@ export default function AdminProductsPage() {
                 onUpload={handleImageUpload}
                 currentImage={formData.image_url}
                 onRemove={() => setFormData({ ...formData, image_url: '' })}
+                disabled={uploading}
               />
               {uploading && (
                 <p className="text-sm text-gray-500 mt-2">Uploading image...</p>
@@ -459,16 +479,16 @@ export default function AdminProductsPage() {
             </div>
             
             {/* Submit Buttons */}
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setIsModalOpen(false)}
-                className="flex-1"
+                className="flex-1 order-2 sm:order-1"
               >
                 Cancel
               </Button>
-              <Button type="submit" className="flex-1">
+              <Button type="submit" className="flex-1 order-1 sm:order-2">
                 {editingProduct ? 'Update Product' : 'Add Product'}
               </Button>
             </div>

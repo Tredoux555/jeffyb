@@ -128,20 +128,20 @@ export default function ProductsPage() {
   
   return (
     <div className="min-h-screen bg-jeffy-yellow">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">
             All Products
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600">
             Browse our complete collection of products
           </p>
         </div>
         
         {/* Filters */}
-        <Card className="mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
+        <Card className="mb-6 sm:mb-8 p-3 sm:p-4">
+          <div className="flex flex-col gap-3 sm:gap-4">
             {/* Search */}
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -149,54 +149,57 @@ export default function ProductsPage() {
                 placeholder="Search products..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 text-sm sm:text-base"
               />
             </div>
             
-            {/* Category Filter */}
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-jeffy-yellow focus:border-transparent"
-            >
-              {categories.map((category) => (
-                <option key={category.value} value={category.value}>
-                  {category.label}
-                </option>
-              ))}
-            </select>
-            
-            {/* View Mode Toggle */}
-            <div className="flex border border-gray-300 rounded-xl overflow-hidden">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-3 ${viewMode === 'grid' ? 'bg-jeffy-yellow text-gray-900' : 'bg-white text-gray-600'}`}
+            {/* Filters Row */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              {/* Category Filter */}
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-jeffy-yellow focus:border-transparent text-sm sm:text-base"
               >
-                <Grid className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-3 ${viewMode === 'list' ? 'bg-jeffy-yellow text-gray-900' : 'bg-white text-gray-600'}`}
-              >
-                <List className="w-4 h-4" />
-              </button>
+                {categories.map((category) => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
+                  </option>
+                ))}
+              </select>
+              
+              {/* View Mode Toggle */}
+              <div className="flex border border-gray-300 rounded-xl overflow-hidden">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 sm:p-3 ${viewMode === 'grid' ? 'bg-jeffy-yellow text-gray-900' : 'bg-white text-gray-600'}`}
+                >
+                  <Grid className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 sm:p-3 ${viewMode === 'list' ? 'bg-jeffy-yellow text-gray-900' : 'bg-white text-gray-600'}`}
+                >
+                  <List className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
           
           {/* Results Count */}
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Filter className="w-4 h-4" />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-4 pt-4 border-t border-gray-200 gap-3 sm:gap-0">
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+              <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>{filteredProducts.length} products found</span>
             </div>
             
             {/* Category Links */}
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {categories.slice(1).map((category) => (
                 <Link
                   key={category.value}
                   href={`/products/${category.value}`}
-                  className="px-3 py-1 text-xs bg-jeffy-yellow-light text-gray-700 rounded-full hover:bg-jeffy-yellow transition-colors"
+                  className="px-2 sm:px-3 py-1 text-xs bg-jeffy-yellow-light text-gray-700 rounded-full hover:bg-jeffy-yellow transition-colors"
                 >
                   {category.label}
                 </Link>
@@ -221,8 +224,8 @@ export default function ProductsPage() {
         ) : (
           <div className={
             viewMode === 'grid' 
-              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
-              : 'space-y-4'
+              ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6'
+              : 'space-y-3 sm:space-y-4'
           }>
             {filteredProducts.map((product) => (
               <ProductCard

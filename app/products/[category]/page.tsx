@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, use } from 'react'
 import { ProductCard } from '@/components/ProductCard'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
@@ -9,24 +9,25 @@ import { createClient } from '@/lib/supabase'
 import { Search, Filter } from 'lucide-react'
 
 interface CategoryPageProps {
-  params: {
+  params: Promise<{
     category: string
-  }
+  }>
 }
 
 export default function CategoryPage({ params }: CategoryPageProps) {
+  const resolvedParams = use(params)
   const [products, setProducts] = useState<Product[]>([])
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [cart, setCart] = useState<CartItem[]>([])
   
-  const categoryName = params.category.charAt(0).toUpperCase() + params.category.slice(1)
+  const categoryName = resolvedParams.category.charAt(0).toUpperCase() + resolvedParams.category.slice(1)
   
   useEffect(() => {
     fetchProducts()
     loadCart()
-  }, [params.category])
+  }, [resolvedParams.category])
   
   useEffect(() => {
     filterProducts()
@@ -39,7 +40,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .eq('category', params.category)
+        .eq('category', resolvedParams.category)
         .order('created_at', { ascending: false })
       
       if (error) throw error
@@ -119,31 +120,31 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   
   return (
     <div className="min-h-screen bg-jeffy-yellow">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">
             {categoryName} Products
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600">
             Discover our amazing {categoryName.toLowerCase()} collection
           </p>
         </div>
         
         {/* Search and Filter */}
-        <Card className="mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
+        <Card className="mb-6 sm:mb-8 p-3 sm:p-4">
+          <div className="flex flex-col gap-3 sm:gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 placeholder="Search products..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 text-sm sm:text-base"
               />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Filter className="w-4 h-4" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+              <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>{filteredProducts.length} products found</span>
             </div>
           </div>
@@ -160,7 +161,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
             </div>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {filteredProducts.map((product) => (
               <ProductCard
                 key={product.id}

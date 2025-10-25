@@ -10,9 +10,10 @@ interface ImageUploadProps {
   onRemove?: () => void
   currentImage?: string | null
   className?: string
+  disabled?: boolean
 }
 
-export function ImageUpload({ onUpload, onRemove, currentImage, className }: ImageUploadProps) {
+export function ImageUpload({ onUpload, onRemove, currentImage, className, disabled = false }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
   
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
@@ -33,6 +34,7 @@ export function ImageUpload({ onUpload, onRemove, currentImage, className }: Ima
     },
     maxFiles: 1,
     maxSize: 5 * 1024 * 1024, // 5MB
+    disabled: disabled || isUploading
   })
   
   return (
@@ -59,12 +61,13 @@ export function ImageUpload({ onUpload, onRemove, currentImage, className }: Ima
         <div
           {...getRootProps()}
           className={`
-            w-full h-48 border-2 border-dashed rounded-lg cursor-pointer transition-colors
-            ${isDragActive 
-              ? 'border-jeffy-yellow bg-jeffy-yellow-light' 
-              : 'border-gray-300 hover:border-jeffy-yellow hover:bg-jeffy-yellow-light'
+            w-full h-48 border-2 border-dashed rounded-lg transition-colors
+            ${disabled || isUploading 
+              ? 'opacity-50 cursor-not-allowed border-gray-200' 
+              : isDragActive 
+                ? 'border-jeffy-yellow bg-jeffy-yellow-light cursor-pointer' 
+                : 'border-gray-300 hover:border-jeffy-yellow hover:bg-jeffy-yellow-light cursor-pointer'
             }
-            ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}
           `}
         >
           <input {...getInputProps()} />
