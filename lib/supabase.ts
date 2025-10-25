@@ -1,5 +1,4 @@
-import { createBrowserClient, createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createBrowserClient } from '@supabase/ssr'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -9,32 +8,7 @@ export const createClient = () => {
   return createBrowserClient(supabaseUrl, supabaseAnonKey)
 }
 
-// Server-side Supabase client
-export const createServerSupabaseClient = () => {
-  const cookieStore = cookies()
-  
-  return createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value
-      },
-    },
-  })
-}
-
-// Admin client for server-side operations
+// Admin client for server-side operations (without cookies)
 export const createAdminClient = () => {
-  return createServerClient(
-    supabaseUrl,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      cookies: {
-        get() {
-          return undefined
-        },
-        set() {},
-        remove() {},
-      },
-    }
-  )
+  return createBrowserClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 }
