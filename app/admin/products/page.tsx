@@ -156,7 +156,6 @@ export default function AdminProductsPage() {
     e.preventDefault()
     
     try {
-      const supabase = createClient()
       const productData = {
         name: formData.name,
         description: formData.description,
@@ -166,21 +165,34 @@ export default function AdminProductsPage() {
         image_url: formData.image_url || null
       }
       
+      let response
       if (editingProduct) {
         // Update existing product
-        const { error } = await supabase
-          .from('products')
-          .update(productData)
-          .eq('id', editingProduct.id)
-        
-        if (error) throw error
+        response = await fetch('/api/admin/products', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: editingProduct.id,
+            ...productData
+          })
+        })
       } else {
         // Create new product
-        const { error } = await supabase
-          .from('products')
-          .insert(productData)
-        
-        if (error) throw error
+        response = await fetch('/api/admin/products', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(productData)
+        })
+      }
+      
+      const result = await response.json()
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to save product')
       }
       
       // Reset form and close modal
@@ -197,7 +209,7 @@ export default function AdminProductsPage() {
       fetchProducts()
     } catch (error) {
       console.error('Error saving product:', error)
-      alert('Error saving product')
+      alert(`Error saving product: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
   
@@ -218,17 +230,20 @@ export default function AdminProductsPage() {
     if (!confirm('Are you sure you want to delete this product?')) return
     
     try {
-      const supabase = createClient()
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', productId)
+      const response = await fetch(`/api/admin/products?id=${productId}`, {
+        method: 'DELETE'
+      })
       
-      if (error) throw error
+      const result = await response.json()
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to delete product')
+      }
+      
       fetchProducts()
     } catch (error) {
       console.error('Error deleting product:', error)
-      alert('Error deleting product')
+      alert(`Error deleting product: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
   
