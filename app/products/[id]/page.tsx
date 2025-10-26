@@ -53,6 +53,7 @@ export default function ProductDetailPage() {
       
       // Fetch variants if product has them
       if (productData.has_variants) {
+        console.log('[Product] Fetching variants for product:', productId)
         const { data: variantsData, error: variantsError } = await supabase
           .from('product_variants')
           .select('*')
@@ -60,16 +61,20 @@ export default function ProductDetailPage() {
           .order('created_at')
 
         if (variantsError) {
-          console.error('Error fetching variants:', variantsError)
+          console.error('[Product] Error fetching variants:', variantsError)
         } else {
+          console.log('[Product] Loaded variants:', variantsData)
           setVariants(variantsData || [])
           // Initialize quantities for all variants
           const initialQuantities: Record<string, number> = {}
           variantsData?.forEach(variant => {
             initialQuantities[variant.id] = 0
           })
+          console.log('[Product] Initialized quantities:', initialQuantities)
           setSelectedVariants(initialQuantities)
         }
+      } else {
+        console.log('[Product] Product has no variants')
       }
       
       setProduct(productData)
@@ -402,17 +407,29 @@ export default function ProductDetailPage() {
                         <span className="text-sm font-medium text-gray-700">Quantity:</span>
                         <div className="flex items-center border border-gray-300 rounded-lg bg-white">
                           <button
-                            onClick={() => updateVariantQuantity(variant.id, quantity - 1)}
-                            className="p-2 hover:bg-gray-100 transition-colors"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              console.log('[Product] Minus clicked for variant:', variant.id, 'current qty:', quantity)
+                              updateVariantQuantity(variant.id, quantity - 1)
+                            }}
+                            className="p-2 hover:bg-gray-100 transition-colors touch-manipulation"
                             disabled={quantity <= 0}
+                            type="button"
                           >
                             <Minus className="w-4 h-4 text-yellow-600" />
                           </button>
                           <span className="px-4 py-2 font-medium w-12 text-center">{quantity}</span>
                           <button
-                            onClick={() => updateVariantQuantity(variant.id, quantity + 1)}
-                            className="p-2 hover:bg-gray-100 transition-colors"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              console.log('[Product] Plus clicked for variant:', variant.id, 'current qty:', quantity)
+                              updateVariantQuantity(variant.id, quantity + 1)
+                            }}
+                            className="p-2 hover:bg-gray-100 transition-colors touch-manipulation"
                             disabled={quantity >= variant.stock}
+                            type="button"
                           >
                             <Plus className="w-4 h-4 text-yellow-600" />
                           </button>
