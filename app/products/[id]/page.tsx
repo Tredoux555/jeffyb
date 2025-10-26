@@ -107,10 +107,15 @@ export default function ProductDetailPage() {
   }
 
   const updateVariantQuantity = (variantId: string, quantity: number) => {
-    setSelectedVariants(prev => ({
-      ...prev,
-      [variantId]: Math.max(0, quantity)
-    }))
+    console.log('[Product] Updating variant quantity:', variantId, quantity)
+    setSelectedVariants(prev => {
+      const updated = {
+        ...prev,
+        [variantId]: Math.max(0, quantity)
+      }
+      console.log('[Product] Updated quantities:', updated)
+      return updated
+    })
   }
 
   const handleAddToCart = () => {
