@@ -244,6 +244,58 @@ export default function AdminProductsPage() {
       }
       
       console.log('[FRONTEND] Product saved successfully!')
+      console.log('[FRONTEND] Product ID:', result.product.id)
+      
+      const productId = result.product.id
+      
+      // Save variants if product has variants
+      if (formData.has_variants && variants.length > 0) {
+        console.log('[FRONTEND] Saving variants:', variants.length)
+        console.log('[FRONTEND] Variants data:', variants)
+        
+        try {
+          // First, delete existing variants if editing
+          if (editingProduct) {
+            console.log('[FRONTEND] Deleting old variants for product:', productId)
+            const deleteResponse = await fetch(`/api/admin/variants?product_id=${productId}`, {
+              method: 'DELETE'
+            })
+            const deleteResult = await deleteResponse.json()
+            console.log('[FRONTEND] Delete variants result:', deleteResult)
+          }
+          
+          // Then insert new variants
+          console.log('[FRONTEND] Creating new variants...')
+          const variantsResponse = await fetch('/api/admin/variants', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              product_id: productId,
+              variants: variants
+            })
+          })
+          
+          const text = await variantsResponse.text()
+          console.log('[FRONTEND] Variants raw response:', text)
+          const variantsResult = JSON.parse(text)
+          
+          console.log('[FRONTEND] Variants result:', variantsResult)
+          
+          if (!variantsResponse.ok || !variantsResult.success) {
+            console.error('[FRONTEND] Variants save failed:', variantsResult)
+            throw new Error(variantsResult.error || 'Failed to save variants')
+          }
+          
+          console.log('[FRONTEND] Variants saved successfully!')
+        } catch (variantError) {
+          console.error('[FRONTEND] Error saving variants:', variantError)
+          throw new Error(`Failed to save variants: ${variantError instanceof Error ? variantError.message : 'Unknown error'}`)
+        }
+      } else {
+        console.log('[FRONTEND] No variants to save (has_variants=false or variants empty)')
+      }
       
       // Reset form and close modal
       setFormData({
