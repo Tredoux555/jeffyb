@@ -122,8 +122,8 @@ export default function CartPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
-              {cart.map((item) => (
-                <Card key={item.product_id} className="p-4">
+              {cart.map((item, index) => (
+                <Card key={`${item.product_id}-${item.variant_id || 'default'}-${index}`} className="p-4">
                   <div className="flex flex-col sm:flex-row gap-4">
                     {/* Image */}
                     {item.image_url && (
