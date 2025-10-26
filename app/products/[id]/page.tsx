@@ -256,7 +256,7 @@ export default function ProductDetailPage() {
           {/* Image Gallery */}
           <div className="space-y-4">
             {/* Main Image */}
-            <div className="relative aspect-square bg-white rounded-xl overflow-hidden shadow-jeffy">
+            <div className="relative aspect-square max-h-[500px] bg-white rounded-xl overflow-hidden shadow-jeffy">
               {images.length > 0 ? (
                 <>
                   <Image
