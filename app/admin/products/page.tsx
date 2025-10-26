@@ -357,8 +357,8 @@ export default function AdminProductsPage() {
           alert(`✅ Product and variants saved successfully!`)
           fetchProducts() // Refresh product list in background
           
-          // Don't reset form or close modal - let user add more variants
-          return
+          // IMPORTANT: Keep modal open so user can continue editing variants
+          return // This prevents the modal from closing
         } catch (variantError) {
           console.error('[FRONTEND] Error saving variants:', variantError)
           throw new Error(`Failed to save variants: ${variantError instanceof Error ? variantError.message : 'Unknown error'}`)
