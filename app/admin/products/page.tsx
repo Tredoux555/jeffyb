@@ -43,7 +43,8 @@ export default function AdminProductsPage() {
     { value: 'gym', label: 'Gym' },
     { value: 'camping', label: 'Camping' },
     { value: 'kitchen', label: 'Kitchen' },
-    { value: 'beauty', label: 'Beauty' }
+    { value: 'beauty', label: 'Beauty' },
+    { value: 'baby-toys', label: 'Baby Toys' }
   ]
   
   useEffect(() => {
@@ -102,24 +103,52 @@ export default function AdminProductsPage() {
   const handleImageUpload = async (file: File) => {
     setUploading(true)
     try {
+      // Mobile-specific file validation
+      if (!file) {
+        throw new Error('No file selected')
+      }
+      
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('File size too large. Maximum size is 5MB.')
+      }
+      
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Please select a valid image file.')
+      }
+      
+      console.log('Uploading file:', file.name, 'Size:', file.size, 'Type:', file.type)
+      
       const supabase = createClient()
+      
+      // Debug: Check Supabase connection
+      console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
+      console.log('Supabase Key exists:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
       
       // Check if storage bucket exists
       const { data: buckets, error: bucketError } = await supabase.storage.listBuckets()
+      console.log('Buckets response:', { buckets, bucketError })
+      
       if (bucketError) {
         console.error('Error checking buckets:', bucketError)
-        throw new Error('Unable to access storage')
+        throw new Error(`Unable to access storage: ${bucketError.message}`)
       }
       
       const productImagesBucket = buckets?.find(bucket => bucket.name === 'product-images')
+      console.log('Found product-images bucket:', productImagesBucket)
+      
       if (!productImagesBucket) {
         console.error('product-images bucket not found')
+        console.log('Available buckets:', buckets?.map(b => b.name))
         throw new Error('Storage bucket not configured. Please contact administrator.')
       }
       
       // Upload to Supabase Storage
       const fileExt = file.name.split('.').pop()
       const fileName = `${Date.now()}.${fileExt}`
+      
+      console.log('Uploading to Supabase:', fileName)
       
       const { data, error } = await supabase.storage
         .from('product-images')
@@ -322,7 +351,8 @@ export default function AdminProductsPage() {
                     <img
                       src={product.image_url}
                       alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover sm:group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
                     />
                   ) : (
                     <div className="w-full h-full bg-jeffy-yellow-light flex items-center justify-center">

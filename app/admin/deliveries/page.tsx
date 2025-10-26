@@ -166,29 +166,27 @@ export default function AdminDeliveriesPage() {
   
   return (
     <div className="min-h-screen bg-jeffy-yellow">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Delivery Management</h1>
-            <p className="text-gray-600">Manage delivery requests and tracking</p>
-          </div>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Delivery Management</h1>
+          <p className="text-sm sm:text-base text-gray-600">Manage delivery requests and tracking</p>
         </div>
         
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           {statusOptions.slice(1).map((status) => {
             const count = deliveries.filter(delivery => delivery.status === status.value).length
             const Icon = statusIcons[status.value as keyof typeof statusIcons]
             return (
-              <Card key={status.value}>
+              <Card key={status.value} className="p-3 sm:p-4">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">{status.label}</p>
-                    <p className="text-2xl font-bold text-gray-900">{count}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1 truncate">{status.label}</p>
+                    <p className="text-lg sm:text-2xl font-bold text-gray-900">{count}</p>
                   </div>
-                  <div className={`w-12 h-12 ${statusColors[status.value as keyof typeof statusColors]} rounded-lg flex items-center justify-center`}>
-                    <Icon className="w-6 h-6 text-white" />
+                  <div className={`w-8 h-8 sm:w-12 sm:h-12 ${statusColors[status.value as keyof typeof statusColors]} rounded-lg flex items-center justify-center flex-shrink-0 ml-2`}>
+                    <Icon className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
                   </div>
                 </div>
               </Card>

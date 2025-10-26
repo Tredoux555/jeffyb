@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Upload, X, Image as ImageIcon } from 'lucide-react'
+import { Upload, X, Image as ImageIcon, Camera } from 'lucide-react'
 import { Button } from '@/components/Button'
 
 interface ImageUploadProps {
@@ -15,6 +15,7 @@ interface ImageUploadProps {
 
 export function ImageUpload({ onUpload, onRemove, currentImage, className, disabled = false }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
@@ -27,6 +28,22 @@ export function ImageUpload({ onUpload, onRemove, currentImage, className, disab
     }
   }, [onUpload])
   
+  const handleFileSelect = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      setIsUploading(true)
+      try {
+        await onUpload(file)
+      } finally {
+        setIsUploading(false)
+        // Reset the input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
+      }
+    }
+  }, [onUpload])
+  
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
@@ -34,8 +51,16 @@ export function ImageUpload({ onUpload, onRemove, currentImage, className, disab
     },
     maxFiles: 1,
     maxSize: 5 * 1024 * 1024, // 5MB
-    disabled: disabled || isUploading
+    disabled: disabled || isUploading,
+    noClick: true, // Disable click on dropzone for mobile
+    noKeyboard: true
   })
+  
+  const handleClick = () => {
+    if (!disabled && !isUploading) {
+      fileInputRef.current?.click()
+    }
+  }
   
   return (
     <div className={className}>
@@ -58,36 +83,58 @@ export function ImageUpload({ onUpload, onRemove, currentImage, className, disab
           )}
         </div>
       ) : (
-        <div
-          {...getRootProps()}
-          className={`
-            w-full h-48 border-2 border-dashed rounded-lg transition-colors
-            ${disabled || isUploading 
-              ? 'opacity-50 cursor-not-allowed border-gray-200' 
-              : isDragActive 
-                ? 'border-jeffy-yellow bg-jeffy-yellow-light cursor-pointer' 
-                : 'border-gray-300 hover:border-jeffy-yellow hover:bg-jeffy-yellow-light cursor-pointer'
-            }
-          `}
-        >
-          <input {...getInputProps()} />
-          <div className="flex flex-col items-center justify-center h-full text-gray-500">
-            {isUploading ? (
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-jeffy-yellow mx-auto mb-2"></div>
-                <p className="text-sm">Uploading...</p>
-              </div>
-            ) : (
-              <div className="text-center">
-                <ImageIcon className="w-12 h-12 mx-auto mb-2" />
-                <p className="text-sm font-medium mb-1">
-                  {isDragActive ? 'Drop the image here' : 'Drag & drop an image'}
-                </p>
-                <p className="text-xs text-gray-400">
-                  or click to select (max 5MB)
-                </p>
-              </div>
-            )}
+        <div>
+          {/* Hidden dropzone for desktop drag & drop */}
+          <div {...getRootProps()} className="hidden sm:block">
+            <input {...getInputProps()} />
+          </div>
+          
+          {/* Mobile-optimized upload area */}
+          <div
+            onClick={handleClick}
+            className={`
+              w-full h-48 border-2 border-dashed rounded-lg transition-colors cursor-pointer
+              ${disabled || isUploading 
+                ? 'opacity-50 cursor-not-allowed border-gray-200' 
+                : 'border-gray-300 hover:border-jeffy-yellow hover:bg-jeffy-yellow-light'
+              }
+            `}
+          >
+            {/* Hidden file input for mobile */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+              disabled={disabled || isUploading}
+            />
+            
+            <div className="flex flex-col items-center justify-center h-full text-gray-500 p-4">
+              {isUploading ? (
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-jeffy-yellow mx-auto mb-2"></div>
+                  <p className="text-sm">Uploading...</p>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-3">
+                    <ImageIcon className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2" />
+                    <Camera className="w-6 h-6 sm:w-8 sm:h-8 ml-2 sm:hidden" />
+                  </div>
+                  <p className="text-sm font-medium mb-1">
+                    <span className="sm:hidden">Tap to select image</span>
+                    <span className="hidden sm:inline">
+                      {isDragActive ? 'Drop the image here' : 'Drag & drop an image'}
+                    </span>
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    <span className="sm:hidden">or tap camera icon</span>
+                    <span className="hidden sm:inline">or click to select (max 5MB)</span>
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

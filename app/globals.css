@@ -7,6 +7,39 @@
   --foreground: #1F2937; /* Dark grey text */
 }
 
+/* Mobile performance optimizations */
+@media (max-width: 768px) {
+  * {
+    /* Reduce animations on mobile for better performance */
+    animation-duration: 0.2s !important;
+    transition-duration: 0.2s !important;
+  }
+  
+  /* Disable hover effects on touch devices */
+  .hover\:scale-105:hover {
+    transform: none !important;
+  }
+  
+  .group:hover .group-hover\:scale-110 {
+    transform: none !important;
+  }
+}
+
+/* Optimize scrolling on mobile */
+html {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

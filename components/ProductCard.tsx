@@ -23,7 +23,11 @@ export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCard
             src={product.image_url}
             alt={product.name}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            className="object-cover sm:group-hover:scale-105 transition-transform duration-300"
+            priority={false}
+            loading="lazy"
+            quality={75}
           />
         ) : (
           <div className="w-full h-full bg-jeffy-yellow-light flex items-center justify-center">

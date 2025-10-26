@@ -19,7 +19,8 @@ INSERT INTO categories (name, slug, icon) VALUES
 ('Gym', 'gym', 'Dumbbell'),
 ('Camping', 'camping', 'Tent'),
 ('Kitchen', 'kitchen', 'ChefHat'),
-('Beauty', 'beauty', 'Sparkles');
+('Beauty', 'beauty', 'Sparkles'),
+('Baby Toys', 'baby-toys', 'Baby');
 
 -- Create products table
 CREATE TABLE products (

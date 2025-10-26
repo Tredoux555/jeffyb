@@ -12,8 +12,8 @@ export default function AdminLoginPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [credentials, setCredentials] = useState({
-    email: '',
-    password: ''
+    email: 'admin@jeffy.com',
+    password: 'jeffy123'
   })
   const [error, setError] = useState('')
   
@@ -84,14 +84,42 @@ export default function AdminLoginPage() {
             <Button type="submit" loading={loading} className="w-full">
               Sign In
             </Button>
+            
+            {/* Quick Login Button */}
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={async () => {
+                setCredentials({ email: 'admin@jeffy.com', password: 'jeffy123' })
+                setLoading(true)
+                setError('')
+                
+                try {
+                  // Set admin session
+                  localStorage.setItem('jeffy-admin', 'true')
+                  router.push('/admin')
+                } catch (error) {
+                  console.error('Login error:', error)
+                  setError('An error occurred during login')
+                } finally {
+                  setLoading(false)
+                }
+              }}
+              className="w-full"
+            >
+              Quick Login (Auto-fill)
+            </Button>
           </form>
           
           {/* Demo Credentials */}
           <div className="mt-6 p-4 bg-jeffy-yellow-light rounded-lg">
-            <h3 className="font-medium text-gray-900 mb-2">Demo Credentials:</h3>
+            <h3 className="font-medium text-gray-900 mb-2">Demo Credentials (Pre-filled):</h3>
             <p className="text-sm text-gray-700">
               <strong>Email:</strong> admin@jeffy.com<br />
               <strong>Password:</strong> jeffy123
+            </p>
+            <p className="text-xs text-gray-600 mt-2">
+              Credentials are pre-filled for easy access. Click "Quick Login" for instant access.
             </p>
           </div>
         </Card>

@@ -17,7 +17,7 @@ export function Button({
   disabled,
   ...props 
 }: ButtonProps) {
-  const baseClasses = 'font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-jeffy-yellow focus:ring-offset-2'
+  const baseClasses = 'font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-jeffy-yellow focus:ring-offset-2 touch-manipulation'
   
   const variants = {
     primary: 'bg-jeffy-yellow text-gray-900 hover:bg-yellow-400 shadow-jeffy',

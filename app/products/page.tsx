@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { ProductCard } from '@/components/ProductCard'
 import { Card } from '@/components/Card'
@@ -23,7 +23,8 @@ export default function ProductsPage() {
     { value: 'gym', label: 'Gym' },
     { value: 'camping', label: 'Camping' },
     { value: 'kitchen', label: 'Kitchen' },
-    { value: 'beauty', label: 'Beauty' }
+    { value: 'beauty', label: 'Beauty' },
+    { value: 'baby-toys', label: 'Baby Toys' }
   ]
   
   useEffect(() => {
