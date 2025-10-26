@@ -352,6 +352,13 @@ export default function AdminProductsPage() {
           }
           
           console.log('[FRONTEND] Variants saved successfully!')
+          
+          // Keep modal open after variant save
+          alert(`✅ Product and variants saved successfully!`)
+          fetchProducts() // Refresh product list in background
+          
+          // Don't reset form or close modal - let user add more variants
+          return
         } catch (variantError) {
           console.error('[FRONTEND] Error saving variants:', variantError)
           throw new Error(`Failed to save variants: ${variantError instanceof Error ? variantError.message : 'Unknown error'}`)
@@ -360,6 +367,7 @@ export default function AdminProductsPage() {
         console.log('[FRONTEND] No variants to save (has_variants=false or variants empty)')
       }
       
+      // If no variants or product without variants, close modal normally
       // Reset form and close modal
       setFormData({
         name: '',
@@ -382,7 +390,7 @@ export default function AdminProductsPage() {
     }
   }
   
-  const handleEdit = (product: Product) => {
+  const handleEdit = async (product: Product) => {
     setEditingProduct(product)
     setFormData({
       name: product.name,
@@ -394,7 +402,23 @@ export default function AdminProductsPage() {
       images: product.images || [],
       has_variants: product.has_variants || false
     })
-    setVariants(product.variants || [])
+    
+    // Load variants from database
+    try {
+      const supabase = createClient()
+      const { data: variantsData } = await supabase
+        .from('product_variants')
+        .select('*')
+        .eq('product_id', product.id)
+        .order('created_at')
+      
+      console.log('[Admin] Loaded variants:', variantsData)
+      setVariants(variantsData || [])
+    } catch (error) {
+      console.error('Error loading variants:', error)
+      setVariants([])
+    }
+    
     setIsModalOpen(true)
   }
   
