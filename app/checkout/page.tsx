@@ -259,10 +259,10 @@ export default function CheckoutPage() {
                 
                 {/* Items */}
                 <div className="space-y-3 mb-6">
-                  {cart.map((item) => (
-                    <div key={item.product_id} className="flex justify-between text-sm">
+                  {cart.map((item, index) => (
+                    <div key={`${item.product_id}-${item.variant_id || 'default'}-${index}`} className="flex justify-between text-sm">
                       <span className="text-gray-600">
-                        {item.product_name} x {item.quantity}
+                        {item.product_name}{item.variant_display ? ` (${item.variant_display})` : ''} x {item.quantity}
                       </span>
                       <span className="font-medium">
                         ${(item.price * item.quantity).toFixed(2)}
