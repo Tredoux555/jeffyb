@@ -248,6 +248,13 @@ export default function AdminProductsPage() {
       
       const productId = result.product.id
       
+      // Validate variants if has_variants is enabled
+      if (formData.has_variants && variants.length === 0) {
+        console.warn('[FRONTEND] WARNING: has_variants is true but no variants created!')
+        console.log('[FRONTEND] Variants array:', variants)
+        alert('WARNING: You enabled variants but did not create any variant combinations.\n\nThe product was saved WITHOUT variants.\n\nTo add variants:\n1. Click "Add Attribute" (e.g., Size)\n2. Add values (e.g., S, M, L)\n3. Click "Generate All Variant Combinations"\n\nThen edit this product to add variants.')
+      }
+      
       // Save variants if product has variants
       if (formData.has_variants && variants.length > 0) {
         console.log('[FRONTEND] Saving variants:', variants.length)
