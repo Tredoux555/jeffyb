@@ -37,6 +37,15 @@ export default function ProductDetailPage() {
     loadCart()
   }, [productId])
 
+  // Monitor state changes for debugging
+  useEffect(() => {
+    console.log('[Product] selectedVariants state updated:', selectedVariants)
+  }, [selectedVariants])
+
+  useEffect(() => {
+    console.log('[Product] variants loaded:', variants)
+  }, [variants])
+
   const fetchProduct = async () => {
     try {
       setLoading(true)
@@ -151,7 +160,7 @@ export default function ProductDetailPage() {
           variant_display: variantDisplay,
           price: variantPrice,
           quantity: quantity,
-          image_url: variant.image_url || product.images?.[0] || product.image_url
+          image_url: variant.image_url || product.images?.[0] || product.image_url || undefined
         }
 
         // Check if this exact variant already exists
@@ -197,7 +206,7 @@ export default function ProductDetailPage() {
           product_name: product.name,
           price: product.price,
           quantity: quantity,
-          image_url: product.images?.[0] || product.image_url
+          image_url: product.images?.[0] || product.image_url || undefined
         }
         saveCart([...currentCart, newItem])
       }
@@ -381,7 +390,7 @@ export default function ProductDetailPage() {
 
             {/* Variant Selection */}
             {product.has_variants && variants.length > 0 && (
-              <div className="space-y-4 border-t border-gray-200 pt-6">
+              <div className="space-y-4 border-t border-gray-200 pt-6 relative z-10">
                 <h3 className="text-lg font-semibold text-gray-900">Select Variants</h3>
                 
                 {variants.map((variant) => {
@@ -390,7 +399,6 @@ export default function ProductDetailPage() {
                     .join(', ')
                   const quantity = selectedVariants[variant.id] ?? 0
                   const variantPrice = variant.price || product.price
-                  console.log('[Product] Rendering variant:', variant.id, 'quantity:', quantity)
                   
                   return (
                     <div key={variant.id} className="border border-gray-200 rounded-lg p-4 space-y-3">
@@ -405,15 +413,16 @@ export default function ProductDetailPage() {
                       
                       <div className="flex items-center gap-4">
                         <span className="text-sm font-medium text-gray-700">Quantity:</span>
-                        <div className="flex items-center border border-gray-300 rounded-lg bg-white">
+                        <div className="flex items-center border border-gray-300 rounded-lg bg-white relative z-10">
                           <button
                             onClick={(e) => {
+                              console.log('[Product] BUTTON CLICKED - event:', e.type)
                               e.preventDefault()
                               e.stopPropagation()
                               console.log('[Product] Minus clicked for variant:', variant.id, 'current qty:', quantity)
                               updateVariantQuantity(variant.id, quantity - 1)
                             }}
-                            className="p-2 hover:bg-gray-100 transition-colors touch-manipulation"
+                            className="p-2 hover:bg-gray-100 transition-colors touch-manipulation pointer-events-auto relative z-10"
                             disabled={quantity <= 0}
                             type="button"
                           >
@@ -422,12 +431,13 @@ export default function ProductDetailPage() {
                           <span className="px-4 py-2 font-medium w-12 text-center">{quantity}</span>
                           <button
                             onClick={(e) => {
+                              console.log('[Product] BUTTON CLICKED - event:', e.type)
                               e.preventDefault()
                               e.stopPropagation()
                               console.log('[Product] Plus clicked for variant:', variant.id, 'current qty:', quantity)
                               updateVariantQuantity(variant.id, quantity + 1)
                             }}
-                            className="p-2 hover:bg-gray-100 transition-colors touch-manipulation"
+                            className="p-2 hover:bg-gray-100 transition-colors touch-manipulation pointer-events-auto relative z-10"
                             disabled={quantity >= variant.stock}
                             type="button"
                           >
