@@ -7,7 +7,7 @@ import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
 import { Modal } from '@/components/Modal'
 import { MultiImageUpload } from '@/components/MultiImageUpload'
-import { VariantManager } from '@/components/VariantManager'
+import { SimpleVariantManager } from '@/components/SimpleVariantManager'
 import { createClient } from '@/lib/supabase'
 import { Product, ProductVariant } from '@/types/database'
 import { 
@@ -43,7 +43,6 @@ export default function AdminProductsPage() {
   })
   
   const [variants, setVariants] = useState<ProductVariant[]>([])
-  const [hasVariantAttributes, setHasVariantAttributes] = useState(false)
   
   const categories = [
     { value: 'gym', label: 'Gym' },
@@ -233,7 +232,6 @@ export default function AdminProductsPage() {
       // Reset form and close
       setFormData({ name: '', description: '', price: '', category: 'gym', stock: '', image_url: '', images: [], has_variants: false })
       setVariants([])
-      setHasVariantAttributes(false)
       setEditingProduct(null)
       setIsModalOpen(false)
       fetchProducts()
@@ -397,7 +395,6 @@ export default function AdminProductsPage() {
       has_variants: product.has_variants || false
     })
     setVariants(product.variants || [])
-    setHasVariantAttributes(false) // Reset - will be set by VariantManager if needed
     setIsModalOpen(true)
   }
   
@@ -435,7 +432,6 @@ export default function AdminProductsPage() {
       has_variants: false
     })
     setVariants([])
-    setHasVariantAttributes(false)
     setIsModalOpen(true)
   }
   
@@ -697,11 +693,10 @@ export default function AdminProductsPage() {
               </div>
               
               {formData.has_variants && (
-                <VariantManager
+                <SimpleVariantManager
                   productId={editingProduct?.id || 'new'}
                   variants={variants}
                   onVariantsChange={setVariants}
-                  onAttributesChange={setHasVariantAttributes}
                   disabled={uploading}
                 />
               )}
