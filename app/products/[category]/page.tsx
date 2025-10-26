@@ -56,7 +56,19 @@ export default function CategoryPage({ params }: CategoryPageProps) {
     if (typeof window !== 'undefined') {
       const savedCart = localStorage.getItem('jeffy-cart')
       if (savedCart) {
-        setCart(JSON.parse(savedCart))
+        try {
+          const parsedCart = JSON.parse(savedCart)
+          // Ensure it's an array
+          if (Array.isArray(parsedCart)) {
+            setCart(parsedCart)
+          } else {
+            console.warn('Cart data is not an array, resetting to empty array')
+            setCart([])
+          }
+        } catch (error) {
+          console.error('Error parsing cart data:', error)
+          setCart([])
+        }
       }
     }
   }
@@ -81,10 +93,13 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   }
   
   const handleAddToCart = (product: Product) => {
-    const existingItem = cart.find(item => item.product_id === product.id)
+    // Ensure cart is always an array
+    const currentCart = Array.isArray(cart) ? cart : []
+    
+    const existingItem = currentCart.find(item => item.product_id === product.id)
     
     if (existingItem) {
-      const updatedCart = cart.map(item =>
+      const updatedCart = currentCart.map(item =>
         item.product_id === product.id
           ? { ...item, quantity: item.quantity + 1 }
           : item
@@ -98,7 +113,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         quantity: 1,
         image_url: product.image_url || undefined
       }
-      saveCart([...cart, newItem])
+      saveCart([...currentCart, newItem])
     }
   }
   
