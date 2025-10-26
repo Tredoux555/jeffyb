@@ -43,6 +43,7 @@ export default function AdminProductsPage() {
   })
   
   const [variants, setVariants] = useState<ProductVariant[]>([])
+  const [hasVariantAttributes, setHasVariantAttributes] = useState(false)
   
   const categories = [
     { value: 'gym', label: 'Gym' },
@@ -181,6 +182,21 @@ export default function AdminProductsPage() {
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Prevent premature submission if user is mid-variant-editing
+    if (formData.has_variants && variants.length === 0 && hasVariantAttributes) {
+      const proceed = confirm(
+        'You enabled variants and added attributes but haven\'t generated any variant combinations.\n\n' +
+        'Click OK to save the product WITHOUT variants, or Cancel to go back and:\n' +
+        '1. Add values to your attributes\n' +
+        '2. Click "Generate All Variant Combinations"\n' +
+        '3. Then save again'
+      )
+      if (!proceed) return
+      
+      // User confirmed, update state to reflect their choice
+      setFormData(prev => ({ ...prev, has_variants: false }))
+    }
     
     try {
       const productData = {
@@ -376,6 +392,7 @@ export default function AdminProductsPage() {
       has_variants: false
     })
     setVariants([])
+    setHasVariantAttributes(false)
     setIsModalOpen(true)
   }
   
@@ -641,6 +658,7 @@ export default function AdminProductsPage() {
                   productId={editingProduct?.id || 'new'}
                   variants={variants}
                   onVariantsChange={setVariants}
+                  onAttributesChange={setHasVariantAttributes}
                   disabled={uploading}
                 />
               )}

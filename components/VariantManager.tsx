@@ -19,6 +19,7 @@ interface VariantManagerProps {
   productId: string
   variants: ProductVariant[]
   onVariantsChange: (variants: ProductVariant[]) => void
+  onAttributesChange?: (hasAttributes: boolean) => void
   disabled?: boolean
 }
 
@@ -34,7 +35,8 @@ interface VariantFormData {
 export function VariantManager({ 
   productId, 
   variants, 
-  onVariantsChange, 
+  onVariantsChange,
+  onAttributesChange,
   disabled = false 
 }: VariantManagerProps) {
   const [isEditing, setIsEditing] = useState(false)
@@ -77,6 +79,12 @@ export function VariantManager({
 
     setVariantAttributes(attributesArray)
   }, [variants])
+  
+  // Notify parent when variant attributes change
+  useEffect(() => {
+    const hasAttributes = Object.keys(variantAttributes).length > 0
+    onAttributesChange?.(hasAttributes)
+  }, [variantAttributes, onAttributesChange])
 
   const handleAddAttribute = () => {
     try {
