@@ -353,8 +353,7 @@ export default function AdminProductsPage() {
           
           console.log('[FRONTEND] Variants saved successfully!')
           
-          // Keep modal open after variant save
-          alert(`✅ Product and variants saved successfully!`)
+          // Keep modal open after variant save - NO ALERT, just silent save
           fetchProducts() // Refresh product list in background
           
           // IMPORTANT: Keep modal open so user can continue editing variants
