@@ -6,7 +6,7 @@ import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
 import { Modal } from '@/components/Modal'
-import { ImageUpload } from '@/components/ImageUpload'
+import { MultiImageUpload } from '@/components/MultiImageUpload'
 import { createClient } from '@/lib/supabase'
 import { Product } from '@/types/database'
 import { 
@@ -36,7 +36,8 @@ export default function AdminProductsPage() {
     price: '',
     category: 'gym',
     stock: '',
-    image_url: ''
+    image_url: '',
+    images: [] as string[]
   })
   
   const categories = [
@@ -100,56 +101,78 @@ export default function AdminProductsPage() {
     setFilteredProducts(filtered)
   }
   
-  const handleImageUpload = async (file: File) => {
+  const handleImageUpload = async (files: File[]) => {
     setUploading(true)
     try {
-      // Mobile-specific file validation
-      if (!file) {
-        throw new Error('No file selected')
-      }
-      
-      // Check file size (5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error('File size too large. Maximum size is 5MB.')
-      }
-      
-      // Check file type
-      if (!file.type.startsWith('image/')) {
-        throw new Error('Please select a valid image file.')
-      }
-      
-      console.log('Uploading file:', file.name, 'Size:', file.size, 'Type:', file.type)
-      
       const supabase = createClient()
+      const uploadedUrls: string[] = []
       
-      // Upload directly to product-images bucket
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Date.now()}.${fileExt}`
-      
-      console.log('Uploading to Supabase:', fileName)
-      
-      const { data, error } = await supabase.storage
-        .from('product-images')
-        .upload(fileName, file)
-      
-      if (error) {
-        console.error('Upload error:', error)
-        throw new Error(`Upload failed: ${error.message}`)
+      for (const file of files) {
+        // Mobile-specific file validation
+        if (!file) {
+          throw new Error('No file selected')
+        }
+        
+        // Check file size (5MB limit)
+        if (file.size > 5 * 1024 * 1024) {
+          throw new Error(`File ${file.name} is too large. Maximum size is 5MB.`)
+        }
+        
+        // Check file type
+        if (!file.type.startsWith('image/')) {
+          throw new Error(`File ${file.name} is not a valid image file.`)
+        }
+        
+        console.log('Uploading file:', file.name, 'Size:', file.size, 'Type:', file.type)
+        
+        // Upload directly to product-images bucket
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`
+        
+        console.log('Uploading to Supabase:', fileName)
+        
+        const { data, error } = await supabase.storage
+          .from('product-images')
+          .upload(fileName, file)
+        
+        if (error) {
+          console.error('Upload error:', error)
+          throw new Error(`Upload failed for ${file.name}: ${error.message}`)
+        }
+        
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('product-images')
+          .getPublicUrl(fileName)
+        
+        console.log('Image uploaded successfully:', publicUrl)
+        uploadedUrls.push(publicUrl)
       }
       
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(fileName)
+      // Update form data with new images
+      setFormData(prev => ({
+        ...prev,
+        images: [...prev.images, ...uploadedUrls],
+        image_url: uploadedUrls[0] || prev.image_url // Set first image as primary
+      }))
       
-      console.log('Image uploaded successfully:', publicUrl)
-      setFormData({ ...formData, image_url: publicUrl })
     } catch (error) {
-      console.error('Error uploading image:', error)
-      alert(`Error uploading image: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      console.error('Error uploading images:', error)
+      alert(`Error uploading images: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setUploading(false)
     }
+  }
+  
+  const handleImageRemove = (index: number) => {
+    setFormData(prev => {
+      const newImages = prev.images.filter((_, i) => i !== index)
+      return {
+        ...prev,
+        images: newImages,
+        image_url: newImages[0] || '' // Set first remaining image as primary
+      }
+    })
   }
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -162,7 +185,8 @@ export default function AdminProductsPage() {
         price: parseFloat(formData.price),
         category: formData.category,
         stock: parseInt(formData.stock),
-        image_url: formData.image_url || null
+        image_url: formData.image_url || null,
+        images: formData.images
       }
       
       let response
@@ -202,7 +226,8 @@ export default function AdminProductsPage() {
         price: '',
         category: 'gym',
         stock: '',
-        image_url: ''
+        image_url: '',
+        images: []
       })
       setEditingProduct(null)
       setIsModalOpen(false)
@@ -221,7 +246,8 @@ export default function AdminProductsPage() {
       price: product.price.toString(),
       category: product.category,
       stock: product.stock.toString(),
-      image_url: product.image_url || ''
+      image_url: product.image_url || '',
+      images: product.images || []
     })
     setIsModalOpen(true)
   }
@@ -255,7 +281,8 @@ export default function AdminProductsPage() {
       price: '',
       category: 'gym',
       stock: '',
-      image_url: ''
+      image_url: '',
+      images: []
     })
     setIsModalOpen(true)
   }
@@ -421,19 +448,20 @@ export default function AdminProductsPage() {
           size="lg"
         >
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Product Image */}
+            {/* Product Images */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Product Image
+                Product Images (up to 5)
               </label>
-              <ImageUpload
+              <MultiImageUpload
                 onUpload={handleImageUpload}
-                currentImage={formData.image_url}
-                onRemove={() => setFormData({ ...formData, image_url: '' })}
+                onRemove={handleImageRemove}
+                currentImages={formData.images}
                 disabled={uploading}
+                maxFiles={5}
               />
               {uploading && (
-                <p className="text-sm text-gray-500 mt-2">Uploading image...</p>
+                <p className="text-sm text-gray-500 mt-2">Uploading images...</p>
               )}
             </div>
             

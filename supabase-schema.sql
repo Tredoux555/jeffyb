@@ -29,7 +29,8 @@ CREATE TABLE products (
   description TEXT,
   price DECIMAL(10,2) NOT NULL,
   category VARCHAR(100) NOT NULL,
-  image_url TEXT,
+  image_url TEXT, -- Keep for backward compatibility
+  images JSONB DEFAULT '[]'::jsonb, -- Array of image URLs
   stock INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

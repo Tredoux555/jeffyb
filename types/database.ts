@@ -6,6 +6,7 @@ export interface Product {
   price: number
   category: string
   image_url: string | null
+  images: string[] // Array of image URLs
   stock: number
   created_at: string
   updated_at: string
