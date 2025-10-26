@@ -6,7 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
-import { Product } from '@/types/database'
+import { Product, ProductVariant, CartItem } from '@/types/database'
 import { createClient } from '@/lib/supabase'
 import { 
   ArrowLeft, 
@@ -24,10 +24,11 @@ export default function ProductDetailPage() {
   const params = useParams()
   const router = useRouter()
   const [product, setProduct] = useState<Product | null>(null)
+  const [variants, setVariants] = useState<ProductVariant[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
-  const [quantity, setQuantity] = useState(1)
-  const [cart, setCart] = useState<any[]>([])
+  const [selectedVariants, setSelectedVariants] = useState<Record<string, number>>({}) // variant_id: quantity
+  const [cart, setCart] = useState<CartItem[]>([])
 
   const productId = params.id as string
 
@@ -40,14 +41,38 @@ export default function ProductDetailPage() {
     try {
       setLoading(true)
       const supabase = createClient()
-      const { data, error } = await supabase
+      
+      // Fetch product with variants
+      const { data: productData, error: productError } = await supabase
         .from('products')
         .select('*')
         .eq('id', productId)
         .single()
 
-      if (error) throw error
-      setProduct(data)
+      if (productError) throw productError
+      
+      // Fetch variants if product has them
+      if (productData.has_variants) {
+        const { data: variantsData, error: variantsError } = await supabase
+          .from('product_variants')
+          .select('*')
+          .eq('product_id', productId)
+          .order('created_at')
+
+        if (variantsError) {
+          console.error('Error fetching variants:', variantsError)
+        } else {
+          setVariants(variantsData || [])
+          // Initialize quantities for all variants
+          const initialQuantities: Record<string, number> = {}
+          variantsData?.forEach(variant => {
+            initialQuantities[variant.id] = 0
+          })
+          setSelectedVariants(initialQuantities)
+        }
+      }
+      
+      setProduct(productData)
     } catch (error) {
       console.error('Error fetching product:', error)
     } finally {
@@ -81,32 +106,94 @@ export default function ProductDetailPage() {
     }
   }
 
+  const updateVariantQuantity = (variantId: string, quantity: number) => {
+    setSelectedVariants(prev => ({
+      ...prev,
+      [variantId]: Math.max(0, quantity)
+    }))
+  }
+
   const handleAddToCart = () => {
     if (!product) return
 
     const currentCart = Array.isArray(cart) ? cart : []
-    const existingItem = currentCart.find(item => item.product_id === product.id)
     
-    if (existingItem) {
-      const updatedCart = currentCart.map(item =>
-        item.product_id === product.id
-          ? { ...item, quantity: item.quantity + quantity }
-          : item
-      )
-      saveCart(updatedCart)
-    } else {
-      const newItem = {
-        product_id: product.id,
-        product_name: product.name,
-        price: product.price,
-        quantity: quantity,
-        image_url: product.images?.[0] || product.image_url
+    // If product has variants, add selected variants
+    if (product.has_variants && variants.length > 0) {
+      const variantsToAdd = variants.filter(v => selectedVariants[v.id] > 0)
+      
+      if (variantsToAdd.length === 0) {
+        alert('Please select at least one variant and set quantity')
+        return
       }
-      saveCart([...currentCart, newItem])
-    }
 
-    // Show success feedback
-    alert(`Added ${quantity} ${product.name}(s) to cart!`)
+      variantsToAdd.forEach(variant => {
+        const quantity = selectedVariants[variant.id]
+        const variantPrice = variant.price || product.price
+        const variantDisplay = Object.entries(variant.variant_attributes)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join(', ')
+
+        const cartItem: CartItem = {
+          product_id: product.id,
+          variant_id: variant.id,
+          product_name: product.name,
+          variant_display: variantDisplay,
+          price: variantPrice,
+          quantity: quantity,
+          image_url: variant.image_url || product.images?.[0] || product.image_url
+        }
+
+        // Check if this exact variant already exists
+        const existingIndex = currentCart.findIndex(
+          item => item.product_id === product.id && item.variant_id === variant.id
+        )
+
+        if (existingIndex >= 0) {
+          // Update existing variant quantity
+          currentCart[existingIndex].quantity += quantity
+        } else {
+          // Add new variant
+          currentCart.push(cartItem)
+        }
+      })
+
+      saveCart(currentCart)
+      
+      const totalItems = variantsToAdd.reduce((sum, v) => sum + selectedVariants[v.id], 0)
+      alert(`Added ${totalItems} item(s) to cart!`)
+      
+      // Reset quantities after adding
+      const resetQuantities: Record<string, number> = {}
+      variants.forEach(v => resetQuantities[v.id] = 0)
+      setSelectedVariants(resetQuantities)
+    } else {
+      // Product without variants - use old logic
+      const quantity = 1 // Default quantity for non-variant products
+      const existingItem = currentCart.find(item => 
+        item.product_id === product.id && !item.variant_id
+      )
+      
+      if (existingItem) {
+        const updatedCart = currentCart.map(item =>
+          item.product_id === product.id && !item.variant_id
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        )
+        saveCart(updatedCart)
+      } else {
+        const newItem: CartItem = {
+          product_id: product.id,
+          product_name: product.name,
+          price: product.price,
+          quantity: quantity,
+          image_url: product.images?.[0] || product.image_url
+        }
+        saveCart([...currentCart, newItem])
+      }
+      
+      alert(`Added ${quantity} ${product.name}(s) to cart!`)
+    }
   }
 
   const nextImage = () => {
@@ -282,27 +369,54 @@ export default function ProductDetailPage() {
               </span>
             </div>
 
-            {/* Quantity Selector */}
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-gray-700">Quantity:</span>
-              <div className="flex items-center border border-gray-300 rounded-lg">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="p-2 hover:bg-gray-100 transition-colors"
-                  disabled={quantity <= 1}
-                >
-                  <Minus className="w-4 h-4" />
-                </button>
-                <span className="px-4 py-2 font-medium">{quantity}</span>
-                <button
-                  onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                  className="p-2 hover:bg-gray-100 transition-colors"
-                  disabled={quantity >= product.stock}
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
+            {/* Variant Selection */}
+            {product.has_variants && variants.length > 0 && (
+              <div className="space-y-4 border-t border-gray-200 pt-6">
+                <h3 className="text-lg font-semibold text-gray-900">Select Variants</h3>
+                
+                {variants.map((variant) => {
+                  const variantDisplay = Object.entries(variant.variant_attributes)
+                    .map(([key, value]) => `${key}: ${value}`)
+                    .join(', ')
+                  const quantity = selectedVariants[variant.id] || 0
+                  const variantPrice = variant.price || product.price
+                  
+                  return (
+                    <div key={variant.id} className="border border-gray-200 rounded-lg p-4 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium text-gray-900">{variantDisplay}</p>
+                          <p className="text-sm text-gray-600">
+                            ${variantPrice.toFixed(2)} • Stock: {variant.stock}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm font-medium text-gray-700">Quantity:</span>
+                        <div className="flex items-center border border-gray-300 rounded-lg bg-white">
+                          <button
+                            onClick={() => updateVariantQuantity(variant.id, quantity - 1)}
+                            className="p-2 hover:bg-gray-100 transition-colors"
+                            disabled={quantity <= 0}
+                          >
+                            <Minus className="w-4 h-4 text-yellow-600" />
+                          </button>
+                          <span className="px-4 py-2 font-medium w-12 text-center">{quantity}</span>
+                          <button
+                            onClick={() => updateVariantQuantity(variant.id, quantity + 1)}
+                            className="p-2 hover:bg-gray-100 transition-colors"
+                            disabled={quantity >= variant.stock}
+                          >
+                            <Plus className="w-4 h-4 text-yellow-600" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
-            </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
@@ -311,21 +425,21 @@ export default function ProductDetailPage() {
                 disabled={product.stock === 0}
                 className="flex-1 flex items-center justify-center gap-2"
               >
-                <ShoppingCart className="w-5 h-5" />
+                <ShoppingCart className="w-5 h-5 text-yellow-600" />
                 Add to Cart
               </Button>
               <Button
                 variant="outline"
                 className="flex items-center justify-center gap-2"
               >
-                <Heart className="w-5 h-5" />
+                <Heart className="w-5 h-5 text-yellow-600" />
                 Wishlist
               </Button>
               <Button
                 variant="outline"
                 className="flex items-center justify-center gap-2"
               >
-                <Share2 className="w-5 h-5" />
+                <Share2 className="w-5 h-5 text-yellow-600" />
                 Share
               </Button>
             </div>
