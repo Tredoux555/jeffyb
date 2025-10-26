@@ -49,6 +49,13 @@ export function VariantManager({
   const [variantAttributes, setVariantAttributes] = useState<Record<string, string[]>>({})
   const [uploading, setUploading] = useState(false)
 
+  // Log component mount
+  useEffect(() => {
+    console.log('[VariantManager] Component mounted')
+    console.log('[VariantManager] Current variants:', variants)
+    console.log('[VariantManager] Product ID:', productId)
+  }, [])
+
   useEffect(() => {
     // Extract unique attribute names and values from existing variants
     const attributes: Record<string, Set<string>> = {}
@@ -72,12 +79,24 @@ export function VariantManager({
   }, [variants])
 
   const handleAddAttribute = () => {
-    const attributeName = prompt('Enter attribute name (e.g., Size, Color, Material):')
-    if (attributeName && attributeName.trim()) {
-      setVariantAttributes(prev => ({
-        ...prev,
-        [attributeName.trim()]: []
-      }))
+    try {
+      console.log('[VariantManager] Add attribute clicked')
+      const attributeName = prompt('Enter attribute name (e.g., Size, Color, Material):')
+      console.log('[VariantManager] Attribute name entered:', attributeName)
+      if (attributeName && attributeName.trim()) {
+        console.log('[VariantManager] Setting new attribute:', attributeName.trim())
+        setVariantAttributes(prev => {
+          const updated = {
+            ...prev,
+            [attributeName.trim()]: []
+          }
+          console.log('[VariantManager] Updated attributes:', updated)
+          return updated
+        })
+      }
+    } catch (error) {
+      console.error('[VariantManager] Error in handleAddAttribute:', error)
+      alert(`Error adding attribute: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
@@ -132,22 +151,40 @@ export function VariantManager({
   }
 
   const handleBulkAddVariants = () => {
-    const combinations = generateAllCombinations()
-    if (!combinations || combinations.length === 0) return
+    try {
+      console.log('[VariantManager] Generate combinations clicked')
+      console.log('[VariantManager] Current variantAttributes:', variantAttributes)
+      
+      const combinations = generateAllCombinations()
+      console.log('[VariantManager] Generated combinations:', combinations)
+      
+      if (!combinations || combinations.length === 0) {
+        console.log('[VariantManager] No combinations to add')
+        return
+      }
 
-    const newVariants: ProductVariant[] = combinations.map((attributes, index) => ({
-      id: `temp-${Date.now()}-${index}`,
-      product_id: productId,
-      sku: '',
-      variant_attributes: attributes,
-      price: null,
-      stock: 0,
-      image_url: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }))
+      console.log('[VariantManager] Creating', combinations.length, 'new variants')
+      const newVariants: ProductVariant[] = combinations.map((attributes, index) => ({
+        id: `temp-${Date.now()}-${index}`,
+        product_id: productId,
+        sku: '',
+        variant_attributes: attributes,
+        price: null,
+        stock: 0,
+        image_url: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }))
 
-    onVariantsChange([...variants, ...newVariants])
+      console.log('[VariantManager] New variants created:', newVariants)
+      console.log('[VariantManager] Total variants will be:', variants.length + newVariants.length)
+
+      onVariantsChange([...variants, ...newVariants])
+      console.log('[VariantManager] Variants updated successfully')
+    } catch (error) {
+      console.error('[VariantManager] Error in handleBulkAddVariants:', error)
+      alert(`Error generating variants: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
   }
 
   const handleEditVariant = (variant: ProductVariant) => {
