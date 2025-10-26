@@ -122,29 +122,7 @@ export default function AdminProductsPage() {
       
       const supabase = createClient()
       
-      // Debug: Check Supabase connection
-      console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
-      console.log('Supabase Key exists:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
-      
-      // Check if storage bucket exists
-      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets()
-      console.log('Buckets response:', { buckets, bucketError })
-      
-      if (bucketError) {
-        console.error('Error checking buckets:', bucketError)
-        throw new Error(`Unable to access storage: ${bucketError.message}`)
-      }
-      
-      const productImagesBucket = buckets?.find(bucket => bucket.name === 'product-images')
-      console.log('Found product-images bucket:', productImagesBucket)
-      
-      if (!productImagesBucket) {
-        console.error('product-images bucket not found')
-        console.log('Available buckets:', buckets?.map(b => b.name))
-        throw new Error('Storage bucket not configured. Please contact administrator.')
-      }
-      
-      // Upload to Supabase Storage
+      // Upload directly to product-images bucket
       const fileExt = file.name.split('.').pop()
       const fileName = `${Date.now()}.${fileExt}`
       
@@ -156,7 +134,7 @@ export default function AdminProductsPage() {
       
       if (error) {
         console.error('Upload error:', error)
-        throw error
+        throw new Error(`Upload failed: ${error.message}`)
       }
       
       // Get public URL
