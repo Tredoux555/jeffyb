@@ -183,23 +183,61 @@ export default function AdminProductsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Prevent premature submission if user is mid-variant-editing
-    console.log('[FRONTEND] Submit check - has_variants:', formData.has_variants, 'variants.length:', variants.length, 'hasVariantAttributes:', hasVariantAttributes)
-    
-    if (formData.has_variants && variants.length === 0 && hasVariantAttributes) {
-      console.log('[FRONTEND] Showing confirmation dialog')
+    // ALWAYS prevent submission if variants enabled but no variants generated
+    if (formData.has_variants && variants.length === 0) {
       const proceed = confirm(
-        'You enabled variants and added attributes but haven\'t generated any variant combinations.\n\n' +
-        'Click OK to save the product WITHOUT variants, or Cancel to go back and:\n' +
-        '1. Add values to your attributes\n' +
-        '2. Click "Generate All Variant Combinations"\n' +
-        '3. Then save again'
+        '⚠️ You enabled variants but haven\'t created any variant combinations yet!\n\n' +
+        'Click OK to save WITHOUT variants (will disable "has variants" checkbox)\n' +
+        'Click Cancel to go back and:\n' +
+        '  1. Add values to your attributes (e.g., Red, Blue for Color)\n' +
+        '  2. Click "Generate All Variant Combinations"\n' +
+        '  3. Then save again'
       )
-      console.log('[FRONTEND] User response:', proceed)
       if (!proceed) return
       
-      // User confirmed, update state to reflect their choice
-      setFormData(prev => ({ ...prev, has_variants: false }))
+      // User confirmed - remove variants from product
+      const updatedFormData = { ...formData, has_variants: false }
+      setFormData(updatedFormData)
+      
+      // Continue with submission using updated data
+      const productData = {
+        name: updatedFormData.name,
+        description: updatedFormData.description,
+        price: parseFloat(updatedFormData.price),
+        category: updatedFormData.category,
+        stock: parseInt(updatedFormData.stock),
+        image_url: updatedFormData.image_url || null,
+        images: updatedFormData.images,
+        has_variants: false
+      }
+      
+      // Submit without variants
+      let response
+      if (editingProduct) {
+        response = await fetch('/api/admin/products', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: editingProduct.id, ...productData })
+        })
+      } else {
+        response = await fetch('/api/admin/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(productData)
+        })
+      }
+      
+      const result = await response.json()
+      if (!result.success) throw new Error(result.error || 'Failed to save product')
+      
+      // Reset form and close
+      setFormData({ name: '', description: '', price: '', category: 'gym', stock: '', image_url: '', images: [], has_variants: false })
+      setVariants([])
+      setHasVariantAttributes(false)
+      setEditingProduct(null)
+      setIsModalOpen(false)
+      fetchProducts()
+      return
     }
     
     try {
