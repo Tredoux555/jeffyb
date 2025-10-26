@@ -83,6 +83,7 @@ export function VariantManager({
   // Notify parent when variant attributes change
   useEffect(() => {
     const hasAttributes = Object.keys(variantAttributes).length > 0
+    console.log('[VariantManager] Notifying parent - hasAttributes:', hasAttributes, 'variantAttributes keys:', Object.keys(variantAttributes))
     onAttributesChange?.(hasAttributes)
   }, [variantAttributes, onAttributesChange])
 
