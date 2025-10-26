@@ -137,55 +137,52 @@ export default function ProductDetailPage() {
 
     const currentCart = Array.isArray(cart) ? cart : []
     
-    // If product has variants, add selected variants
+    // If product has variants, add selected variant
     if (product.has_variants && variants.length > 0) {
-      const variantsToAdd = variants.filter(v => selectedVariants[v.id] > 0)
+      const selectedVariantId = Object.keys(selectedVariants).find(id => selectedVariants[id] > 0)
       
-      if (variantsToAdd.length === 0) {
-        alert('Please select at least one variant and set quantity')
+      if (!selectedVariantId) {
+        alert('Please select a variant')
         return
       }
 
-      variantsToAdd.forEach(variant => {
-        const quantity = selectedVariants[variant.id]
-        const variantPrice = variant.price || product.price
-        const variantDisplay = Object.entries(variant.variant_attributes)
-          .map(([key, value]) => `${key}: ${value}`)
-          .join(', ')
+      const variant = variants.find(v => v.id === selectedVariantId)
+      if (!variant) return
 
-        const cartItem: CartItem = {
-          product_id: product.id,
-          variant_id: variant.id,
-          product_name: product.name,
-          variant_display: variantDisplay,
-          price: variantPrice,
-          quantity: quantity,
-          image_url: variant.image_url || product.images?.[0] || product.image_url || undefined
-        }
+      const quantity = selectedVariants[selectedVariantId]
+      const variantPrice = variant.price || product.price
+      const variantDisplay = Object.entries(variant.variant_attributes)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join(', ')
 
-        // Check if this exact variant already exists
-        const existingIndex = currentCart.findIndex(
-          item => item.product_id === product.id && item.variant_id === variant.id
-        )
+      const cartItem: CartItem = {
+        product_id: product.id,
+        variant_id: variant.id,
+        product_name: product.name,
+        variant_display: variantDisplay,
+        price: variantPrice,
+        quantity: quantity,
+        image_url: variant.image_url || product.images?.[0] || product.image_url || undefined
+      }
 
-        if (existingIndex >= 0) {
-          // Update existing variant quantity
-          currentCart[existingIndex].quantity += quantity
-        } else {
-          // Add new variant
-          currentCart.push(cartItem)
-        }
-      })
+      // Check if this exact variant already exists
+      const existingIndex = currentCart.findIndex(
+        item => item.product_id === product.id && item.variant_id === variant.id
+      )
+
+      if (existingIndex >= 0) {
+        // Update existing variant quantity
+        currentCart[existingIndex].quantity += quantity
+      } else {
+        // Add new variant
+        currentCart.push(cartItem)
+      }
 
       saveCart(currentCart)
+      alert(`Added ${quantity} item(s) to cart!`)
       
-      const totalItems = variantsToAdd.reduce((sum, v) => sum + selectedVariants[v.id], 0)
-      alert(`Added ${totalItems} item(s) to cart!`)
-      
-      // Reset quantities after adding
-      const resetQuantities: Record<string, number> = {}
-      variants.forEach(v => resetQuantities[v.id] = 0)
-      setSelectedVariants(resetQuantities)
+      // Reset selection after adding
+      setSelectedVariants({})
     } else {
       // Product without variants - use old logic
       const quantity = 1 // Default quantity for non-variant products
@@ -388,66 +385,96 @@ export default function ProductDetailPage() {
               </span>
             </div>
 
-            {/* Variant Selection */}
+            {/* Variant Selection - Simplified Approach */}
             {product.has_variants && variants.length > 0 && (
-              <div className="space-y-4 border-t border-gray-200 pt-6 relative z-10">
-                <h3 className="text-lg font-semibold text-gray-900">Select Variants</h3>
+              <div className="space-y-4 border-t border-gray-200 pt-6">
+                <h3 className="text-lg font-semibold text-gray-900">Select Your Options</h3>
                 
-                {variants.map((variant) => {
-                  const variantDisplay = Object.entries(variant.variant_attributes)
-                    .map(([key, value]) => `${key}: ${value}`)
-                    .join(', ')
-                  const quantity = selectedVariants[variant.id] ?? 0
-                  const variantPrice = variant.price || product.price
-                  
-                  return (
-                    <div key={variant.id} className="border border-gray-200 rounded-lg p-4 space-y-3">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium text-gray-900">{variantDisplay}</p>
-                          <p className="text-sm text-gray-600">
-                            ${variantPrice.toFixed(2)} • Stock: {variant.stock}
-                          </p>
+                {/* Variant Selection - One Selected at a Time */}
+                <div className="space-y-3">
+                  {variants.map((variant) => {
+                    const variantDisplay = Object.entries(variant.variant_attributes)
+                      .map(([key, value]) => `${key}: ${value}`)
+                      .join(', ')
+                    const variantPrice = variant.price || product.price
+                    const isSelected = selectedVariants[variant.id] && selectedVariants[variant.id] > 0
+                    
+                    return (
+                      <button
+                        key={variant.id}
+                        onClick={() => {
+                          // Clear all others and select this one
+                          const newSelected: Record<string, number> = {}
+                          newSelected[variant.id] = 1
+                          console.log('[Product] Variant selected:', variant.id)
+                          setSelectedVariants(newSelected)
+                        }}
+                        className={`w-full text-left border-2 rounded-lg p-4 transition-all ${
+                          isSelected
+                            ? 'border-jeffy-yellow bg-yellow-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                        type="button"
+                      >
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="font-medium text-gray-900">{variantDisplay}</p>
+                            <p className="text-sm text-gray-600">
+                              ${variantPrice.toFixed(2)} • Stock: {variant.stock}
+                            </p>
+                          </div>
+                          {isSelected && (
+                            <span className="text-jeffy-yellow font-bold">✓</span>
+                          )}
                         </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-4">
-                        <span className="text-sm font-medium text-gray-700">Quantity:</span>
-                        <div className="flex items-center border border-gray-300 rounded-lg bg-white relative z-10">
-                          <button
-                            onClick={(e) => {
-                              console.log('[Product] BUTTON CLICKED - event:', e.type)
-                              e.preventDefault()
-                              e.stopPropagation()
-                              console.log('[Product] Minus clicked for variant:', variant.id, 'current qty:', quantity)
-                              updateVariantQuantity(variant.id, quantity - 1)
-                            }}
-                            className="p-2 hover:bg-gray-100 transition-colors touch-manipulation pointer-events-auto relative z-10"
-                            disabled={quantity <= 0}
-                            type="button"
-                          >
-                            <Minus className="w-4 h-4 text-yellow-600" />
-                          </button>
-                          <span className="px-4 py-2 font-medium w-12 text-center">{quantity}</span>
-                          <button
-                            onClick={(e) => {
-                              console.log('[Product] BUTTON CLICKED - event:', e.type)
-                              e.preventDefault()
-                              e.stopPropagation()
-                              console.log('[Product] Plus clicked for variant:', variant.id, 'current qty:', quantity)
-                              updateVariantQuantity(variant.id, quantity + 1)
-                            }}
-                            className="p-2 hover:bg-gray-100 transition-colors touch-manipulation pointer-events-auto relative z-10"
-                            disabled={quantity >= variant.stock}
-                            type="button"
-                          >
-                            <Plus className="w-4 h-4 text-yellow-600" />
-                          </button>
-                        </div>
-                      </div>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {/* Quantity Input for Selected Variant */}
+                {Object.keys(selectedVariants).length > 0 && Object.values(selectedVariants).some(qty => qty > 0) && (
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Quantity
+                    </label>
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault()
+                          const selectedId = Object.keys(selectedVariants).find(id => selectedVariants[id] > 0)
+                          if (selectedId) {
+                            const currentQty = selectedVariants[selectedId] || 0
+                            updateVariantQuantity(selectedId, Math.max(1, currentQty - 1))
+                          }
+                        }}
+                        className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100"
+                        type="button"
+                      >
+                        <Minus className="w-5 h-5 text-gray-700" />
+                      </button>
+                      <span className="px-4 py-2 text-lg font-semibold min-w-[3rem] text-center">
+                        {Object.values(selectedVariants).find(qty => qty > 0) || 1}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault()
+                          const selectedId = Object.keys(selectedVariants).find(id => selectedVariants[id] > 0)
+                          if (selectedId) {
+                            const currentQty = selectedVariants[selectedId] || 1
+                            const variant = variants.find(v => v.id === selectedId)
+                            const maxQty = variant?.stock || 0
+                            updateVariantQuantity(selectedId, Math.min(maxQty, currentQty + 1))
+                          }
+                        }}
+                        className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100"
+                        type="button"
+                      >
+                        <Plus className="w-5 h-5 text-gray-700" />
+                      </button>
                     </div>
-                  )
-                })}
+                  </div>
+                )}
               </div>
             )}
 
