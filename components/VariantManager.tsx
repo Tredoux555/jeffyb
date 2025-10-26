@@ -101,12 +101,27 @@ export function VariantManager({
   }
 
   const handleAddAttributeValue = (attributeName: string) => {
-    const value = prompt(`Enter value for ${attributeName}:`)
-    if (value && value.trim()) {
-      setVariantAttributes(prev => ({
-        ...prev,
-        [attributeName]: [...(prev[attributeName] || []), value.trim()]
-      }))
+    try {
+      console.log('[VariantManager] Add value clicked for attribute:', attributeName)
+      const value = prompt(`Enter value for ${attributeName}:`)
+      console.log('[VariantManager] Value entered:', value)
+      
+      if (value && value.trim()) {
+        console.log('[VariantManager] Adding value:', value.trim(), 'to attribute:', attributeName)
+        setVariantAttributes(prev => {
+          const currentValues = prev[attributeName] || []
+          const newValues = [...currentValues, value.trim()]
+          const updated = {
+            ...prev,
+            [attributeName]: newValues
+          }
+          console.log('[VariantManager] Updated attribute values:', updated)
+          return updated
+        })
+      }
+    } catch (error) {
+      console.error('[VariantManager] Error in handleAddAttributeValue:', error)
+      alert(`Error adding attribute value: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
@@ -124,30 +139,49 @@ export function VariantManager({
   }
 
   const generateAllCombinations = () => {
-    const attributeNames = Object.keys(variantAttributes)
-    if (attributeNames.length === 0) return
-
-    const combinations: Record<string, string>[] = []
-    
-    const generateCombinations = (current: Record<string, string>, remaining: string[]) => {
-      if (remaining.length === 0) {
-        combinations.push(current)
-        return
+    try {
+      console.log('[VariantManager] Generating combinations...')
+      const attributeNames = Object.keys(variantAttributes)
+      console.log('[VariantManager] Attribute names:', attributeNames)
+      
+      if (attributeNames.length === 0) {
+        console.log('[VariantManager] No attributes, returning empty array')
+        return []
       }
 
-      const attributeName = remaining[0]
-      const values = variantAttributes[attributeName]
+      const combinations: Record<string, string>[] = []
       
-      values.forEach(value => {
-        generateCombinations(
-          { ...current, [attributeName]: value },
-          remaining.slice(1)
-        )
-      })
-    }
+      const generateCombinations = (current: Record<string, string>, remaining: string[]) => {
+        if (remaining.length === 0) {
+          combinations.push(current)
+          return
+        }
 
-    generateCombinations({}, attributeNames)
-    return combinations
+        const attributeName = remaining[0]
+        const values = variantAttributes[attributeName]
+        
+        console.log('[VariantManager] Processing attribute:', attributeName, 'Values:', values)
+        
+        if (!values || values.length === 0) {
+          console.warn('[VariantManager] Attribute has no values:', attributeName)
+          return
+        }
+        
+        values.forEach(value => {
+          generateCombinations(
+            { ...current, [attributeName]: value },
+            remaining.slice(1)
+          )
+        })
+      }
+
+      generateCombinations({}, attributeNames)
+      console.log('[VariantManager] Generated', combinations.length, 'combinations')
+      return combinations
+    } catch (error) {
+      console.error('[VariantManager] Error in generateAllCombinations:', error)
+      return []
+    }
   }
 
   const handleBulkAddVariants = () => {
