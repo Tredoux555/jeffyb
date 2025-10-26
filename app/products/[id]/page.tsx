@@ -121,11 +121,11 @@ export default function ProductDetailPage() {
   }
 
   const updateVariantQuantity = (variantId: string, quantity: number) => {
-    console.log('[Product] Updating variant quantity:', variantId, quantity)
+    console.log('[Product] Updating variant quantity:', variantId, 'to quantity:', quantity)
     setSelectedVariants(prev => {
       const updated = {
         ...prev,
-        [variantId]: Math.max(0, quantity)
+        [variantId]: Math.max(1, quantity) // Minimum 1, not 0
       }
       console.log('[Product] Updated quantities:', updated)
       return updated
@@ -445,10 +445,15 @@ export default function ProductDetailPage() {
                           e.stopPropagation()
                           const selectedId = Object.keys(selectedVariants).find(id => selectedVariants[id] > 0)
                           if (selectedId) {
-                            const currentQty = selectedVariants[selectedId] || 0
-                            const newQty = Math.max(1, currentQty - 1)
-                            console.log('[Product] Minus button clicked - current:', currentQty, 'new:', newQty)
-                            updateVariantQuantity(selectedId, newQty)
+                            setSelectedVariants(prev => {
+                              const currentQty = prev[selectedId] || 1
+                              const newQty = Math.max(1, currentQty - 1)
+                              console.log('[Product] Minus button - current:', currentQty, 'new:', newQty)
+                              return {
+                                ...prev,
+                                [selectedId]: newQty
+                              }
+                            })
                           }
                         }}
                         className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100"
@@ -468,12 +473,17 @@ export default function ProductDetailPage() {
                           e.stopPropagation()
                           const selectedId = Object.keys(selectedVariants).find(id => selectedVariants[id] > 0)
                           if (selectedId) {
-                            const currentQty = selectedVariants[selectedId] || 0
-                            const variant = variants.find(v => v.id === selectedId)
-                            const maxQty = variant?.stock || 0
-                            const newQty = Math.min(maxQty, currentQty + 1)
-                            console.log('[Product] Plus button clicked - current:', currentQty, 'new:', newQty)
-                            updateVariantQuantity(selectedId, newQty)
+                            setSelectedVariants(prev => {
+                              const currentQty = prev[selectedId] || 1
+                              const variant = variants.find(v => v.id === selectedId)
+                              const maxQty = variant?.stock || 999
+                              const newQty = Math.min(maxQty, currentQty + 1)
+                              console.log('[Product] Plus button - current:', currentQty, 'new:', newQty)
+                              return {
+                                ...prev,
+                                [selectedId]: newQty
+                              }
+                            })
                           }
                         }}
                         className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100"
