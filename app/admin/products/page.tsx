@@ -355,6 +355,7 @@ export default function AdminProductsPage() {
       has_variants: product.has_variants || false
     })
     setVariants(product.variants || [])
+    setHasVariantAttributes(false) // Reset - will be set by VariantManager if needed
     setIsModalOpen(true)
   }
   
