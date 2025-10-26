@@ -133,7 +133,7 @@ export function VariantManager({
 
   const handleBulkAddVariants = () => {
     const combinations = generateAllCombinations()
-    if (combinations.length === 0) return
+    if (!combinations || combinations.length === 0) return
 
     const newVariants: ProductVariant[] = combinations.map((attributes, index) => ({
       id: `temp-${Date.now()}-${index}`,
