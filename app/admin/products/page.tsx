@@ -218,11 +218,32 @@ export default function AdminProductsPage() {
         })
       }
       
-      const result = await response.json()
+      console.log('[FRONTEND] Response status:', response.status, response.statusText)
+      console.log('[FRONTEND] Response ok:', response.ok)
+      
+      let result
+      try {
+        const text = await response.text()
+        console.log('[FRONTEND] Raw response body:', text)
+        result = JSON.parse(text)
+      } catch (parseError) {
+        console.error('[FRONTEND] Failed to parse response:', parseError)
+        throw new Error(`Failed to parse server response: ${response.statusText}`)
+      }
+      
+      console.log('[FRONTEND] Parsed result:', result)
+      
+      if (!response.ok) {
+        console.error('[FRONTEND] HTTP error:', response.status, result)
+        throw new Error(result.error || `Server error: ${response.statusText}`)
+      }
       
       if (!result.success) {
+        console.error('[FRONTEND] API returned success=false:', result)
         throw new Error(result.error || 'Failed to save product')
       }
+      
+      console.log('[FRONTEND] Product saved successfully!')
       
       // Reset form and close modal
       setFormData({
@@ -240,7 +261,8 @@ export default function AdminProductsPage() {
       setIsModalOpen(false)
       fetchProducts()
     } catch (error) {
-      console.error('Error saving product:', error)
+      console.error('[FRONTEND] Error saving product:', error)
+      console.error('[FRONTEND] Error stack:', error instanceof Error ? error.stack : 'No stack')
       alert(`Error saving product: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }

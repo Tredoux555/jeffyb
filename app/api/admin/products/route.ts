@@ -27,6 +27,9 @@ export async function POST(request: NextRequest) {
       has_variants: has_variants || false
     }
 
+    console.log('[API] Creating product with data:', JSON.stringify(productData, null, 2))
+    console.log('[API] has_variants value:', has_variants, 'Type:', typeof has_variants)
+
     const { data, error } = await supabase
       .from('products')
       .insert(productData)
@@ -34,12 +37,15 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error creating product:', error)
+      console.error('[API] Error creating product:', JSON.stringify(error, null, 2))
+      console.error('[API] Full error object:', error)
       return NextResponse.json(
         { success: false, error: error.message },
         { status: 500 }
       )
     }
+
+    console.log('[API] Product created successfully:', data?.id)
 
     return NextResponse.json({
       success: true,
