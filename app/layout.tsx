@@ -13,7 +13,13 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Jeffy - In a Jiffy",
   description: "Your mobile-optimized commerce platform for gym, camping, kitchen, and beauty products",
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
+  // viewport and themeColor moved to viewport export below
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
   themeColor: '#FCD34D',
 };
 
