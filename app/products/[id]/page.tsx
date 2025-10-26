@@ -29,6 +29,8 @@ export default function ProductDetailPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [selectedVariants, setSelectedVariants] = useState<Record<string, number>>({}) // variant_id: quantity
   const [cart, setCart] = useState<CartItem[]>([])
+  const [showNotification, setShowNotification] = useState(false)
+  const [notificationMessage, setNotificationMessage] = useState('')
 
   const productId = params.id as string
 
@@ -179,7 +181,11 @@ export default function ProductDetailPage() {
       }
 
       saveCart(currentCart)
-      alert(`Added ${quantity} item(s) to cart!`)
+      
+      // Show notification
+      setNotificationMessage(`Added ${quantity} ${variantDisplay} to cart!`)
+      setShowNotification(true)
+      setTimeout(() => setShowNotification(false), 3000)
       
       // Reset selection after adding
       setSelectedVariants({})
@@ -208,7 +214,10 @@ export default function ProductDetailPage() {
         saveCart([...currentCart, newItem])
       }
       
-      alert(`Added ${quantity} ${product.name}(s) to cart!`)
+      // Show notification
+      setNotificationMessage(`Added ${quantity} ${product.name}(s) to cart!`)
+      setShowNotification(true)
+      setTimeout(() => setShowNotification(false), 3000)
     }
   }
 
@@ -539,6 +548,14 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {showNotification && (
+        <div className="fixed bottom-6 right-6 bg-jeffy-yellow text-gray-900 px-6 py-4 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-slide-up">
+          <span className="text-2xl">✓</span>
+          <span className="font-medium">{notificationMessage}</span>
+        </div>
+      )}
     </div>
   )
 }
