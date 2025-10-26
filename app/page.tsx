@@ -63,7 +63,7 @@ export default function Home() {
           {categories.map((category) => {
             const Icon = category.icon
             return (
-              <Link key={category.slug} href={`/products/${category.slug}`}>
+              <Link key={category.slug} href={`/products/category/${category.slug}`}>
                 <Card className="text-center hover:shadow-jeffy-lg transition-all duration-300 sm:hover:scale-105 cursor-pointer group p-3 sm:p-4">
                   <div className={`w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full ${category.color} flex items-center justify-center sm:group-hover:scale-110 transition-transform duration-300`}>
                     <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />

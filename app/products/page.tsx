@@ -214,7 +214,7 @@ export default function ProductsPage() {
               {categories.slice(1).map((category) => (
                 <Link
                   key={category.value}
-                  href={`/products/${category.value}`}
+                  href={`/products/category/${category.value}`}
                   className="px-2 sm:px-3 py-1 text-xs bg-jeffy-yellow-light text-gray-700 rounded-full hover:bg-jeffy-yellow transition-colors"
                 >
                   {category.label}
