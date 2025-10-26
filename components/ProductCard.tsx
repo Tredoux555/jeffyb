@@ -40,7 +40,7 @@ export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCard
   return (
     <Card className="group hover:shadow-jeffy-lg transition-all duration-300 p-3 sm:p-4">
       {/* Product Image */}
-      <div className="relative w-full h-40 sm:h-48 mb-3 sm:mb-4 overflow-hidden rounded-lg">
+      <div className="relative w-full h-40 sm:h-48 mb-3 sm:mb-4 rounded-lg overflow-hidden">
         {images.length > 0 ? (
           <Link href={`/products/${product.id}`}>
             <div className="relative w-full h-full cursor-pointer">
