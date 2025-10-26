@@ -8,6 +8,20 @@ export interface Product {
   image_url: string | null
   images: string[] // Array of image URLs
   stock: number
+  has_variants: boolean
+  variants?: ProductVariant[] // Loaded when needed
+  created_at: string
+  updated_at: string
+}
+
+export interface ProductVariant {
+  id: string
+  product_id: string
+  sku: string | null
+  variant_attributes: Record<string, string> // e.g., {size: "L", color: "Red"}
+  price: number | null // null means use product base price
+  stock: number
+  image_url: string | null
   created_at: string
   updated_at: string
 }
@@ -70,7 +84,9 @@ export interface DeliveryRequest {
 
 export interface CartItem {
   product_id: string
+  variant_id?: string // Optional: if product has variants
   product_name: string
+  variant_display?: string // e.g., "Size: L, Color: Red"
   price: number
   quantity: number
   image_url?: string

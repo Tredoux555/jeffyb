@@ -7,8 +7,9 @@ import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
 import { Modal } from '@/components/Modal'
 import { MultiImageUpload } from '@/components/MultiImageUpload'
+import { VariantManager } from '@/components/VariantManager'
 import { createClient } from '@/lib/supabase'
-import { Product } from '@/types/database'
+import { Product, ProductVariant } from '@/types/database'
 import { 
   Plus, 
   Edit, 
@@ -37,8 +38,11 @@ export default function AdminProductsPage() {
     category: 'gym',
     stock: '',
     image_url: '',
-    images: [] as string[]
+    images: [] as string[],
+    has_variants: false
   })
+  
+  const [variants, setVariants] = useState<ProductVariant[]>([])
   
   const categories = [
     { value: 'gym', label: 'Gym' },
@@ -186,7 +190,8 @@ export default function AdminProductsPage() {
         category: formData.category,
         stock: parseInt(formData.stock),
         image_url: formData.image_url || null,
-        images: formData.images
+        images: formData.images,
+        has_variants: formData.has_variants
       }
       
       let response
@@ -227,8 +232,10 @@ export default function AdminProductsPage() {
         category: 'gym',
         stock: '',
         image_url: '',
-        images: []
+        images: [],
+        has_variants: false
       })
+      setVariants([])
       setEditingProduct(null)
       setIsModalOpen(false)
       fetchProducts()
@@ -247,8 +254,10 @@ export default function AdminProductsPage() {
       category: product.category,
       stock: product.stock.toString(),
       image_url: product.image_url || '',
-      images: product.images || []
+      images: product.images || [],
+      has_variants: product.has_variants || false
     })
+    setVariants(product.variants || [])
     setIsModalOpen(true)
   }
   
@@ -282,8 +291,10 @@ export default function AdminProductsPage() {
       category: 'gym',
       stock: '',
       image_url: '',
-      images: []
+      images: [],
+      has_variants: false
     })
+    setVariants([])
     setIsModalOpen(true)
   }
   
@@ -527,6 +538,31 @@ export default function AdminProductsPage() {
                   </option>
                 ))}
               </select>
+            </div>
+            
+            {/* Variants Management */}
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <input
+                  type="checkbox"
+                  id="has_variants"
+                  checked={formData.has_variants}
+                  onChange={(e) => setFormData({ ...formData, has_variants: e.target.checked })}
+                  className="w-4 h-4 text-jeffy-yellow bg-gray-100 border-gray-300 rounded focus:ring-jeffy-yellow focus:ring-2"
+                />
+                <label htmlFor="has_variants" className="text-sm font-medium text-gray-700">
+                  This product has variants (size, color, etc.)
+                </label>
+              </div>
+              
+              {formData.has_variants && (
+                <VariantManager
+                  productId={editingProduct?.id || 'new'}
+                  variants={variants}
+                  onVariantsChange={setVariants}
+                  disabled={uploading}
+                />
+              )}
             </div>
             
             {/* Submit Buttons */}

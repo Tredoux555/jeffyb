@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, description, price, category, stock, image_url, images } = body
+    const { name, description, price, category, stock, image_url, images, has_variants } = body
 
     // Validate required fields
     if (!name || !price || !category) {
@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
       category,
       stock: parseInt(stock) || 0,
       image_url: image_url || null,
-      images: images || []
+      images: images || [],
+      has_variants: has_variants || false
     }
 
     const { data, error } = await supabase
@@ -56,7 +57,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, name, description, price, category, stock, image_url, images } = body
+    const { id, name, description, price, category, stock, image_url, images, has_variants } = body
 
     if (!id) {
       return NextResponse.json(
@@ -74,7 +75,8 @@ export async function PUT(request: NextRequest) {
       category,
       stock: parseInt(stock) || 0,
       image_url: image_url || null,
-      images: images || []
+      images: images || [],
+      has_variants: has_variants || false
     }
 
     const { data, error } = await supabase
