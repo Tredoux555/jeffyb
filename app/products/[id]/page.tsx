@@ -403,10 +403,10 @@ export default function ProductDetailPage() {
                       <button
                         key={variant.id}
                         onClick={() => {
-                          // Clear all others and select this one
+                          // Clear all others and select this one with quantity 1
                           const newSelected: Record<string, number> = {}
                           newSelected[variant.id] = 1
-                          console.log('[Product] Variant selected:', variant.id)
+                          console.log('[Product] Variant selected:', variant.id, 'with quantity 1')
                           setSelectedVariants(newSelected)
                         }}
                         className={`w-full text-left border-2 rounded-lg p-4 transition-all ${
@@ -442,10 +442,13 @@ export default function ProductDetailPage() {
                       <button
                         onClick={(e) => {
                           e.preventDefault()
+                          e.stopPropagation()
                           const selectedId = Object.keys(selectedVariants).find(id => selectedVariants[id] > 0)
                           if (selectedId) {
                             const currentQty = selectedVariants[selectedId] || 0
-                            updateVariantQuantity(selectedId, Math.max(1, currentQty - 1))
+                            const newQty = Math.max(1, currentQty - 1)
+                            console.log('[Product] Minus button clicked - current:', currentQty, 'new:', newQty)
+                            updateVariantQuantity(selectedId, newQty)
                           }
                         }}
                         className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100"
@@ -459,12 +462,15 @@ export default function ProductDetailPage() {
                       <button
                         onClick={(e) => {
                           e.preventDefault()
+                          e.stopPropagation()
                           const selectedId = Object.keys(selectedVariants).find(id => selectedVariants[id] > 0)
                           if (selectedId) {
-                            const currentQty = selectedVariants[selectedId] || 1
+                            const currentQty = selectedVariants[selectedId] || 0
                             const variant = variants.find(v => v.id === selectedId)
                             const maxQty = variant?.stock || 0
-                            updateVariantQuantity(selectedId, Math.min(maxQty, currentQty + 1))
+                            const newQty = Math.min(maxQty, currentQty + 1)
+                            console.log('[Product] Plus button clicked - current:', currentQty, 'new:', newQty)
+                            updateVariantQuantity(selectedId, newQty)
                           }
                         }}
                         className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100"
