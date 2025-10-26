@@ -457,7 +457,10 @@ export default function ProductDetailPage() {
                         <Minus className="w-5 h-5 text-gray-700" />
                       </button>
                       <span className="px-4 py-2 text-lg font-semibold min-w-[3rem] text-center">
-                        {Object.values(selectedVariants).find(qty => qty > 0) || 1}
+                        {(() => {
+                          const selectedId = Object.keys(selectedVariants).find(id => selectedVariants[id] > 0)
+                          return selectedVariants[selectedId || ''] || 1
+                        })()}
                       </span>
                       <button
                         onClick={(e) => {
