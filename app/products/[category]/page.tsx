@@ -118,8 +118,8 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   }
   
   const handleViewDetails = (product: Product) => {
-    // TODO: Implement product detail modal/page
-    console.log('View details for:', product.name)
+    // Navigate to product detail page
+    window.location.href = `/products/${product.id}`
   }
   
   if (loading) {

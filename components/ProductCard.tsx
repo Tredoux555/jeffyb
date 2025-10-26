@@ -1,10 +1,11 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
-import { ShoppingCart, Eye } from 'lucide-react'
+import { ShoppingCart, Eye, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Product } from '@/types/database'
 
 interface ProductCardProps {
@@ -14,21 +15,70 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCardProps) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  
+  // Get all available images
+  const images = product.images && product.images.length > 0 ? product.images : 
+                 product.image_url ? [product.image_url] : []
+  
+  const nextImage = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setCurrentImageIndex((prev) => 
+      prev === images.length - 1 ? 0 : prev + 1
+    )
+  }
+  
+  const prevImage = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setCurrentImageIndex((prev) => 
+      prev === 0 ? images.length - 1 : prev - 1
+    )
+  }
+
   return (
     <Card className="group hover:shadow-jeffy-lg transition-all duration-300 p-3 sm:p-4">
       {/* Product Image */}
       <div className="relative w-full h-40 sm:h-48 mb-3 sm:mb-4 overflow-hidden rounded-lg">
-        {product.image_url ? (
-          <Image
-            src={product.image_url}
-            alt={product.name}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className="object-cover sm:group-hover:scale-105 transition-transform duration-300"
-            priority={false}
-            loading="lazy"
-            quality={75}
-          />
+        {images.length > 0 ? (
+          <Link href={`/products/${product.id}`}>
+            <div className="relative w-full h-full cursor-pointer">
+              <Image
+                src={images[currentImageIndex]}
+                alt={product.name}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                className="object-cover sm:group-hover:scale-105 transition-transform duration-300"
+                priority={false}
+                loading="lazy"
+                quality={75}
+              />
+              
+              {/* Image Navigation for Multiple Images */}
+              {images.length > 1 && (
+                <>
+                  <button
+                    onClick={prevImage}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <ChevronLeft className="w-3 h-3" />
+                  </button>
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <ChevronRight className="w-3 h-3" />
+                  </button>
+                  
+                  {/* Image Counter */}
+                  <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                    {currentImageIndex + 1}/{images.length}
+                  </div>
+                </>
+              )}
+            </div>
+          </Link>
         ) : (
           <div className="w-full h-full bg-jeffy-yellow-light flex items-center justify-center">
             <span className="text-gray-500 text-xs sm:text-sm">No Image</span>
@@ -37,8 +87,15 @@ export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCard
         
         {/* Stock Badge */}
         {product.stock <= 5 && (
-          <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+          <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
             Low Stock
+          </div>
+        )}
+        
+        {/* Multiple Images Indicator */}
+        {images.length > 1 && (
+          <div className="absolute top-2 right-2 bg-jeffy-yellow text-gray-900 text-xs px-2 py-1 rounded-full font-medium">
+            {images.length} photos
           </div>
         )}
       </div>
@@ -46,9 +103,11 @@ export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCard
       {/* Product Info */}
       <div className="space-y-2 sm:space-y-3">
         <div>
-          <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-1">
-            {product.name}
-          </h3>
+          <Link href={`/products/${product.id}`}>
+            <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-1 hover:text-jeffy-grey transition-colors cursor-pointer">
+              {product.name}
+            </h3>
+          </Link>
           <p className="text-gray-600 text-xs sm:text-sm line-clamp-2">
             {product.description}
           </p>
