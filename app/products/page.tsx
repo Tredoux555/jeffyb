@@ -45,7 +45,13 @@ export default function ProductsPage() {
         .select('*')
         .order('created_at', { ascending: false })
       
-      if (error) throw error
+      if (error) {
+        console.error('Error fetching products:', error)
+        throw error
+      }
+      
+      console.log('[Products Page] Fetched products:', data?.length || 0)
+      console.log('[Products Page] Sample product:', data?.[0])
       setProducts(data || [])
     } catch (error) {
       console.error('Error fetching products:', error)
