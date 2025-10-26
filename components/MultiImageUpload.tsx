@@ -11,7 +11,7 @@ interface MultiImageUploadProps {
   currentImages: string[]
   className?: string
   disabled?: boolean
-  maxFiles?: number
+  maxFiles?: number  // Default is set below, can be overridden
 }
 
 export function MultiImageUpload({ 
@@ -20,7 +20,7 @@ export function MultiImageUpload({
   currentImages, 
   className, 
   disabled = false,
-  maxFiles = 5 
+  maxFiles = 10 
 }: MultiImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)

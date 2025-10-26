@@ -383,8 +383,9 @@ export default function ProductDetailPage() {
                   const variantDisplay = Object.entries(variant.variant_attributes)
                     .map(([key, value]) => `${key}: ${value}`)
                     .join(', ')
-                  const quantity = selectedVariants[variant.id] || 0
+                  const quantity = selectedVariants[variant.id] ?? 0
                   const variantPrice = variant.price || product.price
+                  console.log('[Product] Rendering variant:', variant.id, 'quantity:', quantity)
                   
                   return (
                     <div key={variant.id} className="border border-gray-200 rounded-lg p-4 space-y-3">
