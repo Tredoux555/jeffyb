@@ -123,7 +123,7 @@ export default function AdminDashboard() {
     },
     {
       title: 'Total Revenue',
-      value: `R${stats.totalRevenue.toFixed(2)}`},,
+      value: `R${stats.totalRevenue.toFixed(2)}`,
       icon: DollarSign,
       color: 'bg-jeffy-yellow',
       link: '/admin/orders'
