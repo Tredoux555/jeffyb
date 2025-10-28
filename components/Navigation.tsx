@@ -64,7 +64,10 @@ export function Navigation({ cartItemCount = 0 }: NavigationProps) {
             <Link href="/cart" className="relative">
               <ShoppingCart className="w-6 h-6 text-white" />
               {cartItemCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-jeffy-yellow text-gray-900 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                <span 
+                  key={cartItemCount}
+                  className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg animate-bounce-in"
+                >
                   {cartItemCount}
                 </span>
               )}
