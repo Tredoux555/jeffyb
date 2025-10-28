@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ProductCard } from '@/components/ProductCard'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
@@ -10,6 +11,7 @@ import { createClient } from '@/lib/supabase'
 import { Search, Filter, Grid, List } from 'lucide-react'
 
 export default function ProductsPage() {
+  const router = useRouter()
   const [products, setProducts] = useState<Product[]>([])
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -134,7 +136,7 @@ export default function ProductsPage() {
   
   const handleViewDetails = (product: Product) => {
     // Navigate to product detail page
-    window.location.href = `/products/${product.id}`
+    router.push(`/products/${product.id}`)
   }
   
   if (loading) {

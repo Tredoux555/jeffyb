@@ -49,7 +49,7 @@ export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCard
                 alt={product.name}
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                className="object-cover sm:group-hover:scale-105 transition-transform duration-300"
+                className="object-cover lg:group-hover:scale-105 transition-transform duration-300"
                 priority={false}
                 loading="lazy"
                 quality={75}
@@ -60,19 +60,19 @@ export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCard
                 <>
                   <button
                     onClick={prevImage}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 active:bg-white rounded-full p-2 shadow-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                   >
-                    <ChevronLeft className="w-3 h-3" />
+                    <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
                     onClick={nextImage}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 active:bg-white rounded-full p-2 shadow-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                   >
-                    <ChevronRight className="w-3 h-3" />
+                    <ChevronRight className="w-4 h-4" />
                   </button>
                   
                   {/* Image Counter */}
-                  <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                     {currentImageIndex + 1}/{images.length}
                   </div>
                 </>
@@ -129,7 +129,7 @@ export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCard
           <Button
             onClick={() => onAddToCart(product)}
             disabled={product.stock === 0}
-            className="flex-1 text-xs sm:text-sm"
+            className="flex-1 text-xs sm:text-sm active:scale-95"
             size="sm"
           >
             <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
@@ -139,7 +139,7 @@ export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCard
             variant="outline"
             onClick={() => onViewDetails(product)}
             size="sm"
-            className="px-2 sm:px-3"
+            className="px-2 sm:px-3 active:scale-95"
           >
             <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
