@@ -78,7 +78,7 @@ export function Cart({ items, onUpdateQuantity, onRemoveItem, onCheckout }: Cart
                       {item.product_name}
                     </h4>
                     <p className="text-jeffy-yellow font-semibold">
-                      ${item.price.toFixed(2)}
+                      R{item.price.toFixed(2)}
                     </p>
                   </div>
                   
@@ -119,7 +119,7 @@ export function Cart({ items, onUpdateQuantity, onRemoveItem, onCheckout }: Cart
                   Total ({itemCount} items)
                 </span>
                 <span className="text-2xl font-bold text-jeffy-yellow">
-                  ${total.toFixed(2)}
+                  R{total.toFixed(2)}
                 </span>
               </div>
               

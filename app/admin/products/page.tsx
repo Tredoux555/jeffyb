@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { Toast } from "@/components/Toast"
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
@@ -30,6 +31,7 @@ export default function AdminProductsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [toast, setToast] = useState({ isVisible: false, message: '' })
   
   const [formData, setFormData] = useState({
     name: '',
@@ -110,59 +112,60 @@ export default function AdminProductsPage() {
     try {
       const supabase = createClient()
       const uploadedUrls: string[] = []
-      
+      const failedFiles: string[] = []
       for (const file of files) {
-        // Mobile-specific file validation
         if (!file) {
-          throw new Error('No file selected')
+          failedFiles.push('Invalid file')
+          continue
         }
-        
-        // Check file size (5MB limit)
         if (file.size > 5 * 1024 * 1024) {
-          throw new Error(`File ${file.name} is too large. Maximum size is 5MB.`)
+          failedFiles.push(`${file.name} (too large)`)
+          continue
         }
-        
-        // Check file type
         if (!file.type.startsWith('image/')) {
-          throw new Error(`File ${file.name} is not a valid image file.`)
+          failedFiles.push(`${file.name} (invalid type)`)
+          continue
         }
-        
-        console.log('Uploading file:', file.name, 'Size:', file.size, 'Type:', file.type)
-        
-        // Upload directly to product-images bucket
-        const fileExt = file.name.split('.').pop()
-        const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`
-        
-        console.log('Uploading to Supabase:', fileName)
-        
-        const { data, error } = await supabase.storage
-          .from('product-images')
-          .upload(fileName, file)
-        
-        if (error) {
-          console.error('Upload error:', error)
-          throw new Error(`Upload failed for ${file.name}: ${error.message}`)
+        console.log('Uploading file:', file.name)
+        // Retry logic for SSL/network errors
+        let uploaded = false
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          try {
+            const fileExt = file.name.split('.').pop()
+            const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`
+            const { data, error } = await supabase.storage
+              .from('product-images')
+              .upload(fileName, file)
+            if (error) throw error
+            const { data: { publicUrl } } = supabase.storage
+              .from('product-images')
+              .getPublicUrl(fileName)
+            uploadedUrls.push(publicUrl)
+            uploaded = true
+            break
+          } catch (error) {
+            console.error(`Attempt ${attempt} failed:`, error)
+            if (attempt < 3) {
+              await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
+            } else {
+              failedFiles.push(`${file.name}`)
+            }
+          }
         }
-        
-        // Get public URL
-        const { data: { publicUrl } } = supabase.storage
-          .from('product-images')
-          .getPublicUrl(fileName)
-        
-        console.log('Image uploaded successfully:', publicUrl)
-        uploadedUrls.push(publicUrl)
       }
-      
-      // Update form data with new images
-      setFormData(prev => ({
-        ...prev,
-        images: [...prev.images, ...uploadedUrls],
-        image_url: uploadedUrls[0] || prev.image_url // Set first image as primary
-      }))
-      
+      if (uploadedUrls.length > 0) {
+        setFormData(prev => ({
+          ...prev,
+          images: [...prev.images, ...uploadedUrls],
+          image_url: uploadedUrls[0] || prev.image_url
+        }))
+      }
+      if (failedFiles.length > 0) {
+        alert(`Uploaded ${uploadedUrls.length} images. Failed: ${failedFiles.join(', ')}`)
+      }
     } catch (error) {
-      console.error('Error uploading images:', error)
-      alert(`Error uploading images: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      console.error('Error:', error)
+      alert(`Upload error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setUploading(false)
     }
@@ -353,11 +356,20 @@ export default function AdminProductsPage() {
           
           console.log('[FRONTEND] Variants saved successfully!')
           
-          // Keep modal open after variant save - NO ALERT, just silent save
+          // Show success toast and close modal
+          setToast({ 
+            isVisible: true, 
+            message: editingProduct ? 'Product Successfully Updated' : 'Product Successfully Added' 
+          })
+          
           fetchProducts() // Refresh product list in background
           
-          // IMPORTANT: Keep modal open so user can continue editing variants
-          return // This prevents the modal from closing
+          // Close modal after showing toast
+          setFormData({ name: '', description: '', price: '', category: 'gym', stock: '', image_url: '', images: [], has_variants: false })
+          setVariants([])
+          setEditingProduct(null)
+          setIsModalOpen(false)
+          return // Exit the function
         } catch (variantError) {
           console.error('[FRONTEND] Error saving variants:', variantError)
           throw new Error(`Failed to save variants: ${variantError instanceof Error ? variantError.message : 'Unknown error'}`)
@@ -367,6 +379,12 @@ export default function AdminProductsPage() {
       }
       
       // If no variants or product without variants, close modal normally
+      // Show success toast and close modal
+      setToast({ 
+        isVisible: true, 
+        message: editingProduct ? 'Product Successfully Updated' : 'Product Successfully Added' 
+      })
+      
       // Reset form and close modal
       setFormData({
         name: '',
@@ -573,7 +591,7 @@ export default function AdminProductsPage() {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
                       <span className="text-lg sm:text-xl font-bold text-gray-900">
-                        ${product.price.toFixed(2)}
+                        R{product.price.toFixed(2)}
                       </span>
                       <span className="text-xs sm:text-sm text-gray-500 ml-1 sm:ml-2">
                         ({product.stock} in stock)
@@ -622,14 +640,14 @@ export default function AdminProductsPage() {
             {/* Product Images */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Product Images (up to 5)
+                Product Images (up to 10)
               </label>
               <MultiImageUpload
                 onUpload={handleImageUpload}
                 onRemove={handleImageRemove}
                 currentImages={formData.images}
                 disabled={uploading}
-                maxFiles={5}
+                maxFiles={10}
               />
               {uploading && (
                 <p className="text-sm text-gray-500 mt-2">Uploading images...</p>
@@ -741,6 +759,11 @@ export default function AdminProductsPage() {
             </div>
           </form>
         </Modal>
+        <Toast
+          message={toast.message}
+          isVisible={toast.isVisible}
+          onClose={() => setToast({ isVisible: false, message: '' })}
+        />
       </div>
     </div>
   )

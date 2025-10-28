@@ -133,7 +133,7 @@ function CheckoutSuccessContent() {
                     <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                   </div>
                   <p className="font-medium text-jeffy-yellow">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    R{(item.price * item.quantity).toFixed(2)}
                   </p>
                 </div>
               ))}
@@ -142,7 +142,7 @@ function CheckoutSuccessContent() {
             <div className="mt-4 pt-4 border-t border-gray-200">
               <div className="flex justify-between items-center text-lg font-semibold">
                 <span>Total</span>
-                <span className="text-jeffy-yellow">${total.toFixed(2)}</span>
+                <span className="text-jeffy-yellow">R{total.toFixed(2)}</span>
               </div>
             </div>
           </Card>

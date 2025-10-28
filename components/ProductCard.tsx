@@ -116,7 +116,7 @@ export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCard
         <div className="flex items-center justify-between">
           <div>
             <span className="text-lg sm:text-2xl font-bold text-gray-900">
-              ${product.price.toFixed(2)}
+              R{product.price.toFixed(2)}
             </span>
             <span className="text-xs sm:text-sm text-gray-500 ml-1 sm:ml-2">
               ({product.stock} in stock)

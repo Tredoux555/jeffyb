@@ -459,7 +459,7 @@ export function VariantManager({
                           <p className="text-sm text-gray-600">
                             SKU: {variant.sku || 'Not set'} | 
                             Stock: {variant.stock} | 
-                            Price: {variant.price ? `$${variant.price.toFixed(2)}` : 'Use product price'}
+                            Price: {variant.price ? `R${variant.price.toFixed(2)}` : 'Use product price'}
                           </p>
                         </div>
                       </div>

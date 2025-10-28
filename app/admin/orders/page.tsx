@@ -157,7 +157,7 @@ export default function AdminOrdersPage() {
           </div>
           <div className="text-left sm:text-right">
             <p className="text-xs sm:text-sm text-gray-600">Total Revenue</p>
-            <p className="text-xl sm:text-2xl font-bold text-jeffy-yellow">${getTotalRevenue().toFixed(2)}</p>
+            <p className="text-xl sm:text-2xl font-bold text-jeffy-yellow">R{getTotalRevenue().toFixed(2)}</p>
           </div>
         </div>
         
@@ -260,7 +260,7 @@ export default function AdminOrdersPage() {
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">Order Details</p>
-                          <p>{order.items.length} items • ${total.toFixed(2)}</p>
+                          <p>{order.items.length} items • R{total.toFixed(2)}</p>
                         </div>
                       </div>
                     </div>
@@ -355,7 +355,7 @@ export default function AdminOrdersPage() {
                         <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                       </div>
                       <p className="font-medium text-jeffy-yellow">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        R{(item.price * item.quantity).toFixed(2)}
                       </p>
                     </div>
                   ))}
@@ -364,7 +364,7 @@ export default function AdminOrdersPage() {
                 <div className="mt-4 pt-4 border-t border-gray-200">
                   <div className="flex justify-between items-center text-lg font-semibold">
                     <span>Total</span>
-                    <span className="text-jeffy-yellow">${selectedOrder.total.toFixed(2)}</span>
+                    <span className="text-jeffy-yellow">R{selectedOrder.total.toFixed(2)}</span>
                   </div>
                 </div>
               </div>

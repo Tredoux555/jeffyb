@@ -359,7 +359,7 @@ export default function ProductDetailPage() {
               </h1>
               <div className="flex items-center gap-4 mb-4">
                 <span className="text-3xl font-bold text-jeffy-grey">
-                  ${product.price.toFixed(2)}
+                  R{product.price.toFixed(2)}
                 </span>
                 <span className="bg-jeffy-yellow-light text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
                   {product.category}
@@ -429,7 +429,7 @@ export default function ProductDetailPage() {
                           <div>
                             <p className="font-medium text-gray-900">{variantDisplay}</p>
                             <p className="text-sm text-gray-600">
-                              ${variantPrice.toFixed(2)} • Stock: {variant.stock}
+                              R{variantPrice.toFixed(2)} • Stock: {variant.stock}
                             </p>
                           </div>
                           {isSelected && (

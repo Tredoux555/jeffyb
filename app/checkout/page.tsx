@@ -265,7 +265,7 @@ export default function CheckoutPage() {
                         {item.product_name}{item.variant_display ? ` (${item.variant_display})` : ''} x {item.quantity}
                       </span>
                       <span className="font-medium">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        R{(item.price * item.quantity).toFixed(2)}
                       </span>
                     </div>
                   ))}
@@ -275,7 +275,7 @@ export default function CheckoutPage() {
                 <div className="border-t border-gray-200 pt-4">
                   <div className="flex justify-between text-lg font-semibold">
                     <span>Total ({itemCount} items)</span>
-                    <span className="text-jeffy-yellow">${total.toFixed(2)}</span>
+                    <span className="text-jeffy-yellow">R{total.toFixed(2)}</span>
                   </div>
                 </div>
                 

@@ -148,7 +148,7 @@ export default function CartPage() {
                         </p>
                       )}
                       <p className="text-jeffy-yellow font-bold text-xl mb-3">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        R{(item.price * item.quantity).toFixed(2)}
                       </p>
                       
                       {/* Quantity Controls */}
@@ -195,7 +195,7 @@ export default function CartPage() {
                 <div className="space-y-3 mb-4">
                   <div className="flex justify-between text-gray-600">
                     <span>Items ({itemCount})</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>R{total.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Shipping</span>
@@ -203,7 +203,7 @@ export default function CartPage() {
                   </div>
                   <div className="border-t border-gray-200 pt-3 flex justify-between text-xl font-bold text-gray-900">
                     <span>Total</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>R{total.toFixed(2)}</span>
                   </div>
                 </div>
 

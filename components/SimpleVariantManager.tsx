@@ -188,6 +188,7 @@ export function SimpleVariantManager({
             Variant Attributes
           </h3>
           <Button
+            type="button"
             onClick={handleAddCustomAttribute}
             size="sm"
             variant="outline"
@@ -214,6 +215,7 @@ export function SimpleVariantManager({
                 </label>
                 {attr.checked && (
                   <Button
+                    type="button"
                     onClick={() => handleAddAttributeValue(attrIndex)}
                     size="sm"
                     variant="outline"
@@ -239,6 +241,7 @@ export function SimpleVariantManager({
                       />
                       {attr.values.length > 1 && (
                         <button
+                          type="button"
                           onClick={() => handleRemoveAttributeValue(attrIndex, valueIndex)}
                           className="text-red-600 hover:text-red-700 p-2"
                           disabled={disabled}
@@ -256,6 +259,7 @@ export function SimpleVariantManager({
           <div className="pt-4 border-t">
             <Button
               onClick={generateVariants}
+              type="button"
               className="w-full"
               disabled={disabled || attributes.filter(a => a.checked).length === 0}
             >
@@ -331,7 +335,7 @@ export function SimpleVariantManager({
                       <p className="text-sm text-gray-600">
                         SKU: {variant.sku || 'Not set'} | 
                         Stock: {variant.stock} | 
-                        Price: {variant.price ? `$${variant.price.toFixed(2)}` : 'Use product price'}
+                        Price: {variant.price ? `R${variant.price.toFixed(2)}` : 'Use product price'}
                       </p>
                     </div>
                     <div className="flex gap-2">
