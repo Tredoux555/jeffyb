@@ -84,9 +84,21 @@ export default function ProductsPage() {
   }
   
   const saveCart = (newCart: CartItem[]) => {
-    setCart(newCart)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('jeffy-cart', JSON.stringify(newCart))
+    try {
+      setCart(newCart)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('jeffy-cart', JSON.stringify(newCart))
+        console.log('[Cart] Saved successfully. Items:', newCart.length)
+      }
+    } catch (error) {
+      console.error('[Cart] Failed to save to localStorage:', error)
+      // Still update state even if localStorage fails
+      setCart(newCart)
+      
+      // Check if it's a quota error
+      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+        alert('Cart storage is full. Please checkout or clear your cart.')
+      }
     }
   }
   
@@ -110,27 +122,41 @@ export default function ProductsPage() {
   }
   
   const handleAddToCart = (product: Product) => {
-    // Ensure cart is always an array
-    const currentCart = Array.isArray(cart) ? cart : []
+    // If product has variants, redirect to detail page
+    if (product.has_variants) {
+      router.push(`/products/${product.id}`)
+      return
+    }
     
-    const existingItem = currentCart.find(item => item.product_id === product.id)
-    
-    if (existingItem) {
-      const updatedCart = currentCart.map(item =>
-        item.product_id === product.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      )
-      saveCart(updatedCart)
-    } else {
-      const newItem: CartItem = {
-        product_id: product.id,
-        product_name: product.name,
-        price: product.price,
-        quantity: 1,
-        image_url: product.image_url || undefined
+    try {
+      // Ensure cart is always an array
+      const currentCart = Array.isArray(cart) ? cart : []
+      
+      const existingItem = currentCart.find(item => item.product_id === product.id && !item.variant_id)
+      
+      if (existingItem) {
+        const updatedCart = currentCart.map(item =>
+          item.product_id === product.id && !item.variant_id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+        saveCart(updatedCart)
+      } else {
+        const newItem: CartItem = {
+          product_id: product.id,
+          product_name: product.name,
+          price: product.price,
+          quantity: 1,
+          image_url: product.images?.[0] || product.image_url || undefined
+        }
+        saveCart([...currentCart, newItem])
       }
-      saveCart([...currentCart, newItem])
+      
+      // Show success feedback
+      console.log('[Cart] Item added successfully:', product.name)
+    } catch (error) {
+      console.error('[Cart] Failed to add item:', error)
+      alert('Failed to add item to cart. Please try again.')
     }
   }
   

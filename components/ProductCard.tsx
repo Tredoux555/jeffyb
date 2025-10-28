@@ -16,6 +16,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [isAdding, setIsAdding] = useState(false)
   
   // Get all available images
   const images = product.images && product.images.length > 0 ? product.images : 
@@ -35,6 +36,16 @@ export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCard
     setCurrentImageIndex((prev) => 
       prev === 0 ? images.length - 1 : prev - 1
     )
+  }
+  
+  const handleAddClick = () => {
+    if (isAdding) return // Prevent double-tap
+    
+    setIsAdding(true)
+    onAddToCart(product)
+    
+    // Re-enable after 500ms
+    setTimeout(() => setIsAdding(false), 500)
   }
 
   return (
@@ -127,13 +138,13 @@ export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCard
         {/* Action Buttons */}
         <div className="flex gap-2">
           <Button
-            onClick={() => onAddToCart(product)}
-            disabled={product.stock === 0}
+            onClick={handleAddClick}
+            disabled={product.stock === 0 || isAdding}
             className="flex-1 text-xs sm:text-sm active:scale-95"
             size="sm"
           >
             <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-            {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+            {product.stock === 0 ? 'Out of Stock' : isAdding ? 'Adding...' : 'Add to Cart'}
           </Button>
           <Button
             variant="outline"
