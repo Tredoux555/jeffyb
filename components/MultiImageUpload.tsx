@@ -28,7 +28,6 @@ export function MultiImageUpload({
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
       setIsUploading(true)
- направленный
       try {
         await onUpload(acceptedFiles)
       } finally {
