@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
-import { Dumbbell, Tent, ChefHat, Sparkles, ArrowLeftRight, Baby } from 'lucide-react'
+import { Dumbbell, Tent, ChefHat, Sparkles, ArrowLeftRight, Baby, Target } from 'lucide-react'
 
 const categories = [
   {
@@ -38,6 +38,13 @@ const categories = [
     icon: Baby,
     description: 'Safe and fun toys for babies',
     color: 'bg-purple-500'
+  },
+  {
+    name: 'Archery',
+    slug: 'archery',
+    icon: Target,
+    description: 'Bows, arrows, and archery equipment',
+    color: 'bg-red-500'
   }
 ]
 

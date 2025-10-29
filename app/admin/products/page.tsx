@@ -51,7 +51,8 @@ export default function AdminProductsPage() {
     { value: 'camping', label: 'Camping' },
     { value: 'kitchen', label: 'Kitchen' },
     { value: 'beauty', label: 'Beauty' },
-    { value: 'baby-toys', label: 'Baby Toys' }
+    { value: 'baby-toys', label: 'Baby Toys' },
+    { value: 'archery', label: 'Archery' }
   ]
   
   useEffect(() => {
