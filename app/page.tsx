@@ -57,30 +57,22 @@ export default function Home() {
           <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-gray-900 mb-3 sm:mb-4">
             Welcome to Jeffy
           </h1>
-          <p className="text-lg sm:text-xl md:text-2xl text-gray-700 mb-2">
-            Your trusted commerce platform
-          </p>
           <p className="text-base sm:text-lg text-gray-600 font-medium">
             Jeffy in a Jiffy
           </p>
+          <div className="mt-4 flex justify-center">
+            <Link href="/delivery">
+              <Button variant="outline" size="lg" className="w-full sm:w-auto flex items-center justify-center gap-2 text-sm sm:text-base">
+                Send <ArrowLeftRight className="w-4 h-4" /> Receive
+              </Button>
+            </Link>
+          </div>
+          <p className="text-sm sm:text-base text-gray-700 mt-3">
+            Try our exclusive service, send or request anything (within reason) for just R20 in town
+          </p>
         </div>
         
-        {/* Call to Action - moved above categories */}
-        <div className="text-center mb-8 sm:mb-12">
-          <Card className="max-w-2xl mx-auto p-4 sm:p-6">
-            <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3 sm:mb-4">
-              Ready to Shop?
-            </h2>
-            {/* Removed descriptive paragraph per request */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-              <Link href="/delivery">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto flex items-center justify-center gap-2 text-sm sm:text-base">
-                  Send <ArrowLeftRight className="w-4 h-4" /> Receive
-                </Button>
-              </Link>
-            </div>
-          </Card>
-        </div>
+        {/* Call to Action moved into hero above */}
 
         {/* Categories Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-6 mb-8 sm:mb-12">
