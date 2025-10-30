@@ -65,30 +65,8 @@ export default function Home() {
           </p>
         </div>
         
-        {/* Categories Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-6 mb-8 sm:mb-12">
-          {categories.map((category) => {
-            const Icon = category.icon
-            return (
-              <Link key={category.slug} href={`/products/category/${category.slug}`}>
-                <Card className="text-center hover:shadow-jeffy-lg transition-all duration-300 sm:hover:scale-105 cursor-pointer group p-3 sm:p-4">
-                  <div className={`w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full ${category.color} flex items-center justify-center sm:group-hover:scale-110 transition-transform duration-300`}>
-                    <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                  </div>
-                  <h3 className="text-base sm:text-xl font-semibold text-gray-900 mb-1 sm:mb-2">
-                    {category.name}
-                  </h3>
-                  <p className="text-gray-600 text-xs sm:text-sm">
-                    {category.description}
-                  </p>
-                </Card>
-              </Link>
-            )
-          })}
-        </div>
-        
-        {/* Call to Action */}
-        <div className="text-center">
+        {/* Call to Action - moved above categories */}
+        <div className="text-center mb-8 sm:mb-12">
           <Card className="max-w-2xl mx-auto p-4 sm:p-6">
             <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3 sm:mb-4">
               Ready to Shop?
@@ -110,6 +88,28 @@ export default function Home() {
               </Link>
             </div>
           </Card>
+        </div>
+
+        {/* Categories Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-6 mb-8 sm:mb-12">
+          {categories.map((category) => {
+            const Icon = category.icon
+            return (
+              <Link key={category.slug} href={`/products/category/${category.slug}`}>
+                <Card className="text-center hover:shadow-jeffy-lg transition-all duration-300 sm:hover:scale-105 cursor-pointer group p-3 sm:p-4">
+                  <div className={`w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full ${category.color} flex items-center justify-center sm:group-hover:scale-110 transition-transform duration-300`}>
+                    <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                  </div>
+                  <h3 className="text-base sm:text-xl font-semibold text-gray-900 mb-1 sm:mb-2">
+                    {category.name}
+                  </h3>
+                  <p className="text-gray-600 text-xs sm:text-sm">
+                    {category.description}
+                  </p>
+                </Card>
+              </Link>
+            )
+          })}
         </div>
       </div>
     </div>
