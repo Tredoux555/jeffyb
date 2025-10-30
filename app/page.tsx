@@ -60,16 +60,30 @@ export default function Home() {
           <p className="text-base sm:text-lg text-gray-600 font-medium">
             Jeffy in a Jiffy
           </p>
-          <div className="mt-4 flex justify-center">
-            <Link href="/delivery">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto flex items-center justify-center gap-2 text-sm sm:text-base">
-                Send <ArrowLeftRight className="w-4 h-4" /> Receive
-              </Button>
-            </Link>
+          {/* White container that wraps the CTA and the two lines */}
+          <div className="mt-4 sm:mt-6">
+            <Card className="max-w-xl sm:max-w-2xl mx-auto p-4 sm:p-6 bg-white">
+              {/* Green box wrapping the Send / Receive text */}
+              <div className="flex justify-center">
+                <Link href="/delivery" className="inline-block">
+                  <div className="px-4 sm:px-6 py-2 sm:py-3 rounded-md border border-green-600 bg-green-50 text-green-700 font-semibold inline-flex items-center gap-2">
+                    <span>Send</span>
+                    <ArrowLeftRight className="w-4 h-4 text-green-700" />
+                    <span>Receive</span>
+                  </div>
+                </Link>
+              </div>
+              {/* Two equal-width lines under the CTA inside the same white box */}
+              <div className="mt-3 sm:mt-4 text-center">
+                <p className="text-sm sm:text-base text-gray-700 w-[32ch] sm:w-[40ch] mx-auto">
+                  Try our exclusive service
+                </p>
+                <p className="text-sm sm:text-base text-gray-700 w-[32ch] sm:w-[40ch] mx-auto">
+                  Send or request anything (within reason) for just R20 in town
+                </p>
+              </div>
+            </Card>
           </div>
-          <p className="text-sm sm:text-base text-gray-700 mt-3">
-            Try our exclusive service, send or request anything (within reason) for just R20 in town
-          </p>
         </div>
         
         {/* Call to Action moved into hero above */}
