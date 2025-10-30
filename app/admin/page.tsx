@@ -92,8 +92,23 @@ export default function AdminDashboard() {
     return (
       <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jeffy-grey mx-auto mb-4"></div>
+          {/* Animated cube loader */}
+          <div className="relative w-12 h-12 mx-auto mb-4">
+            {/* Outline */}
+            <Package className="w-12 h-12 text-green-500" />
+            {/* Filling quadrants */}
+            <span className="absolute inset-1 grid grid-cols-2 grid-rows-2">
+              <span className="bg-green-500/90 animate-cube-fill delay-[0ms]" />
+              <span className="bg-green-500/90 animate-cube-fill delay-[250ms]" />
+              <span className="bg-green-500/90 animate-cube-fill delay-[500ms]" />
+              <span className="bg-green-500/90 animate-cube-fill delay-[750ms]" />
+            </span>
+          </div>
           <p className="text-gray-700">Loading dashboard...</p>
+          <style jsx>{`
+            @keyframes cubeFill { 0% {opacity:0;} 25% {opacity:1;} 50% {opacity:.35;} 100% {opacity:0;} }
+            .animate-cube-fill { animation: cubeFill 1.5s infinite ease-in-out; }
+          `}</style>
         </div>
       </div>
     )
