@@ -66,20 +66,17 @@ export default function Home() {
               {/* Green box wrapping the Send / Receive text */}
               <div className="flex justify-center">
                 <Link href="/delivery" className="inline-block">
-                  <div className="px-4 sm:px-6 py-2 sm:py-3 rounded-md border border-green-600 bg-green-50 text-green-700 font-semibold inline-flex items-center gap-2">
+                  <div className="px-4 sm:px-6 py-2 sm:py-3 rounded-md bg-green-600 text-black font-semibold inline-flex items-center gap-2">
                     <span>Send</span>
-                    <ArrowLeftRight className="w-4 h-4 text-green-700" />
+                    <ArrowLeftRight className="w-4 h-4 text-black" />
                     <span>Receive</span>
                   </div>
                 </Link>
               </div>
-              {/* Two equal-width lines under the CTA inside the same white box */}
+              {/* Promo line under the CTA inside the same white box */}
               <div className="mt-3 sm:mt-4 text-center">
-                <p className="text-sm sm:text-base text-gray-700 w-[32ch] sm:w-[40ch] mx-auto">
-                  Try our exclusive service
-                </p>
-                <p className="text-sm sm:text-base text-gray-700 w-[32ch] sm:w-[40ch] mx-auto">
-                  Send or request anything (within reason) for just R20 in town
+                <p className="text-sm sm:text-base text-gray-700 w-[40ch] mx-auto">
+                  Send or Recieve anything in town for just R20 (within limits)
                 </p>
               </div>
             </Card>
