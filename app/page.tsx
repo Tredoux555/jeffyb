@@ -71,10 +71,7 @@ export default function Home() {
             <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3 sm:mb-4">
               Ready to Shop?
             </h2>
-            <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
-              Browse our wide selection of products across all categories. 
-              Fast delivery, great prices, and excellent customer service.
-            </p>
+            {/* Removed descriptive paragraph per request */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
               <Link href="/delivery">
                 <Button variant="outline" size="lg" className="w-full sm:w-auto flex items-center justify-center gap-2 text-sm sm:text-base">
