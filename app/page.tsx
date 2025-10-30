@@ -76,11 +76,6 @@ export default function Home() {
               Fast delivery, great prices, and excellent customer service.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-              <Link href="/products">
-                <Button size="lg" className="w-full sm:w-auto text-sm sm:text-base">
-                  Browse All Products
-                </Button>
-              </Link>
               <Link href="/delivery">
                 <Button variant="outline" size="lg" className="w-full sm:w-auto flex items-center justify-center gap-2 text-sm sm:text-base">
                   Send <ArrowLeftRight className="w-4 h-4" /> Receive
