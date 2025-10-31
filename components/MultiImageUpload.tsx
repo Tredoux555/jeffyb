@@ -2,7 +2,7 @@
 
 import React, { useCallback, useState, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Upload, X, Image as ImageIcon, Camera, Plus } from 'lucide-react'
+import { X, Image as ImageIcon, Camera, Plus, Package } from 'lucide-react'
 import { Button } from '@/components/Button'
 
 interface MultiImageUploadProps {
@@ -120,7 +120,7 @@ export function MultiImageUpload({
           <div className="flex flex-col items-center justify-center h-full text-gray-500 p-4">
             {isUploading ? (
               <div className="text-center">
-                <div className="animate-[spin_3s_linear_infinite] rounded-full h-6 w-6 border-b-2 border-jeffy-yellow mx-auto mb-2"></div>
+                <Package className="w-6 h-6 text-green-500 animate-[spin_3s_linear_infinite] mx-auto mb-2" />
                 <p className="text-sm">Uploading...</p>
               </div>
             ) : (

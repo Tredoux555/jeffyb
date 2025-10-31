@@ -6,7 +6,7 @@ import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
 import { Product, CartItem } from '@/types/database'
 import { createClient } from '@/lib/supabase'
-import { Search, Filter } from 'lucide-react'
+import { Search, Filter, Package } from 'lucide-react'
 
 interface CategoryPageProps {
   params: Promise<{
@@ -126,7 +126,9 @@ export default function CategoryPage({ params }: CategoryPageProps) {
     return (
       <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-[spin_3s_linear_infinite] rounded-full h-12 w-12 border-b-2 border-jeffy-grey mx-auto mb-4"></div>
+          <div className="relative w-12 h-12 mx-auto mb-4">
+            <Package className="w-12 h-12 text-green-500 animate-[spin_3s_linear_infinite]" />
+          </div>
           <p className="text-gray-700">Loading products...</p>
         </div>
       </div>

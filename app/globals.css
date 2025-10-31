@@ -30,6 +30,11 @@
     transition-duration: 0.2s !important;
   }
   
+  /* Keep slow spin animation for Package icons (3 seconds) */
+  [class*="spin_3s"] {
+    animation: spin 3s linear infinite !important;
+  }
+  
   /* Disable hover effects on touch devices */
   .hover\:scale-105:hover {
     transform: none !important;

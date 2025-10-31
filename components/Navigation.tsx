@@ -17,7 +17,7 @@ export function Navigation({ cartItemCount = 0 }: NavigationProps) {
     { href: '/', label: 'Jeffy', icon: Package },
     // { href: '/products', label: 'Products', icon: Package }, // hidden by request
     { href: '/admin', label: 'Admin', icon: User },
-    { href: '/delivery', label: 'Delivery', icon: Truck },
+    { href: '/delivery', label: 'Send and Recieve', icon: Truck },
   ]
   
   const isActive = (href: string) => {

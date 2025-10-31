@@ -16,7 +16,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
-  Minus
+  Minus,
+  Package
 } from 'lucide-react'
 
 export default function ProductDetailPage() {
@@ -30,6 +31,8 @@ export default function ProductDetailPage() {
   const [cart, setCart] = useState<CartItem[]>([])
   const [showNotification, setShowNotification] = useState(false)
   const [notificationMessage, setNotificationMessage] = useState('')
+  const [touchStartX, setTouchStartX] = useState<number | null>(null)
+  const [touchEndX, setTouchEndX] = useState<number | null>(null)
 
   const productId = params.id as string
 
@@ -223,11 +226,40 @@ export default function ProductDetailPage() {
     )
   }
 
+  // Swipe handlers for mobile
+  const minSwipeDistance = 50
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEndX(null)
+    setTouchStartX(e.targetTouches[0].clientX)
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEndX(e.targetTouches[0].clientX)
+  }
+
+  const onTouchEnd = () => {
+    if (!touchStartX || !touchEndX || !product?.images || product.images.length <= 1) return
+    
+    const distance = touchStartX - touchEndX
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+
+    if (isLeftSwipe) {
+      nextImage()
+    }
+    if (isRightSwipe) {
+      prevImage()
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-[spin_3s_linear_infinite] rounded-full h-12 w-12 border-b-2 border-jeffy-grey mx-auto mb-4"></div>
+          <div className="relative w-12 h-12 mx-auto mb-4">
+            <Package className="w-12 h-12 text-green-500 animate-[spin_3s_linear_infinite]" />
+          </div>
           <p className="text-gray-700">Loading product...</p>
         </div>
       </div>
@@ -269,7 +301,12 @@ export default function ProductDetailPage() {
           {/* Image Gallery */}
           <div className="space-y-4">
             {/* Main Image */}
-            <div className="relative aspect-square max-h-[500px] bg-white rounded-xl overflow-hidden shadow-jeffy">
+            <div 
+              className="relative aspect-square max-h-[500px] bg-white rounded-xl overflow-hidden shadow-jeffy"
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+            >
               {images.length > 0 ? (
                 <>
                   <Image

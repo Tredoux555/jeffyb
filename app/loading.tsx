@@ -21,9 +21,12 @@ export default function Loading() {
         </div>
       </div>
 
-      {/* Centered subtle message */}
+      {/* Centered loading icon */}
       <div className="container mx-auto px-4 py-12">
-        <div className="flex items-center justify-center">
+        <div className="flex flex-col items-center justify-center">
+          <div className="relative w-12 h-12 mx-auto mb-4">
+            <Package className="w-12 h-12 text-green-500 animate-[spin_3s_linear_infinite]" />
+          </div>
           <p className="text-gray-800 font-medium">Loading…</p>
         </div>
       </div>

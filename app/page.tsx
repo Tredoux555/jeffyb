@@ -75,7 +75,7 @@ export default function Home() {
               {/* Promo line under the CTA inside the same white box */}
               <div className="mt-3 sm:mt-4 text-center">
                 <p className="text-sm sm:text-base text-gray-700 w-[40ch] mx-auto">
-                  Send or Recieve small packages within town for just R20 (within reason)
+                  Send or Recieve a package in town for R20
                 </p>
               </div>
             </Card>

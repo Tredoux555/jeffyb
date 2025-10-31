@@ -1,5 +1,6 @@
 import React from 'react'
 import { cn } from '@/lib/utils'
+import { Package } from 'lucide-react'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost'
@@ -40,7 +41,7 @@ export function Button({
     >
       {loading ? (
         <div className="flex items-center justify-center">
-          <div className="animate-[spin_3s_linear_infinite] rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+          <Package className="w-4 h-4 text-green-500 animate-[spin_3s_linear_infinite] mr-2" />
           Loading...
         </div>
       ) : (
