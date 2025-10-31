@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
-import { Product, CartItem } from '@/types/database'
+import { CartItem } from '@/types/database'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { 
@@ -10,34 +10,28 @@ import {
   Plus, 
   Minus, 
   Trash2,
-  ArrowLeft,
-  Package
+  ArrowLeft
 } from 'lucide-react'
 import Image from 'next/image'
 
 export default function CartPage() {
-  const [cart, setCart] = useState<CartItem[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    loadCart()
-  }, [])
-
-  const loadCart = () => {
+  const [cart, setCart] = useState<CartItem[]>(() => {
     if (typeof window !== 'undefined') {
       const savedCart = localStorage.getItem('jeffy-cart')
       if (savedCart) {
         try {
           const parsedCart = JSON.parse(savedCart)
-          setCart(Array.isArray(parsedCart) ? parsedCart : [])
+          return Array.isArray(parsedCart) ? parsedCart as CartItem[] : []
         } catch (error) {
           console.error('Error parsing cart data:', error)
-          setCart([])
+          return []
         }
       }
     }
-    setLoading(false)
-  }
+    return []
+  })
+
+  
 
   const saveCart = (newCart: CartItem[]) => {
     setCart(newCart)
@@ -74,16 +68,7 @@ export default function CartPage() {
   const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0)
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
-        <div className="text-center">
-          <Package className="w-16 h-16 mx-auto text-gray-600 animate-pulse" />
-          <p className="mt-4 text-gray-600">Loading cart...</p>
-        </div>
-      </div>
-    )
-  }
+  
 
   return (
     <div className="min-h-screen bg-jeffy-yellow-light">
@@ -227,4 +212,5 @@ export default function CartPage() {
     </div>
   )
 }
+
 

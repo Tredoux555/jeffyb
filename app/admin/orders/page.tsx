@@ -139,7 +139,7 @@ export default function AdminOrdersPage() {
     return (
       <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jeffy-grey mx-auto mb-4"></div>
+          <div className="animate-[spin_3s_linear_infinite] rounded-full h-12 w-12 border-b-2 border-jeffy-grey mx-auto mb-4"></div>
           <p className="text-gray-700">Loading orders...</p>
         </div>
       </div>

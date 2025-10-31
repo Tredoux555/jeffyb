@@ -5,7 +5,7 @@ import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
 import { createClient } from '@/lib/supabase'
-import { Package, Truck, MapPin, User, Phone } from 'lucide-react'
+import { Package, Truck, MapPin, User } from 'lucide-react'
 
 export default function DeliveryPage() {
   const [requestType, setRequestType] = useState<'pickup' | 'send_products'>('pickup')
@@ -124,7 +124,7 @@ export default function DeliveryPage() {
           </div>
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">Request Submitted!</h2>
           <p className="text-gray-600 mb-6">
-            Your delivery request has been submitted successfully. We'll contact you soon to confirm the details.
+            Your delivery request has been submitted successfully. We&apos;ll contact you soon to confirm the details.
           </p>
           <Button onClick={() => setSuccess(false)}>
             Submit Another Request

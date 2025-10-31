@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
-import { createClient } from '@/lib/supabase'
-import { User, Lock, Package } from 'lucide-react'
+import { Package } from 'lucide-react'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -119,7 +118,7 @@ export default function AdminLoginPage() {
               <strong>Password:</strong> jeffy123
             </p>
             <p className="text-xs text-gray-600 mt-2">
-              Credentials are pre-filled for easy access. Click "Quick Login" for instant access.
+              Credentials are pre-filled for easy access. Click &quot;Quick Login&quot; for instant access.
             </p>
           </div>
         </Card>

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Product, ProductVariant, CartItem } from '@/types/database'
 import { createClient } from '@/lib/supabase'
@@ -115,24 +114,13 @@ export default function ProductDetailPage() {
     }
   }
 
-  const saveCart = (newCart: any[]) => {
+  const saveCart = (newCart: CartItem[]) => {
     setCart(newCart)
     if (typeof window !== 'undefined') {
       localStorage.setItem('jeffy-cart', JSON.stringify(newCart))
     }
   }
 
-  const updateVariantQuantity = (variantId: string, quantity: number) => {
-    console.log('[Product] Updating variant quantity:', variantId, 'to quantity:', quantity)
-    setSelectedVariants(prev => {
-      const updated = {
-        ...prev,
-        [variantId]: Math.max(1, quantity) // Minimum 1, not 0
-      }
-      console.log('[Product] Updated quantities:', updated)
-      return updated
-    })
-  }
 
   const handleAddToCart = () => {
     if (!product) return
@@ -239,7 +227,7 @@ export default function ProductDetailPage() {
     return (
       <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jeffy-grey mx-auto mb-4"></div>
+          <div className="animate-[spin_3s_linear_infinite] rounded-full h-12 w-12 border-b-2 border-jeffy-grey mx-auto mb-4"></div>
           <p className="text-gray-700">Loading product...</p>
         </div>
       </div>

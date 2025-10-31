@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react'
 import { Navigation } from '@/components/Navigation'
-import { CartItem } from '@/types/database'
 
 export function ClientNavigation() {
   const [cartItemCount, setCartItemCount] = useState(0)

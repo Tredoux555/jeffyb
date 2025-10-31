@@ -7,7 +7,7 @@ import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
 import { CartItem } from '@/types/database'
 import { createClient } from '@/lib/supabase'
-import { CheckCircle, CreditCard, Truck } from 'lucide-react'
+import { CreditCard } from 'lucide-react'
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -244,7 +244,7 @@ export default function CheckoutPage() {
                     <div className="bg-jeffy-yellow-light p-4 rounded-xl">
                       <p className="text-sm text-gray-700">
                         <strong>Note:</strong> Payment integration is ready but requires API keys to be configured. 
-                        For now, orders will be processed and you'll be contacted for payment.
+                        For now, orders will be processed and you&apos;ll be contacted for payment.
                       </p>
                     </div>
                   </div>

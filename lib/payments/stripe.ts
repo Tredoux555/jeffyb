@@ -92,7 +92,7 @@ export class StripeService {
    */
   static async createRefund(paymentIntentId: string, amount?: number) {
     try {
-      const refundData: any = {
+      const refundData: Stripe.RefundCreateParams = {
         payment_intent: paymentIntentId,
       }
       

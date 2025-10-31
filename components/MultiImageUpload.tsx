@@ -120,7 +120,7 @@ export function MultiImageUpload({
           <div className="flex flex-col items-center justify-center h-full text-gray-500 p-4">
             {isUploading ? (
               <div className="text-center">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-jeffy-yellow mx-auto mb-2"></div>
+                <div className="animate-[spin_3s_linear_infinite] rounded-full h-6 w-6 border-b-2 border-jeffy-yellow mx-auto mb-2"></div>
                 <p className="text-sm">Uploading...</p>
               </div>
             ) : (

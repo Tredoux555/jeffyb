@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, Suspense } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ProductCard } from '@/components/ProductCard'
@@ -170,7 +170,7 @@ export default function ProductsPage() {
     return (
       <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jeffy-grey mx-auto mb-4"></div>
+          <div className="animate-[spin_3s_linear_infinite] rounded-full h-12 w-12 border-b-2 border-jeffy-grey mx-auto mb-4"></div>
           <p className="text-gray-700">Loading products...</p>
         </div>
       </div>

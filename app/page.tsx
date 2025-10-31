@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { Card } from '@/components/Card'
-import { Button } from '@/components/Button'
 import { Dumbbell, Tent, ChefHat, Sparkles, ArrowLeftRight, Baby, Target } from 'lucide-react'
 
 const categories = [
@@ -66,7 +65,7 @@ export default function Home() {
               {/* Green box wrapping the Send / Receive text */}
               <div className="flex justify-center">
                 <Link href="/delivery" className="inline-block">
-                  <div className="px-4 sm:px-6 py-2 sm:py-3 rounded-md bg-green-600 text-black font-semibold inline-flex items-center gap-2">
+                  <div className="px-4 sm:px-6 py-2 sm:py-3 rounded-md bg-green-500 text-black font-semibold inline-flex items-center gap-2">
                     <span>Send</span>
                     <ArrowLeftRight className="w-4 h-4 text-black" />
                     <span>Receive</span>
@@ -76,7 +75,7 @@ export default function Home() {
               {/* Promo line under the CTA inside the same white box */}
               <div className="mt-3 sm:mt-4 text-center">
                 <p className="text-sm sm:text-base text-gray-700 w-[40ch] mx-auto">
-                  Send or Recieve anything in town for just R20 (within limits)
+                  Send or Recieve small packages within town for just R20 (within reason)
                 </p>
               </div>
             </Card>

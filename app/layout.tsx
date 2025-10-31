@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+// import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClientNavigation } from "../components/ClientNavigation";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: 'swap',
-  preload: true,
-});
+// const inter = Inter({
+//   subsets: ["latin"],
+//   variable: "--font-inter",
+//   display: 'swap',
+//   preload: false,
+// });
 
 export const metadata: Metadata = {
   title: "Jeffy - In a Jiffy",
@@ -30,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`font-sans antialiased`}>
         <ClientNavigation />
         <main className="min-h-screen">
           {children}

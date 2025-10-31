@@ -89,7 +89,7 @@ export class QuickBooksService {
   /**
    * Make authenticated request to QuickBooks API
    */
-  private async makeRequest(endpoint: string, method: string = 'GET', data?: any) {
+  private async makeRequest(endpoint: string, method: string = 'GET', data?: unknown) {
     if (!this.accessToken || !this.companyId) {
       throw new Error('QuickBooks not authenticated')
     }

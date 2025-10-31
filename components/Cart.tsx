@@ -2,10 +2,9 @@
 
 import React, { useState } from 'react'
 import Image from 'next/image'
-import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Modal } from '@/components/Modal'
-import { ShoppingCart, Plus, Minus, Trash2, X } from 'lucide-react'
+import { ShoppingCart, Plus, Minus, Trash2 } from 'lucide-react'
 import { CartItem } from '@/types/database'
 
 interface CartProps {

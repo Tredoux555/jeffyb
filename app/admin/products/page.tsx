@@ -17,8 +17,6 @@ import {
   Trash2, 
   Search, 
   Filter,
-  Upload,
-  X
 } from 'lucide-react'
 
 export default function AdminProductsPage() {
@@ -58,10 +56,12 @@ export default function AdminProductsPage() {
   useEffect(() => {
     checkAuth()
     fetchProducts()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   
   useEffect(() => {
     filterProducts()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [products, searchTerm, selectedCategory])
   
   const checkAuth = () => {
@@ -129,12 +129,11 @@ export default function AdminProductsPage() {
         }
         console.log('Uploading file:', file.name)
         // Retry logic for SSL/network errors
-        let uploaded = false
         for (let attempt = 1; attempt <= 3; attempt++) {
           try {
             const fileExt = file.name.split('.').pop()
             const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`
-            const { data, error } = await supabase.storage
+            const { error } = await supabase.storage
               .from('product-images')
               .upload(fileName, file)
             if (error) throw error
@@ -142,7 +141,6 @@ export default function AdminProductsPage() {
               .from('product-images')
               .getPublicUrl(fileName)
             uploadedUrls.push(publicUrl)
-            uploaded = true
             break
           } catch (error) {
             console.error(`Attempt ${attempt} failed:`, error)
@@ -481,7 +479,7 @@ export default function AdminProductsPage() {
     return (
       <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jeffy-grey mx-auto mb-4"></div>
+          <div className="animate-[spin_3s_linear_infinite] rounded-full h-12 w-12 border-b-2 border-jeffy-grey mx-auto mb-4"></div>
           <p className="text-gray-700">Loading products...</p>
         </div>
       </div>
@@ -558,6 +556,7 @@ export default function AdminProductsPage() {
                 {/* Product Image */}
                 <div className="relative w-full h-40 sm:h-48 mb-3 sm:mb-4 overflow-hidden rounded-lg">
                   {product.image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={product.image_url}
                       alt={product.name}

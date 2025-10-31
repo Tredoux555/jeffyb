@@ -97,10 +97,10 @@ export class PayPalService {
       const data = await response.json()
 
       if (response.ok) {
-        return {
+          return {
           success: true,
           orderId: data.id,
-          approvalUrl: data.links.find((link: any) => link.rel === 'approve')?.href,
+          approvalUrl: (data.links as Array<{ rel: string; href: string }>).find((link) => link.rel === 'approve')?.href,
         }
       } else {
         return {
@@ -183,7 +183,7 @@ export class PayPalService {
     try {
       const accessToken = await this.getAccessToken()
 
-      const refundPayload: any = {
+      const refundPayload: { amount?: { value?: string; currency_code: string } } = {
         amount: {
           value: amount?.toFixed(2),
           currency_code: 'USD',
@@ -208,7 +208,7 @@ export class PayPalService {
 }
 
 // PayPal webhook handler
-export async function handlePayPalWebhook(body: string, headers: Record<string, string>) {
+export async function handlePayPalWebhook(body: string) {
   try {
     // Verify webhook signature
     // This is a simplified version - in production, you should verify the webhook signature

@@ -46,7 +46,7 @@ function CheckoutSuccessContent() {
     return (
       <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jeffy-grey mx-auto mb-4"></div>
+          <div className="animate-[spin_3s_linear_infinite] rounded-full h-12 w-12 border-b-2 border-jeffy-grey mx-auto mb-4"></div>
           <p className="text-gray-700">Loading order details...</p>
         </div>
       </div>
@@ -58,7 +58,7 @@ function CheckoutSuccessContent() {
       <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
         <Card className="text-center py-12 max-w-md">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">Order Not Found</h2>
-          <p className="text-gray-600 mb-6">The order you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mb-6">The order you&apos;re looking for doesn&apos;t exist.</p>
           <Button onClick={() => router.push('/')}>
             Go Home
           </Button>
@@ -80,7 +80,7 @@ function CheckoutSuccessContent() {
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Confirmed!</h1>
             <p className="text-gray-600">
-              Thank you for your order. We'll process it and get back to you soon.
+              Thank you for your order. We&apos;ll process it and get back to you soon.
             </p>
           </div>
           
@@ -149,11 +149,11 @@ function CheckoutSuccessContent() {
           
           {/* Next Steps */}
           <Card className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">What's Next?</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">What&apos;s Next?</h3>
             <div className="space-y-3 text-sm text-gray-600">
-              <p>• We'll review your order and contact you for payment details</p>
-              <p>• Once payment is confirmed, we'll prepare your items</p>
-              <p>• You'll receive a delivery confirmation with tracking details</p>
+              <p>• We&apos;ll review your order and contact you for payment details</p>
+              <p>• Once payment is confirmed, we&apos;ll prepare your items</p>
+              <p>• You&apos;ll receive a delivery confirmation with tracking details</p>
               <p>• Your order will be delivered to the address provided</p>
             </div>
           </Card>
@@ -182,7 +182,7 @@ export default function CheckoutSuccessPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jeffy-grey mx-auto mb-4"></div>
+          <div className="animate-[spin_3s_linear_infinite] rounded-full h-12 w-12 border-b-2 border-jeffy-grey mx-auto mb-4"></div>
           <p className="text-gray-700">Loading...</p>
         </div>
       </div>

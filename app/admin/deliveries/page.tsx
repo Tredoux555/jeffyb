@@ -18,8 +18,7 @@ import {
   CheckCircle,
   XCircle,
   MapPin,
-  User,
-  Phone
+  User
 } from 'lucide-react'
 
 export default function AdminDeliveriesPage() {
@@ -127,7 +126,7 @@ export default function AdminDeliveriesPage() {
   
   const handleStatusUpdate = async (deliveryId: string, newStatus: string) => {
     try {
-      const updateData: any = { status: newStatus }
+      const updateData: Partial<DeliveryRequest> & { estimated_arrival?: string } = { status: newStatus as DeliveryRequest['status'] }
       
       if (etaInput && newStatus === 'accepted') {
         updateData.estimated_arrival = etaInput
@@ -157,7 +156,7 @@ export default function AdminDeliveriesPage() {
     return (
       <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jeffy-grey mx-auto mb-4"></div>
+          <div className="animate-[spin_3s_linear_infinite] rounded-full h-12 w-12 border-b-2 border-jeffy-grey mx-auto mb-4"></div>
           <p className="text-gray-700">Loading deliveries...</p>
         </div>
       </div>

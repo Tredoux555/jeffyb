@@ -39,7 +39,6 @@ export function VariantManager({
   onAttributesChange,
   disabled = false 
 }: VariantManagerProps) {
-  const [isEditing, setIsEditing] = useState(false)
   const [editingVariant, setEditingVariant] = useState<string | null>(null)
   const [formData, setFormData] = useState<VariantFormData>({
     sku: '',
@@ -276,7 +275,7 @@ export function VariantManager({
     }
   }
 
-  const handleImageUpload = async (files: File[]) => {
+  const handleImageUpload = async () => {
     setUploading(true)
     try {
       // This would integrate with your existing image upload logic

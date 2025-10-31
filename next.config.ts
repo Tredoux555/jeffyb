@@ -5,7 +5,8 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['tailwindcss'],
   },
   turbopack: {
-    // Turbopack configuration for Tailwind CSS compatibility
+    // Pin the root so Turbopack resolves internal modules correctly
+    root: __dirname,
   },
   images: {
     formats: ['image/webp', 'image/avif'],

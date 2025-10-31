@@ -2,8 +2,7 @@
 
 import React, { useCallback, useState, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Upload, X, Image as ImageIcon, Camera } from 'lucide-react'
-import { Button } from '@/components/Button'
+import { X, Image as ImageIcon, Camera } from 'lucide-react'
 
 interface ImageUploadProps {
   onUpload: (file: File) => void
@@ -113,7 +112,7 @@ export function ImageUpload({ onUpload, onRemove, currentImage, className, disab
             <div className="flex flex-col items-center justify-center h-full text-gray-500 p-4">
               {isUploading ? (
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-jeffy-yellow mx-auto mb-2"></div>
+                  <div className="animate-[spin_3s_linear_infinite] rounded-full h-8 w-8 border-b-2 border-jeffy-yellow mx-auto mb-2"></div>
                   <p className="text-sm">Uploading...</p>
                 </div>
               ) : (

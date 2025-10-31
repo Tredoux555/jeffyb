@@ -279,7 +279,7 @@ export function SimpleVariantManager({
           <div className="text-center py-8 text-gray-500">
             <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
             <p>No variants created yet</p>
-            <p className="text-sm">Select attributes above and click "Generate"</p>
+            <p className="text-sm">Select attributes above and click &quot;Generate&quot;</p>
           </div>
         ) : (
           <div className="space-y-3">
