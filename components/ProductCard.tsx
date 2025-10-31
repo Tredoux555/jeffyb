@@ -17,6 +17,8 @@ interface ProductCardProps {
 export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isAdding, setIsAdding] = useState(false)
+  const [touchStartX, setTouchStartX] = useState<number | null>(null)
+  const [touchEndX, setTouchEndX] = useState<number | null>(null)
   
   // Get all available images
   const images = product.images && product.images.length > 0 ? product.images : 
@@ -38,6 +40,41 @@ export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCard
     )
   }
   
+  // Swipe handlers for mobile
+  const minSwipeDistance = 50
+  
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEndX(null)
+    setTouchStartX(e.targetTouches[0].clientX)
+  }
+  
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEndX(e.targetTouches[0].clientX)
+  }
+  
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartX || !touchEndX || !images || images.length <= 1) return
+    
+    const distance = touchStartX - touchEndX
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+    
+    if (isLeftSwipe || isRightSwipe) {
+      e.preventDefault()
+      e.stopPropagation()
+      if (isLeftSwipe) {
+        setCurrentImageIndex((prev) => 
+          prev === images.length - 1 ? 0 : prev + 1
+        )
+      }
+      if (isRightSwipe) {
+        setCurrentImageIndex((prev) => 
+          prev === 0 ? images.length - 1 : prev - 1
+        )
+      }
+    }
+  }
+  
   const handleAddClick = () => {
     if (isAdding) return // Prevent double-tap
     
@@ -54,7 +91,12 @@ export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCard
       <div className="relative w-full h-40 sm:h-48 mb-3 sm:mb-4 rounded-lg overflow-hidden">
         {images.length > 0 ? (
           <Link href={`/products/${product.id}`}>
-            <div className="relative w-full h-full cursor-pointer">
+            <div 
+              className="relative w-full h-full cursor-pointer"
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+            >
               <Image
                 src={images[currentImageIndex]}
                 alt={product.name}
