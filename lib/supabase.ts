@@ -7,6 +7,17 @@ export const createClient = () => {
 
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error('Missing Supabase environment variables')
+    console.error('Please check your .env.local file for NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY')
+    // Return a mock client to prevent crashes during development
+    // This will cause API calls to fail gracefully instead of crashing the app
+    if (typeof window !== 'undefined') {
+      // Create a minimal client with dummy credentials to prevent immediate errors
+      // Actual API calls will fail but won't crash the app
+      return createBrowserClient(
+        supabaseUrl || 'https://placeholder.supabase.co',
+        supabaseAnonKey || 'placeholder-key'
+      )
+    }
     throw new Error('Supabase configuration is missing. Please check your environment variables.')
   }
 
