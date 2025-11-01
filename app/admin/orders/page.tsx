@@ -36,6 +36,7 @@ export default function AdminOrdersPage() {
   const statusOptions = [
     { value: 'all', label: 'All Orders' },
     { value: 'pending', label: 'Pending' },
+    { value: 'confirmed', label: 'Confirmed' },
     { value: 'processing', label: 'Processing' },
     { value: 'shipped', label: 'Shipped' },
     { value: 'delivered', label: 'Delivered' },
@@ -44,6 +45,7 @@ export default function AdminOrdersPage() {
   
   const statusColors = {
     pending: 'bg-yellow-500',
+    confirmed: 'bg-green-500',
     processing: 'bg-blue-500',
     shipped: 'bg-purple-500',
     delivered: 'bg-green-500',
@@ -52,6 +54,7 @@ export default function AdminOrdersPage() {
   
   const statusIcons = {
     pending: Clock,
+    confirmed: CheckCircle,
     processing: Package,
     shipped: Truck,
     delivered: CheckCircle,
@@ -192,7 +195,7 @@ export default function AdminOrdersPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           {statusOptions.slice(1).map((status) => {
             const count = orders.filter(order => order.status === status.value).length
-            const Icon = statusIcons[status.value as keyof typeof statusIcons]
+            const Icon = statusIcons[status.value as keyof typeof statusIcons] || Package
             return (
               <Card key={status.value} className="p-3 sm:p-4">
                 <div className="flex items-center justify-between">
@@ -200,8 +203,8 @@ export default function AdminOrdersPage() {
                     <p className="text-xs sm:text-sm text-gray-600 mb-1 truncate">{status.label}</p>
                     <p className="text-lg sm:text-2xl font-bold text-gray-900">{count}</p>
                   </div>
-                  <div className={`w-8 h-8 sm:w-12 sm:h-12 ${statusColors[status.value as keyof typeof statusColors]} rounded-lg flex items-center justify-center flex-shrink-0 ml-2`}>
-                    <Icon className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
+                  <div className={`w-8 h-8 sm:w-12 sm:h-12 ${statusColors[status.value as keyof typeof statusColors] || 'bg-gray-500'} rounded-lg flex items-center justify-center flex-shrink-0 ml-2`}>
+                    {Icon && <Icon className="w-4 h-4 sm:w-6 sm:h-6 text-white" />}
                   </div>
                 </div>
               </Card>
@@ -259,7 +262,7 @@ export default function AdminOrdersPage() {
         ) : (
           <div className="space-y-4">
             {filteredOrders.map((order) => {
-              const StatusIcon = statusIcons[order.status as keyof typeof statusIcons]
+              const StatusIcon = statusIcons[order.status as keyof typeof statusIcons] || Package
               const total = order.items && order.items.length > 0 
                 ? order.items.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 0)), 0)
                 : order.total || 0
@@ -271,9 +274,9 @@ export default function AdminOrdersPage() {
                       <div className="flex items-center gap-4 mb-2">
                         <h3 className="font-semibold text-gray-900">#{order.id ? order.id.slice(0, 8) : 'N/A'}</h3>
                         <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${
-                          statusColors[order.status as keyof typeof statusColors]
+                          statusColors[order.status as keyof typeof statusColors] || 'bg-gray-500'
                         } text-white`}>
-                          <StatusIcon className="w-3 h-3" />
+                          {StatusIcon && <StatusIcon className="w-3 h-3" />}
                           {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'Unknown'}
                         </div>
                       </div>
@@ -311,6 +314,7 @@ export default function AdminOrdersPage() {
                           className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jeffy-yellow"
                         >
                           <option value="pending">Pending</option>
+                          <option value="confirmed">Confirmed</option>
                           <option value="processing">Processing</option>
                           <option value="shipped">Shipped</option>
                           <option value="delivered">Delivered</option>
@@ -338,11 +342,11 @@ export default function AdminOrdersPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
-                    statusColors[selectedOrder.status as keyof typeof statusColors]
+                    statusColors[selectedOrder.status as keyof typeof statusColors] || 'bg-gray-500'
                   } text-white`}>
                     {(() => {
-                      const StatusIcon = statusIcons[selectedOrder.status as keyof typeof statusIcons]
-                      return <StatusIcon className="w-4 h-4" />
+                      const StatusIcon = statusIcons[selectedOrder.status as keyof typeof statusIcons] || Package
+                      return StatusIcon ? <StatusIcon className="w-4 h-4" /> : null
                     })()}
                     {selectedOrder.status ? selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1) : 'Unknown'}
                   </div>
