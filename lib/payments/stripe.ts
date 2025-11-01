@@ -3,9 +3,21 @@
 
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-09-30.clover',
-})
+// Lazy initialization - only create client when needed at runtime
+let stripeClient: Stripe | null = null
+
+function getStripeClient(): Stripe {
+  if (!stripeClient) {
+    const secretKey = process.env.STRIPE_SECRET_KEY
+    if (!secretKey) {
+      throw new Error('STRIPE_SECRET_KEY environment variable is not set')
+    }
+    stripeClient = new Stripe(secretKey, {
+      apiVersion: '2025-09-30.clover',
+    })
+  }
+  return stripeClient
+}
 
 export interface PaymentIntentData {
   amount: number
@@ -27,6 +39,7 @@ export class StripeService {
    */
   static async createPaymentIntent(data: PaymentIntentData): Promise<PaymentResult> {
     try {
+      const stripe = getStripeClient()
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(data.amount * 100), // Convert to cents
         currency: data.currency || 'usd',
@@ -56,6 +69,7 @@ export class StripeService {
    */
   static async getPaymentIntent(paymentIntentId: string) {
     try {
+      const stripe = getStripeClient()
       return await stripe.paymentIntents.retrieve(paymentIntentId)
     } catch (error) {
       console.error('Failed to retrieve payment intent:', error)
@@ -68,6 +82,7 @@ export class StripeService {
    */
   static async confirmPaymentIntent(paymentIntentId: string) {
     try {
+      const stripe = getStripeClient()
       return await stripe.paymentIntents.confirm(paymentIntentId)
     } catch (error) {
       console.error('Failed to confirm payment intent:', error)
@@ -80,6 +95,7 @@ export class StripeService {
    */
   static async cancelPaymentIntent(paymentIntentId: string) {
     try {
+      const stripe = getStripeClient()
       return await stripe.paymentIntents.cancel(paymentIntentId)
     } catch (error) {
       console.error('Failed to cancel payment intent:', error)
@@ -92,6 +108,7 @@ export class StripeService {
    */
   static async createRefund(paymentIntentId: string, amount?: number) {
     try {
+      const stripe = getStripeClient()
       const refundData: Stripe.RefundCreateParams = {
         payment_intent: paymentIntentId,
       }
@@ -112,6 +129,7 @@ export class StripeService {
    */
   static async createCustomer(email: string, name?: string) {
     try {
+      const stripe = getStripeClient()
       return await stripe.customers.create({
         email,
         name,
@@ -127,6 +145,7 @@ export class StripeService {
    */
   static async getCustomer(customerId: string) {
     try {
+      const stripe = getStripeClient()
       return await stripe.customers.retrieve(customerId)
     } catch (error) {
       console.error('Failed to retrieve customer:', error)
@@ -138,10 +157,16 @@ export class StripeService {
 // Webhook handler for Stripe events
 export async function handleStripeWebhook(body: string, signature: string) {
   try {
+    const stripe = getStripeClient()
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+    if (!webhookSecret) {
+      throw new Error('STRIPE_WEBHOOK_SECRET environment variable is not set')
+    }
+    
     const event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      webhookSecret
     )
 
     switch (event.type) {
