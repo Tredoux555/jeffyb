@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
+import { AddressInput } from '@/components/AddressInput'
 import { CartItem } from '@/types/database'
 import { createClient } from '@/lib/supabase'
 import { generateOrderQRCode } from '@/lib/qrcode'
@@ -26,7 +27,9 @@ export default function CheckoutPage() {
     address: '',
     city: '',
     postal_code: '',
-    country: 'South Africa'
+    country: 'South Africa',
+    latitude: undefined as number | undefined,
+    longitude: undefined as number | undefined
   })
   
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'paypal' | 'mock'>('mock')
@@ -75,7 +78,11 @@ export default function CheckoutPage() {
             phone: customerInfo.phone,
             address: deliveryInfo.address,
             city: deliveryInfo.city,
-            postal_code: deliveryInfo.postal_code
+            postal_code: deliveryInfo.postal_code,
+            ...(deliveryInfo.latitude && deliveryInfo.longitude && {
+              latitude: deliveryInfo.latitude,
+              longitude: deliveryInfo.longitude
+            })
           }
         })
         .select()
@@ -226,11 +233,22 @@ export default function CheckoutPage() {
                 <Card>
                   <h2 className="text-xl font-semibold text-gray-900 mb-6">Delivery Information</h2>
                   <div className="space-y-4">
-                    <Input
+                    <AddressInput
                       label="Delivery Address *"
                       value={deliveryInfo.address}
-                      onChange={(e) => setDeliveryInfo({...deliveryInfo, address: e.target.value})}
-                      placeholder="Enter your delivery address"
+                      onChange={(address) => setDeliveryInfo({...deliveryInfo, address})}
+                      onAddressSelect={(data) => {
+                        setDeliveryInfo({
+                          ...deliveryInfo,
+                          address: data.address,
+                          city: data.city || deliveryInfo.city,
+                          postal_code: data.postal_code || deliveryInfo.postal_code,
+                          latitude: data.latitude,
+                          longitude: data.longitude
+                        })
+                      }}
+                      placeholder="Type and select an address (e.g., 123 Main St, Johannesburg)"
+                      required
                     />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <Input
