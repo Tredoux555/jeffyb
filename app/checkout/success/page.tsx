@@ -69,7 +69,9 @@ function CheckoutSuccessContent() {
     )
   }
   
-  const total = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  const total = order.items && order.items.length > 0 
+    ? order.items.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 0)), 0)
+    : order.total || 0
   
   return (
     <div className="min-h-screen bg-jeffy-yellow">
@@ -90,15 +92,15 @@ function CheckoutSuccessContent() {
           <Card className="mb-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-gray-900">Order Details</h2>
-              <span className="text-sm text-gray-500">#{order.id.slice(0, 8)}</span>
+              <span className="text-sm text-gray-500">#{order.id ? order.id.slice(0, 8) : 'N/A'}</span>
             </div>
             
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-gray-500" />
                 <div>
-                  <p className="font-medium text-gray-900">{order.delivery_info.name}</p>
-                  <p className="text-sm text-gray-600">{order.user_email}</p>
+                  <p className="font-medium text-gray-900">{order.delivery_info?.name || 'N/A'}</p>
+                  <p className="text-sm text-gray-600">{order.user_email || 'N/A'}</p>
                 </div>
               </div>
               
@@ -107,9 +109,9 @@ function CheckoutSuccessContent() {
                 <div>
                   <p className="font-medium text-gray-900">Delivery Address</p>
                   <p className="text-sm text-gray-600">
-                    {order.delivery_info.address}
-                    {order.delivery_info.city && `, ${order.delivery_info.city}`}
-                    {order.delivery_info.postal_code && ` ${order.delivery_info.postal_code}`}
+                    {order.delivery_info?.address || 'N/A'}
+                    {order.delivery_info?.city && `, ${order.delivery_info.city}`}
+                    {order.delivery_info?.postal_code && ` ${order.delivery_info.postal_code}`}
                   </p>
                 </div>
               </div>
@@ -118,7 +120,7 @@ function CheckoutSuccessContent() {
                 <Package className="w-5 h-5 text-gray-500" />
                 <div>
                   <p className="font-medium text-gray-900">Order Status</p>
-                  <p className="text-sm text-gray-600 capitalize">{order.status}</p>
+                  <p className="text-sm text-gray-600 capitalize">{order.status || 'pending'}</p>
                 </div>
               </div>
             </div>
@@ -128,17 +130,21 @@ function CheckoutSuccessContent() {
           <Card className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h3>
             <div className="space-y-3">
-              {order.items.map((item, index) => (
-                <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-                  <div>
-                    <p className="font-medium text-gray-900">{item.product_name}</p>
-                    <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+              {order.items && order.items.length > 0 ? (
+                order.items.map((item, index) => (
+                  <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                    <div>
+                      <p className="font-medium text-gray-900">{item.product_name || 'Unknown Product'}</p>
+                      <p className="text-sm text-gray-600">Qty: {item.quantity || 0}</p>
+                    </div>
+                    <p className="font-medium text-jeffy-yellow">
+                      R{((item.price || 0) * (item.quantity || 0)).toFixed(2)}
+                    </p>
                   </div>
-                  <p className="font-medium text-jeffy-yellow">
-                    R{(item.price * item.quantity).toFixed(2)}
-                  </p>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-gray-600 text-sm">No items found</p>
+              )}
             </div>
             
             <div className="mt-4 pt-4 border-t border-gray-200">

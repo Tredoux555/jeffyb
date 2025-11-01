@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase'
 
 /**
  * Mock Payment API Route
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     await new Promise(resolve => setTimeout(resolve, 1500))
 
     // Update order with successful payment status
-    const supabase = createClient()
+    const supabase = createAdminClient()
     const { error } = await supabase
       .from('orders')
       .update({
