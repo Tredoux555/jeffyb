@@ -7,6 +7,7 @@ import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
 import { CartItem } from '@/types/database'
 import { createClient } from '@/lib/supabase'
+import { generateOrderQRCode } from '@/lib/qrcode'
 import { CreditCard } from 'lucide-react'
 
 export default function CheckoutPage() {
@@ -28,7 +29,7 @@ export default function CheckoutPage() {
     country: 'South Africa'
   })
   
-  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'paypal'>('stripe')
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'paypal' | 'mock'>('mock')
   
   useEffect(() => {
     loadCart()
@@ -81,6 +82,52 @@ export default function CheckoutPage() {
         .single()
       
       if (error) throw error
+      
+      // Process payment - ALL payment methods use mock payment for testing
+      // This bypasses real payment processing and marks order as ready_for_delivery
+      // When ready for production, add conditional logic for real Stripe/PayPal
+      try {
+        const paymentResponse = await fetch('/api/payments/mock', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId: data.id,
+            amount: total
+          })
+        })
+
+        const paymentResult = await paymentResponse.json()
+
+        if (!paymentResult.success) {
+          console.error('Payment processing failed:', paymentResult.error)
+          // Order created but payment failed - admin can handle manually
+          // Continue to success page but order will be pending
+        } else {
+          console.log(`Payment processed (${paymentMethod}):`, paymentResult)
+          // Payment successful - order is now marked ready_for_delivery
+        }
+      } catch (paymentError) {
+        console.error('Payment processing error:', paymentError)
+        // Order created but payment failed - admin can handle manually
+        // Continue to success page
+      }
+      
+      // Generate QR code for order tracking
+      let qrCode = null
+      try {
+        qrCode = await generateOrderQRCode(data.id)
+      } catch (qrError) {
+        console.error('Error generating QR code:', qrError)
+        // Continue even if QR generation fails
+      }
+      
+      // Update order with QR code if generated
+      if (qrCode) {
+        await supabase
+          .from('orders')
+          .update({ qr_code: qrCode })
+          .eq('id', data.id)
+      }
       
       // Clear cart
       localStorage.removeItem('jeffy-cart')
@@ -214,7 +261,19 @@ export default function CheckoutPage() {
                 <Card>
                   <h2 className="text-xl font-semibold text-gray-900 mb-6">Payment Method</h2>
                   <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <button
+                        onClick={() => setPaymentMethod('mock')}
+                        className={`p-4 border-2 rounded-xl text-left transition-colors ${
+                          paymentMethod === 'mock' 
+                            ? 'border-jeffy-yellow bg-jeffy-yellow-light' 
+                            : 'border-gray-300 hover:border-jeffy-yellow'
+                        }`}
+                      >
+                        <CreditCard className="w-6 h-6 mb-2" />
+                        <div className="font-medium">Test Payment (Mock)</div>
+                        <div className="text-sm text-gray-600">Instant processing for testing</div>
+                      </button>
                       <button
                         onClick={() => setPaymentMethod('stripe')}
                         className={`p-4 border-2 rounded-xl text-left transition-colors ${
@@ -241,12 +300,23 @@ export default function CheckoutPage() {
                       </button>
                     </div>
                     
-                    <div className="bg-jeffy-yellow-light p-4 rounded-xl">
-                      <p className="text-sm text-gray-700">
-                        <strong>Note:</strong> Payment integration is ready but requires API keys to be configured. 
-                        For now, orders will be processed and you&apos;ll be contacted for payment.
-                      </p>
-                    </div>
+                    {paymentMethod === 'mock' && (
+                      <div className="bg-green-50 border border-green-200 p-4 rounded-xl">
+                        <p className="text-sm text-green-700">
+                          <strong>Test Mode:</strong> This payment will be processed instantly. 
+                          Your order will be automatically marked as ready for delivery.
+                        </p>
+                      </div>
+                    )}
+                    
+                    {(paymentMethod === 'stripe' || paymentMethod === 'paypal') && (
+                      <div className="bg-jeffy-yellow-light p-4 rounded-xl">
+                        <p className="text-sm text-gray-700">
+                          <strong>Note:</strong> Payment integration is ready but requires API keys to be configured. 
+                          For now, orders will be processed and you&apos;ll be contacted for payment.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </Card>
               )}

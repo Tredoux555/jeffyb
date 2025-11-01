@@ -38,8 +38,12 @@ export interface Order {
   user_email: string
   items: OrderItem[]
   total: number
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  payment_status?: 'pending' | 'paid' | 'failed' | 'refunded'
   delivery_info: DeliveryInfo
+  qr_code?: string // QR code data URL for order tracking
+  ready_for_delivery?: boolean
+  ready_for_delivery_at?: string
   created_at: string
 }
 

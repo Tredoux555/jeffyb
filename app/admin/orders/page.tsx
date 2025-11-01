@@ -16,8 +16,12 @@ import {
   Truck,
   CheckCircle,
   XCircle,
-  Clock
+  Clock,
+  Printer
 } from 'lucide-react'
+import { ShippingLabelPDF } from '@/components/ShippingLabel'
+import { pdf } from '@react-pdf/renderer'
+import { DeliveryMap } from '@/components/DeliveryMap'
 
 export default function AdminOrdersPage() {
   const router = useRouter()
@@ -127,6 +131,27 @@ export default function AdminOrdersPage() {
   const viewOrderDetails = (order: Order) => {
     setSelectedOrder(order)
     setIsModalOpen(true)
+  }
+
+  const handlePrintLabel = async (order: Order) => {
+    try {
+      // Generate PDF blob
+      const doc = <ShippingLabelPDF order={order} />
+      const blob = await pdf(doc).toBlob()
+      
+      // Create download link
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `shipping-label-${order.id.slice(0, 8)}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Error generating shipping label:', error)
+      alert('Error generating shipping label. Please try again.')
+    }
   }
   
   const getTotalRevenue = () => {
@@ -344,6 +369,73 @@ export default function AdminOrdersPage() {
                     {selectedOrder.delivery_info.postal_code && <p>{selectedOrder.delivery_info.postal_code}</p>}
                   </div>
                 </div>
+              </div>
+              
+              {/* QR Code */}
+              {selectedOrder.qr_code && (
+                <div className="border-t border-gray-200 pt-6">
+                  <h4 className="font-semibold text-gray-900 mb-3">Order QR Code</h4>
+                  <div className="flex flex-col items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                    <img 
+                      src={selectedOrder.qr_code} 
+                      alt="Order QR Code" 
+                      className="w-48 h-48 border-2 border-gray-300 rounded-lg"
+                    />
+                    <p className="text-xs text-gray-500 text-center max-w-xs">
+                      Scan this QR code to track the order. Can be printed on shipping labels.
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {/* Print Label Button */}
+              <div className="border-t border-gray-200 pt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  onClick={() => handlePrintLabel(selectedOrder)}
+                  className="flex items-center gap-2"
+                >
+                  <Printer className="w-4 h-4" />
+                  Print Shipping Label
+                </Button>
+                {selectedOrder.status !== 'cancelled' && !selectedOrder.ready_for_delivery && (
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const supabase = createClient()
+                        await supabase
+                          .from('orders')
+                          .update({
+                            ready_for_delivery: true,
+                            ready_for_delivery_at: new Date().toISOString()
+                          })
+                          .eq('id', selectedOrder.id)
+                        alert('Order marked as ready for delivery!')
+                        fetchOrders()
+                      } catch (error) {
+                        console.error('Error marking ready for delivery:', error)
+                        alert('Error updating order status')
+                      }
+                    }}
+                    className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white"
+                  >
+                    <Truck className="w-4 h-4" />
+                    Ready for Delivery
+                  </Button>
+                )}
+              </div>
+              
+              {/* Delivery Map */}
+              <div className="border-t border-gray-200 pt-6">
+                <h4 className="font-semibold text-gray-900 mb-3">Delivery Route</h4>
+                <div className="rounded-lg overflow-hidden border border-gray-200">
+                  <DeliveryMap
+                    pickupAddress="123 Main Street, Johannesburg, 2000"
+                    deliveryAddress={selectedOrder.delivery_info.address}
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Map showing route from pickup location to delivery address
+                </p>
               </div>
               
               {/* Order Items */}
