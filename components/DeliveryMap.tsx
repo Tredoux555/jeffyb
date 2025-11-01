@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { GoogleMap, LoadScript, DirectionsRenderer } from '@react-google-maps/api'
+import { GoogleMap, LoadScript, DirectionsRenderer, Marker } from '@react-google-maps/api'
 import { useGoogleMaps } from '@/lib/hooks/useGoogleMaps'
 
 interface DeliveryMapProps {
@@ -9,6 +9,7 @@ interface DeliveryMapProps {
   deliveryAddress: string
   pickupCoords?: { lat: number; lng: number }
   deliveryCoords?: { lat: number; lng: number }
+  driverLocation?: { lat: number; lng: number }
 }
 
 const containerStyle = {
@@ -26,6 +27,7 @@ export function DeliveryMap({
   deliveryAddress,
   pickupCoords,
   deliveryCoords,
+  driverLocation,
 }: DeliveryMapProps) {
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null)
   const [mapError, setMapError] = useState<string | null>(null)

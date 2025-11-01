@@ -19,6 +19,7 @@ import {
   Minus,
   Package
 } from 'lucide-react'
+import { FavoriteButton } from '@/components/FavoriteButton'
 
 export default function ProductDetailPage() {
   const params = useParams()
@@ -541,13 +542,11 @@ export default function ProductDetailPage() {
                 <ShoppingCart className="w-5 h-5 text-yellow-600" />
                 Add to Cart
               </Button>
-              <Button
-                variant="outline"
-                className="flex items-center justify-center gap-2"
-              >
-                <Heart className="w-5 h-5 text-yellow-600" />
-                Wishlist
-              </Button>
+              {product && (
+                <div className="flex items-center justify-center">
+                  <FavoriteButton productId={product.id} size="lg" />
+                </div>
+              )}
               <Button
                 variant="outline"
                 className="flex items-center justify-center gap-2"

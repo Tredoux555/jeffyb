@@ -191,7 +191,7 @@ export interface DeliveryAssignment {
   id: string
   order_id: string
   driver_id: string
-  status: 'assigned' | 'picked_up' | 'in_transit' | 'delivered' | 'failed'
+  status: 'assigned' | 'picked_up' | 'in_transit' | 'delivered' | 'failed' | 'cancelled'
   assigned_at: string
   picked_up_at?: string
   delivered_at?: string

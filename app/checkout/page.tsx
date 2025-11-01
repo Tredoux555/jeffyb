@@ -6,16 +6,24 @@ import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
 import { AddressInput } from '@/components/AddressInput'
-import { CartItem } from '@/types/database'
+import { AddressSelector } from '@/components/AddressSelector'
+import { PaymentMethodSelector } from '@/components/PaymentMethodSelector'
+import { useAuth } from '@/lib/contexts/AuthContext'
+import { CartItem, SavedAddress, SavedPaymentMethod } from '@/types/database'
 import { createClient } from '@/lib/supabase'
 import { generateOrderQRCode } from '@/lib/qrcode'
 import { CreditCard } from 'lucide-react'
 
 export default function CheckoutPage() {
   const router = useRouter()
+  const { user, profile } = useAuth()
   const [cart, setCart] = useState<CartItem[]>([])
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(1)
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null)
+  const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null)
+  const [useSavedAddress, setUseSavedAddress] = useState(false)
+  const [useSavedPayment, setUseSavedPayment] = useState(false)
   
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
@@ -36,7 +44,16 @@ export default function CheckoutPage() {
   
   useEffect(() => {
     loadCart()
-  }, [])
+    
+    // Pre-populate customer info if user is logged in
+    if (user && profile) {
+      setCustomerInfo({
+        name: profile.full_name || user.email?.split('@')[0] || '',
+        email: user.email || '',
+        phone: profile.phone || ''
+      })
+    }
+  }, [user, profile])
   
   const loadCart = () => {
     if (typeof window !== 'undefined') {
@@ -64,6 +81,7 @@ export default function CheckoutPage() {
       const { data, error } = await supabase
         .from('orders')
         .insert({
+          user_id: user?.id || null, // Add user_id if logged in
           user_email: customerInfo.email,
           items: cart.map(item => ({
             product_id: item.product_id,
@@ -233,43 +251,79 @@ export default function CheckoutPage() {
                 <Card>
                   <h2 className="text-xl font-semibold text-gray-900 mb-6">Delivery Information</h2>
                   <div className="space-y-4">
-                    <AddressInput
-                      label="Delivery Address *"
-                      value={deliveryInfo.address}
-                      onChange={(address) => setDeliveryInfo({...deliveryInfo, address})}
-                      onAddressSelect={(data) => {
-                        setDeliveryInfo({
-                          ...deliveryInfo,
-                          address: data.address,
-                          city: data.city || deliveryInfo.city,
-                          postal_code: data.postal_code || deliveryInfo.postal_code,
-                          latitude: data.latitude,
-                          longitude: data.longitude
-                        })
-                      }}
-                      placeholder="Type and select an address (e.g., 123 Main St, Johannesburg)"
-                      required
-                    />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Input
-                        label="City"
-                        value={deliveryInfo.city}
-                        onChange={(e) => setDeliveryInfo({...deliveryInfo, city: e.target.value})}
-                        placeholder="Enter your city"
-                      />
-                      <Input
-                        label="Postal Code"
-                        value={deliveryInfo.postal_code}
-                        onChange={(e) => setDeliveryInfo({...deliveryInfo, postal_code: e.target.value})}
-                        placeholder="Enter postal code"
-                      />
-                    </div>
-                    <Input
-                      label="Country"
-                      value={deliveryInfo.country}
-                      onChange={(e) => setDeliveryInfo({...deliveryInfo, country: e.target.value})}
-                      placeholder="Enter your country"
-                    />
+                    {user && (
+                      <div className="mb-4">
+                        <label className="flex items-center mb-2">
+                          <input
+                            type="checkbox"
+                            checked={useSavedAddress}
+                            onChange={(e) => setUseSavedAddress(e.target.checked)}
+                            className="rounded border-gray-300 text-jeffy-yellow focus:ring-jeffy-yellow"
+                          />
+                          <span className="ml-2 text-sm text-gray-700">Use a saved address</span>
+                        </label>
+                        {useSavedAddress && (
+                          <AddressSelector
+                            selectedAddressId={selectedAddressId}
+                            onSelect={(address) => {
+                              if (address) {
+                                setSelectedAddressId(address.id)
+                                setDeliveryInfo({
+                                  address: address.address,
+                                  city: address.city || '',
+                                  postal_code: address.postal_code || '',
+                                  country: address.country || 'South Africa',
+                                  latitude: address.latitude || undefined,
+                                  longitude: address.longitude || undefined,
+                                })
+                              }
+                            }}
+                            onNew={() => setUseSavedAddress(false)}
+                          />
+                        )}
+                      </div>
+                    )}
+                    {(!user || !useSavedAddress) && (
+                      <>
+                        <AddressInput
+                          label="Delivery Address *"
+                          value={deliveryInfo.address}
+                          onChange={(address) => setDeliveryInfo({...deliveryInfo, address})}
+                          onAddressSelect={(data) => {
+                            setDeliveryInfo({
+                              ...deliveryInfo,
+                              address: data.address,
+                              city: data.city || deliveryInfo.city,
+                              postal_code: data.postal_code || deliveryInfo.postal_code,
+                              latitude: data.latitude,
+                              longitude: data.longitude
+                            })
+                          }}
+                          placeholder="Type and select an address (e.g., 123 Main St, Johannesburg)"
+                          required
+                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Input
+                            label="City"
+                            value={deliveryInfo.city}
+                            onChange={(e) => setDeliveryInfo({...deliveryInfo, city: e.target.value})}
+                            placeholder="Enter your city"
+                          />
+                          <Input
+                            label="Postal Code"
+                            value={deliveryInfo.postal_code}
+                            onChange={(e) => setDeliveryInfo({...deliveryInfo, postal_code: e.target.value})}
+                            placeholder="Enter postal code"
+                          />
+                        </div>
+                        <Input
+                          label="Country"
+                          value={deliveryInfo.country}
+                          onChange={(e) => setDeliveryInfo({...deliveryInfo, country: e.target.value})}
+                          placeholder="Enter your country"
+                        />
+                      </>
+                    )}
                   </div>
                 </Card>
               )}

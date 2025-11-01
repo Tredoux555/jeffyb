@@ -311,9 +311,52 @@ export default function ProfilePage() {
           {activeTab === 'orders' && (
             <div>
               <Card className="p-4 sm:p-6">
-                <p className="text-gray-600 text-center py-8">
-                  Order history page will be implemented in Phase 7
-                </p>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">Order History</h2>
+                  <Link href="/profile/orders">
+                    <Button variant="outline" size="sm">
+                      View All Orders
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                </div>
+                {recentOrders.length > 0 ? (
+                  <div className="space-y-3">
+                    {recentOrders.map((order) => (
+                      <Link
+                        key={order.id}
+                        href={`/profile/orders/${order.id}`}
+                        className="block p-3 border border-gray-200 rounded-lg hover:border-jeffy-yellow transition-colors"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-semibold text-gray-900">Order #{order.id.slice(0, 8)}</p>
+                            <p className="text-sm text-gray-600 flex items-center gap-2 mt-1">
+                              <Clock className="w-3 h-3" />
+                              {new Date(order.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-jeffy-yellow">R{order.total?.toFixed(2) || '0.00'}</p>
+                            <span
+                              className={`inline-block px-2 py-1 rounded-full text-xs font-medium mt-1 ${
+                                order.status === 'delivered'
+                                  ? 'bg-green-100 text-green-700'
+                                  : order.status === 'pending'
+                                  ? 'bg-yellow-100 text-yellow-700'
+                                  : 'bg-blue-100 text-blue-700'
+                              }`}
+                            >
+                              {order.status}
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-600 text-center py-4">No orders yet</p>
+                )}
               </Card>
             </div>
           )}
@@ -321,9 +364,42 @@ export default function ProfilePage() {
           {activeTab === 'favorites' && (
             <div>
               <Card className="p-4 sm:p-6">
-                <p className="text-gray-600 text-center py-8">
-                  Favorites page will be implemented in Phase 6
-                </p>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">Favorites</h2>
+                  <Link href="/profile/favorites">
+                    <Button variant="outline" size="sm">
+                      View All Favorites
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                </div>
+                {recentFavorites.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                    {recentFavorites.map((favorite) => (
+                      <Link
+                        key={favorite.id}
+                        href={`/products/${favorite.product_id}`}
+                        className="block p-3 border border-gray-200 rounded-lg hover:border-jeffy-yellow transition-colors"
+                      >
+                        {favorite.product && (
+                          <>
+                            {favorite.product.images && favorite.product.images.length > 0 && (
+                              <img
+                                src={favorite.product.images[0]}
+                                alt={favorite.product.name}
+                                className="w-full h-32 object-cover rounded-lg mb-2"
+                              />
+                            )}
+                            <p className="font-semibold text-gray-900 text-sm truncate">{favorite.product.name}</p>
+                            <p className="text-jeffy-yellow font-bold">R{favorite.product.price?.toFixed(2) || '0.00'}</p>
+                          </>
+                        )}
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-600 text-center py-4">No favorites yet</p>
+                )}
               </Card>
             </div>
           )}
@@ -331,8 +407,19 @@ export default function ProfilePage() {
           {activeTab === 'addresses' && (
             <div>
               <Card className="p-4 sm:p-6">
-                <p className="text-gray-600 text-center py-8">
-                  Address management will be implemented in Phase 4
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">Saved Addresses</h2>
+                  <Link href="/profile/addresses">
+                    <Button variant="outline" size="sm">
+                      Manage Addresses
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                </div>
+                <p className="text-gray-600 text-center py-4">
+                  <Link href="/profile/addresses" className="text-jeffy-yellow hover:underline">
+                    Click here to manage your saved addresses
+                  </Link>
                 </p>
               </Card>
             </div>
@@ -341,8 +428,19 @@ export default function ProfilePage() {
           {activeTab === 'payment' && (
             <div>
               <Card className="p-4 sm:p-6">
-                <p className="text-gray-600 text-center py-8">
-                  Payment methods management will be implemented in Phase 5
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">Payment Methods</h2>
+                  <Link href="/profile/payment">
+                    <Button variant="outline" size="sm">
+                      Manage Payments
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                </div>
+                <p className="text-gray-600 text-center py-4">
+                  <Link href="/profile/payment" className="text-jeffy-yellow hover:underline">
+                    Click here to manage your saved payment methods
+                  </Link>
                 </p>
               </Card>
             </div>

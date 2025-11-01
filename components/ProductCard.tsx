@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
+import { FavoriteButton } from '@/components/FavoriteButton'
 import { ShoppingCart, Eye, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Product } from '@/types/database'
 
@@ -151,6 +152,11 @@ export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCard
             {images.length} photos
           </div>
         )}
+
+        {/* Favorite Button */}
+        <div className="absolute top-2 right-2 sm:top-2 sm:right-12 z-10">
+          <FavoriteButton productId={product.id} size="md" />
+        </div>
       </div>
       
       {/* Product Info */}
