@@ -30,8 +30,15 @@ export class PayPalService {
   private baseUrl: string
 
   constructor() {
-    this.clientId = process.env.PAYPAL_CLIENT_ID!
-    this.clientSecret = process.env.PAYPAL_CLIENT_SECRET!
+    const clientId = process.env.PAYPAL_CLIENT_ID
+    const clientSecret = process.env.PAYPAL_CLIENT_SECRET
+    
+    if (!clientId || !clientSecret) {
+      throw new Error('PayPal environment variables are not set. Please check PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET.')
+    }
+    
+    this.clientId = clientId
+    this.clientSecret = clientSecret
     this.baseUrl = process.env.NODE_ENV === 'production' 
       ? 'https://api-m.paypal.com' 
       : 'https://api-m.sandbox.paypal.com'
