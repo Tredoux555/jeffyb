@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { ShoppingCart, Menu, X, User, Package, Truck } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { ShoppingCart, Menu, X, User, Package, Truck, LogOut, Settings, Heart, ShoppingBag } from 'lucide-react'
+import { useAuth } from '@/lib/contexts/AuthContext'
 
 interface NavigationProps {
   cartItemCount?: number
@@ -11,7 +12,10 @@ interface NavigationProps {
 
 export function Navigation({ cartItemCount = 0 }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
+  const { user, profile, signOut } = useAuth()
   
   const navItems = [
     { href: '/', label: 'Jeffy', icon: Package },
@@ -57,7 +61,7 @@ export function Navigation({ cartItemCount = 0 }: NavigationProps) {
             })}
           </div>
           
-          {/* Cart & Mobile Menu */}
+          {/* Cart, Auth & Mobile Menu */}
           <div className="flex items-center space-x-4">
             {/* Cart */}
             <Link href="/cart" className="relative">
@@ -71,6 +75,100 @@ export function Navigation({ cartItemCount = 0 }: NavigationProps) {
                 </span>
               )}
             </Link>
+
+            {/* Auth: Login or Profile Dropdown */}
+            {user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                  className="flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors text-white hover:bg-jeffy-yellow-light hover:text-gray-900"
+                >
+                  <div className="w-8 h-8 rounded-full bg-jeffy-yellow flex items-center justify-center">
+                    <span className="text-gray-900 font-semibold text-sm">
+                      {profile?.full_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                  <span className="hidden md:block text-sm">{profile?.full_name || user.email?.split('@')[0]}</span>
+                </button>
+
+                {/* Profile Dropdown Menu */}
+                {isProfileMenuOpen && (
+                  <>
+                    {/* Backdrop */}
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                    />
+                    {/* Menu */}
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-jeffy-lg z-20 overflow-hidden">
+                      <div className="px-4 py-3 border-b border-gray-200">
+                        <p className="text-sm font-semibold text-gray-900">{profile?.full_name || 'User'}</p>
+                        <p className="text-xs text-gray-600 truncate">{user.email}</p>
+                      </div>
+                      <div className="py-1">
+                        <Link
+                          href="/profile"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                          className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-jeffy-yellow-light transition-colors"
+                        >
+                          <User className="w-4 h-4" />
+                          <span>View Profile</span>
+                        </Link>
+                        <Link
+                          href="/profile/orders"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                          className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-jeffy-yellow-light transition-colors"
+                        >
+                          <ShoppingBag className="w-4 h-4" />
+                          <span>My Orders</span>
+                        </Link>
+                        <Link
+                          href="/profile/favorites"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                          className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-jeffy-yellow-light transition-colors"
+                        >
+                          <Heart className="w-4 h-4" />
+                          <span>Favorites</span>
+                        </Link>
+                        <Link
+                          href="/profile/settings"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                          className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-jeffy-yellow-light transition-colors"
+                        >
+                          <Settings className="w-4 h-4" />
+                          <span>Settings</span>
+                        </Link>
+                        <div className="border-t border-gray-200 mt-1">
+                          <button
+                            onClick={async () => {
+                              await signOut()
+                              setIsProfileMenuOpen(false)
+                              router.push('/')
+                            }}
+                            className="flex items-center space-x-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors w-full"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            <span>Logout</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <Link
+                href="/auth/login"
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+                  isActive('/auth/login') || isActive('/auth/register')
+                    ? 'bg-jeffy-yellow text-gray-900'
+                    : 'text-white hover:bg-jeffy-yellow-light hover:text-gray-900'
+                }`}
+              >
+                <User className="w-4 h-4" />
+                <span className="hidden md:inline">Login</span>
+              </Link>
+            )}
             
             {/* Mobile Menu Button */}
             <button
@@ -104,6 +202,38 @@ export function Navigation({ cartItemCount = 0 }: NavigationProps) {
                   </Link>
                 )
               })}
+              {user ? (
+                <>
+                  <Link
+                    href="/profile"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors text-white hover:bg-jeffy-yellow-light hover:text-gray-900"
+                  >
+                    <User className="w-4 h-4" />
+                    <span>Profile</span>
+                  </Link>
+                  <button
+                    onClick={async () => {
+                      await signOut()
+                      setIsMenuOpen(false)
+                      router.push('/')
+                    }}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors text-white hover:bg-jeffy-yellow-light hover:text-gray-900"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Logout</span>
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors text-white hover:bg-jeffy-yellow-light hover:text-gray-900"
+                >
+                  <User className="w-4 h-4" />
+                  <span>Login</span>
+                </Link>
+              )}
             </div>
           </div>
         )}

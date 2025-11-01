@@ -35,7 +35,8 @@ export interface Category {
 
 export interface Order {
   id: string
-  user_email: string
+  user_id?: string | null // New field for authenticated users (nullable for backward compatibility)
+  user_email: string // Maintained for guest checkout and backward compatibility
   items: OrderItem[]
   total: number
   status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
@@ -103,4 +104,119 @@ export interface AdminUser {
   id: string
   email: string
   password_hash: string
+}
+
+// User Profile Types
+export interface UserProfile {
+  id: string
+  full_name: string | null
+  phone: string | null
+  avatar_url: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface SavedAddress {
+  id: string
+  user_id: string
+  label: string
+  address: string
+  city: string | null
+  postal_code: string | null
+  country: string
+  latitude: number | null
+  longitude: number | null
+  is_default: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface SavedPaymentMethod {
+  id: string
+  user_id: string
+  type: 'card' | 'paypal' | 'other'
+  last4: string | null
+  brand: string | null
+  expiry_month: number | null
+  expiry_year: number | null
+  is_default: boolean
+  stripe_payment_method_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface Favorite {
+  id: string
+  user_id: string
+  product_id: string
+  created_at: string
+  product?: Product // Joined product data
+}
+
+export interface UserCart {
+  id: string
+  user_id: string
+  items: CartItem[]
+  updated_at: string
+}
+
+export interface OrderNotification {
+  id: string
+  user_id: string
+  order_id: string
+  type: 'status_update' | 'driver_assigned' | 'delivered' | 'payment_received' | 'other'
+  message: string
+  read: boolean
+  created_at: string
+  order?: Order // Joined order data
+}
+
+// Driver and Delivery Types (for admin driver location tracking)
+export interface Driver {
+  id: string
+  name: string
+  email: string
+  phone: string
+  password_hash: string
+  vehicle_type?: string
+  license_number?: string
+  status: 'active' | 'inactive' | 'busy'
+  current_location?: { lat: number; lng: number }
+  last_location_update?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface DeliveryAssignment {
+  id: string
+  order_id: string
+  driver_id: string
+  status: 'assigned' | 'picked_up' | 'in_transit' | 'delivered' | 'failed'
+  assigned_at: string
+  picked_up_at?: string
+  delivered_at?: string
+  delivery_notes?: string
+  delivery_photo_url?: string
+  customer_signature_url?: string
+  created_at: string
+  updated_at: string
+  order?: Order
+  driver?: Driver
+}
+
+export interface DeliveryStatusUpdate {
+  id: string
+  assignment_id: string
+  status: string
+  location?: { lat: number; lng: number }
+  notes?: string
+  updated_by: 'driver' | 'admin' | 'system'
+  created_at: string
+}
+
+export interface DriverLocationHistory {
+  id: string
+  driver_id: string
+  location: { lat: number; lng: number }
+  created_at: string
 }

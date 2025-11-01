@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 // import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClientNavigation } from "../components/ClientNavigation";
+import { AuthProvider } from "../lib/contexts/AuthContext";
 
 // const inter = Inter({
 //   subsets: ["latin"],
@@ -31,10 +32,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
-        <ClientNavigation />
-        <main className="min-h-screen">
-          {children}
-        </main>
+        <AuthProvider>
+          <ClientNavigation />
+          <main className="min-h-screen">
+            {children}
+          </main>
+        </AuthProvider>
       </body>
     </html>
   );

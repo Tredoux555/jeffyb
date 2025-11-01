@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState, useRef, useCallback } from 'react'
+import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { LoadScript, Autocomplete } from '@react-google-maps/api'
 import { Input } from './Input'
 import { MapPin, CheckCircle2, AlertCircle } from 'lucide-react'
+import { useGoogleMaps } from '@/lib/hooks/useGoogleMaps'
 
 interface AddressInputProps {
   label?: string
@@ -43,6 +44,9 @@ export function AddressInput({
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''
 
+  // Check if Google Maps is already loaded
+  const { isLoaded: googleMapsLoaded, scriptLoaded } = useGoogleMaps()
+
   // Validate API key format
   const isValidApiKey = apiKey && 
                         apiKey !== '' && 
@@ -51,6 +55,13 @@ export function AddressInput({
                         !apiKey.includes('YOUR_') &&
                         apiKey.length > 20
 
+  // Update mapsLoaded state if Google Maps is already loaded
+  useEffect(() => {
+    if (googleMapsLoaded || (typeof window !== 'undefined' && window.google?.maps)) {
+      setMapsLoaded(true)
+    }
+  }, [googleMapsLoaded])
+
   const handleLoad = useCallback(() => {
     setMapsLoaded(true)
   }, [])
@@ -58,7 +69,12 @@ export function AddressInput({
   const handleError = useCallback((error: Error) => {
     console.error('Google Maps LoadScript error:', error)
     setMapsLoaded(false)
-    setGeocodeError('Google Maps failed to load. You can still enter your address manually.')
+    // Check for specific error types
+    if (error.message?.includes('InvalidKeyMapError') || error.message?.includes('InvalidKey')) {
+      setGeocodeError('Invalid API key. Please check your Google Maps API key configuration.')
+    } else {
+      setGeocodeError('Google Maps failed to load. You can still enter your address manually.')
+    }
   }, [])
 
   const handlePlaceSelect = useCallback(() => {
@@ -149,7 +165,81 @@ export function AddressInput({
     )
   }
 
-  // With valid API key, use Google Places Autocomplete
+  // Render input field with icons
+  const renderInputField = () => (
+    <div className={className}>
+      <div className="relative">
+        {/* MapPin Icon */}
+        <MapPin className="absolute left-3 top-[42px] w-5 h-5 text-gray-400 pointer-events-none z-10" />
+        
+        {/* Validation Icons */}
+        {isGeocoding && (
+          <div className="absolute right-3 top-[42px] w-5 h-5 pointer-events-none z-10">
+            <div className="w-5 h-5 border-2 border-jeffy-yellow border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+        {isValidated && !isGeocoding && (
+          <CheckCircle2 className="absolute right-3 top-[42px] w-5 h-5 text-green-500 pointer-events-none z-10" />
+        )}
+        {geocodeError && (
+          <AlertCircle className="absolute right-3 top-[42px] w-5 h-5 text-yellow-500 pointer-events-none z-10" />
+        )}
+
+        {mapsLoaded ? (
+          <Autocomplete
+            onLoad={handleAutocompleteLoad}
+            onPlaceChanged={handlePlaceSelect}
+            options={{
+              componentRestrictions: { country: 'za' }, // Restrict to South Africa
+              fields: ['formatted_address', 'geometry', 'address_components', 'name'],
+              types: ['address']
+            }}
+          >
+            <Input
+              label={label}
+              value={value}
+              onChange={(e) => {
+                onChange(e.target.value)
+                setIsValidated(false)
+                setGeocodeError(null)
+              }}
+              placeholder={placeholder || 'Type and select an address...'}
+              required={required}
+              error={error || geocodeError || undefined}
+              helperText={
+                isValidated 
+                  ? 'Address validated! Coordinates captured.' 
+                  : helperText || 'Start typing your address and select from suggestions'
+              }
+              className="pl-10 pr-10"
+            />
+          </Autocomplete>
+        ) : (
+          <Input
+            label={label}
+            value={value}
+            onChange={(e) => {
+              onChange(e.target.value)
+              setIsValidated(false)
+              setGeocodeError(null)
+            }}
+            placeholder={placeholder || 'Enter your delivery address'}
+            required={required}
+            error={error || geocodeError || undefined}
+            helperText={helperText || 'Enter your full address'}
+            className="pl-10"
+          />
+        )}
+      </div>
+    </div>
+  )
+
+  // If Google Maps is already loaded, render directly without LoadScript
+  if (scriptLoaded || (typeof window !== 'undefined' && window.google?.maps)) {
+    return renderInputField()
+  }
+
+  // Otherwise, use LoadScript to load Google Maps
   return (
     <LoadScript
       googleMapsApiKey={apiKey}
@@ -175,71 +265,7 @@ export function AddressInput({
         </div>
       }
     >
-      <div className={className}>
-        <div className="relative">
-          {/* MapPin Icon */}
-          <MapPin className="absolute left-3 top-[42px] w-5 h-5 text-gray-400 pointer-events-none z-10" />
-          
-          {/* Validation Icons */}
-          {isGeocoding && (
-            <div className="absolute right-3 top-[42px] w-5 h-5 pointer-events-none z-10">
-              <div className="w-5 h-5 border-2 border-jeffy-yellow border-t-transparent rounded-full animate-spin" />
-            </div>
-          )}
-          {isValidated && !isGeocoding && (
-            <CheckCircle2 className="absolute right-3 top-[42px] w-5 h-5 text-green-500 pointer-events-none z-10" />
-          )}
-          {geocodeError && (
-            <AlertCircle className="absolute right-3 top-[42px] w-5 h-5 text-yellow-500 pointer-events-none z-10" />
-          )}
-
-          {mapsLoaded ? (
-            <Autocomplete
-              onLoad={handleAutocompleteLoad}
-              onPlaceChanged={handlePlaceSelect}
-              options={{
-                componentRestrictions: { country: 'za' }, // Restrict to South Africa
-                fields: ['formatted_address', 'geometry', 'address_components', 'name'],
-                types: ['address']
-              }}
-            >
-              <Input
-                label={label}
-                value={value}
-                onChange={(e) => {
-                  onChange(e.target.value)
-                  setIsValidated(false)
-                  setGeocodeError(null)
-                }}
-                placeholder={placeholder || 'Type and select an address...'}
-                required={required}
-                error={error || geocodeError || undefined}
-                helperText={
-                  isValidated 
-                    ? 'Address validated! Coordinates captured.' 
-                    : helperText || 'Start typing your address and select from suggestions'
-                }
-                className="pl-10 pr-10"
-              />
-            </Autocomplete>
-          ) : (
-            <Input
-              label={label}
-              value={value}
-              onChange={(e) => {
-                onChange(e.target.value)
-                setIsValidated(false)
-                setGeocodeError(null)
-              }}
-              placeholder={placeholder || 'Enter your delivery address'}
-              required={required}
-              error={error || geocodeError || undefined}
-              helperText={helperText || 'Enter your full address'}
-              className="pl-10"
-            />
-          )}
-        </div>
-      </div>
+      {renderInputField()}
     </LoadScript>
   )
 }

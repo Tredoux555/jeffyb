@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Maps APIs Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .success { background-color: #4CAF50; color: white; }
+        .error { background-color: #f44336; color: white; }
+        .pending { background-color: #ff9800; color: white; }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        #map {
+            width: 100%;
+            height: 300px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Google Maps APIs Status Check</h1>
+    
+    <div class="test-section">
+        <h2>1. Maps JavaScript API</h2>
+        <div id="maps-status" class="status pending">Testing...</div>
+        <div id="map"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Places API (Autocomplete)</h2>
+        <div id="places-status" class="status pending">Testing...</div>
+        <input type="text" id="address-input" placeholder="Type an address to test autocomplete...">
+        <div id="places-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Geocoding API</h2>
+        <div id="geocoding-status" class="status pending">Testing...</div>
+        <button onclick="testGeocoding()">Test Geocoding</button>
+        <div id="geocoding-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Directions API</h2>
+        <div id="directions-status" class="status pending">Testing...</div>
+        <button onclick="testDirections()">Test Directions</button>
+        <div id="directions-results"></div>
+    </div>
+
+    <script>
+        // Replace with your actual API key
+        const API_KEY = 'AIzaSyAT5FF3xVciBazvfh2CkMVZQQ3986EkyhA';
+        
+        // Test 1: Maps JavaScript API
+        function initMap() {
+            try {
+                const map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 10,
+                    center: { lat: -26.2041, lng: 28.0473 } // Johannesburg
+                });
+                
+                document.getElementById('maps-status').textContent = '✅ Working';
+                document.getElementById('maps-status').className = 'status success';
+            } catch (error) {
+                document.getElementById('maps-status').textContent = '❌ Failed: ' + error.message;
+                document.getElementById('maps-status').className = 'status error';
+            }
+        }
+        
+        // Test 2: Places API
+        let autocomplete;
+        function initAutocomplete() {
+            try {
+                autocomplete = new google.maps.places.Autocomplete(
+                    document.getElementById('address-input'),
+                    { types: ['address'], componentRestrictions: { country: 'za' } }
+                );
+                
+                autocomplete.addListener('place_changed', () => {
+                    const place = autocomplete.getPlace();
+                    if (place.geometry) {
+                        document.getElementById('places-status').textContent = '✅ Working';
+                        document.getElementById('places-status').className = 'status success';
+                        document.getElementById('places-results').innerHTML = 
+                            '<p>✅ Address found: ' + place.formatted_address + '</p>';
+                    }
+                });
+            } catch (error) {
+                document.getElementById('places-status').textContent = '❌ Failed: ' + error.message;
+                document.getElementById('places-status').className = 'status error';
+            }
+        }
+        
+        // Test 3: Geocoding API
+        async function testGeocoding() {
+            const address = '123 Main Street, Johannesburg, South Africa';
+            try {
+                const response = await fetch(
+                    `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${API_KEY}`
+                );
+                const data = await response.json();
+                
+                if (data.status === 'OK') {
+                    document.getElementById('geocoding-status').textContent = '✅ Working';
+                    document.getElementById('geocoding-status').className = 'status success';
+                    const location = data.results[0].geometry.location;
+                    document.getElementById('geocoding-results').innerHTML = 
+                        `<p>✅ Coordinates: ${location.lat}, ${location.lng}</p>`;
+                } else {
+                    document.getElementById('geocoding-status').textContent = '❌ Error: ' + data.status;
+                    document.getElementById('geocoding-status').className = 'status error';
+                }
+            } catch (error) {
+                document.getElementById('geocoding-status').textContent = '❌ Failed: ' + error.message;
+                document.getElementById('geocoding-status').className = 'status error';
+            }
+        }
+        
+        // Test 4: Directions API
+        async function testDirections() {
+            try {
+                const directionsService = new google.maps.DirectionsService();
+                const request = {
+                    origin: 'Johannesburg, South Africa',
+                    destination: 'Pretoria, South Africa',
+                    travelMode: 'DRIVING'
+                };
+                
+                directionsService.route(request, (result, status) => {
+                    if (status === 'OK') {
+                        document.getElementById('directions-status').textContent = '✅ Working';
+                        document.getElementById('directions-status').className = 'status success';
+                        const route = result.routes[0].legs[0];
+                        document.getElementById('directions-results').innerHTML = 
+                            `<p>✅ Route calculated: ${route.distance.text} in ${route.duration.text}</p>`;
+                    } else {
+                        document.getElementById('directions-status').textContent = '❌ Error: ' + status;
+                        document.getElementById('directions-status').className = 'status error';
+                    }
+                });
+            } catch (error) {
+                document.getElementById('directions-status').textContent = '❌ Failed: ' + error.message;
+                document.getElementById('directions-status').className = 'status error';
+            }
+        }
+        
+        // Load Google Maps script
+        function loadScript() {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=places&callback=initializeAll`;
+            script.async = true;
+            script.defer = true;
+            script.onerror = () => {
+                document.getElementById('maps-status').textContent = '❌ Failed to load script';
+                document.getElementById('maps-status').className = 'status error';
+            };
+            document.head.appendChild(script);
+        }
+        
+        function initializeAll() {
+            initMap();
+            initAutocomplete();
+        }
+        
+        // Start loading
+        loadScript();
+    </script>
+</body>
+</html>
+

@@ -12,7 +12,8 @@ import {
   Truck, 
   Plus, 
   Edit, 
-  DollarSign
+  DollarSign,
+  MapPin
 } from 'lucide-react'
 
 export default function AdminDashboard() {
@@ -169,7 +170,7 @@ export default function AdminDashboard() {
         </div>
         
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <Card className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <h3 className="text-base sm:text-lg font-semibold text-gray-900">Product Management</h3>
@@ -202,7 +203,7 @@ export default function AdminDashboard() {
             </div>
           </Card>
           
-          <Card className="p-4 sm:p-6 sm:col-span-2 lg:col-span-1">
+          <Card className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <h3 className="text-base sm:text-lg font-semibold text-gray-900">Delivery Management</h3>
               <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
@@ -213,6 +214,22 @@ export default function AdminDashboard() {
                 <Button className="w-full text-sm sm:text-base">
                   <Truck className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                   Manage Deliveries
+                </Button>
+              </Link>
+            </div>
+          </Card>
+
+          <Card className="p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Driver Locations</h3>
+              <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+            </div>
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Track all delivery drivers in real-time</p>
+            <div className="space-y-2">
+              <Link href="/admin/drivers">
+                <Button className="w-full text-sm sm:text-base">
+                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                  View Driver Map
                 </Button>
               </Link>
             </div>
