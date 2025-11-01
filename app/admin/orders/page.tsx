@@ -103,9 +103,9 @@ export default function AdminOrdersPage() {
     
     if (searchTerm) {
       filtered = filtered.filter(order =>
-        order.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.delivery_info.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.id.toLowerCase().includes(searchTerm.toLowerCase())
+        order.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.delivery_info?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.id?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
     
@@ -143,7 +143,7 @@ export default function AdminOrdersPage() {
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `shipping-label-${order.id.slice(0, 8)}.pdf`
+      link.download = `shipping-label-${order.id ? order.id.slice(0, 8) : 'unknown'}.pdf`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -157,7 +157,7 @@ export default function AdminOrdersPage() {
   const getTotalRevenue = () => {
     return orders
       .filter(order => order.status === 'delivered')
-      .reduce((sum, order) => sum + order.total, 0)
+      .reduce((sum, order) => sum + (order.total || 0), 0)
   }
   
   if (loading) {
@@ -260,34 +260,36 @@ export default function AdminOrdersPage() {
           <div className="space-y-4">
             {filteredOrders.map((order) => {
               const StatusIcon = statusIcons[order.status as keyof typeof statusIcons]
-              const total = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+              const total = order.items && order.items.length > 0 
+                ? order.items.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 0)), 0)
+                : order.total || 0
               
               return (
                 <Card key={order.id} className="hover:shadow-jeffy-lg transition-all duration-300">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-4 mb-2">
-                        <h3 className="font-semibold text-gray-900">#{order.id.slice(0, 8)}</h3>
+                        <h3 className="font-semibold text-gray-900">#{order.id ? order.id.slice(0, 8) : 'N/A'}</h3>
                         <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${
                           statusColors[order.status as keyof typeof statusColors]
                         } text-white`}>
                           <StatusIcon className="w-3 h-3" />
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                          {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'Unknown'}
                         </div>
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
                         <div>
-                          <p className="font-medium text-gray-900">{order.delivery_info.name}</p>
-                          <p>{order.user_email}</p>
+                          <p className="font-medium text-gray-900">{order.delivery_info?.name || 'N/A'}</p>
+                          <p>{order.user_email || 'N/A'}</p>
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">Delivery Address</p>
-                          <p>{order.delivery_info.address}</p>
+                          <p>{order.delivery_info?.address || 'N/A'}</p>
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">Order Details</p>
-                          <p>{order.items.length} items • R{total.toFixed(2)}</p>
+                          <p>{order.items ? order.items.length : 0} items • R{total.toFixed(2)}</p>
                         </div>
                       </div>
                     </div>
@@ -327,7 +329,7 @@ export default function AdminOrdersPage() {
         <Modal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          title={`Order Details #${selectedOrder?.id.slice(0, 8)}`}
+          title={`Order Details #${selectedOrder?.id ? selectedOrder.id.slice(0, 8) : 'N/A'}`}
           size="lg"
         >
           {selectedOrder && (
@@ -342,7 +344,7 @@ export default function AdminOrdersPage() {
                       const StatusIcon = statusIcons[selectedOrder.status as keyof typeof statusIcons]
                       return <StatusIcon className="w-4 h-4" />
                     })()}
-                    {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
+                    {selectedOrder.status ? selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1) : 'Unknown'}
                   </div>
                 </div>
                 <p className="text-sm text-gray-500">
@@ -355,18 +357,18 @@ export default function AdminOrdersPage() {
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-2">Customer Information</h4>
                   <div className="space-y-1 text-sm">
-                    <p><strong>Name:</strong> {selectedOrder.delivery_info.name}</p>
-                    <p><strong>Email:</strong> {selectedOrder.user_email}</p>
-                    <p><strong>Phone:</strong> {selectedOrder.delivery_info.phone}</p>
+                    <p><strong>Name:</strong> {selectedOrder.delivery_info?.name || 'N/A'}</p>
+                    <p><strong>Email:</strong> {selectedOrder.user_email || 'N/A'}</p>
+                    <p><strong>Phone:</strong> {selectedOrder.delivery_info?.phone || 'N/A'}</p>
                   </div>
                 </div>
                 
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-2">Delivery Address</h4>
                   <div className="text-sm text-gray-600">
-                    <p>{selectedOrder.delivery_info.address}</p>
-                    {selectedOrder.delivery_info.city && <p>{selectedOrder.delivery_info.city}</p>}
-                    {selectedOrder.delivery_info.postal_code && <p>{selectedOrder.delivery_info.postal_code}</p>}
+                    <p>{selectedOrder.delivery_info?.address || 'N/A'}</p>
+                    {selectedOrder.delivery_info?.city && <p>{selectedOrder.delivery_info.city}</p>}
+                    {selectedOrder.delivery_info?.postal_code && <p>{selectedOrder.delivery_info.postal_code}</p>}
                   </div>
                 </div>
               </div>
@@ -430,7 +432,7 @@ export default function AdminOrdersPage() {
                 <div className="rounded-lg overflow-hidden border border-gray-200">
                   <DeliveryMap
                     pickupAddress="123 Main Street, Johannesburg, 2000"
-                    deliveryAddress={selectedOrder.delivery_info.address}
+                    deliveryAddress={selectedOrder.delivery_info?.address || 'N/A'}
                   />
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
@@ -442,23 +444,27 @@ export default function AdminOrdersPage() {
               <div>
                 <h4 className="font-semibold text-gray-900 mb-3">Order Items</h4>
                 <div className="space-y-3">
-                  {selectedOrder.items.map((item, index) => (
-                    <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-                      <div>
-                        <p className="font-medium text-gray-900">{item.product_name}</p>
-                        <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                  {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                    selectedOrder.items.map((item, index) => (
+                      <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                        <div>
+                          <p className="font-medium text-gray-900">{item.product_name || 'Unknown Product'}</p>
+                          <p className="text-sm text-gray-600">Qty: {item.quantity || 0}</p>
+                        </div>
+                        <p className="font-medium text-jeffy-yellow">
+                          R{((item.price || 0) * (item.quantity || 0)).toFixed(2)}
+                        </p>
                       </div>
-                      <p className="font-medium text-jeffy-yellow">
-                        R{(item.price * item.quantity).toFixed(2)}
-                      </p>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-gray-600 text-sm">No items found</p>
+                  )}
                 </div>
                 
                 <div className="mt-4 pt-4 border-t border-gray-200">
                   <div className="flex justify-between items-center text-lg font-semibold">
                     <span>Total</span>
-                    <span className="text-jeffy-yellow">R{selectedOrder.total.toFixed(2)}</span>
+                    <span className="text-jeffy-yellow">R{(selectedOrder.total || 0).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
