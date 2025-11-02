@@ -13,13 +13,14 @@ import { CartItem, SavedAddress, SavedPaymentMethod } from '@/types/database'
 import { createClient } from '@/lib/supabase'
 import { generateOrderQRCode } from '@/lib/qrcode'
 import { loadCart, clearCart as clearCartFromDB } from '@/lib/cart'
-import { CreditCard } from 'lucide-react'
+import { CreditCard, Package } from 'lucide-react'
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { user, profile } = useAuth()
+  const { user, profile, loading: authLoading } = useAuth()
   const [cart, setCart] = useState<CartItem[]>([])
   const [loading, setLoading] = useState(false)
+  const [cartLoading, setCartLoading] = useState(true)
   const [step, setStep] = useState(1)
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null)
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null)
@@ -43,19 +44,29 @@ export default function CheckoutPage() {
   
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'paypal' | 'mock'>('mock')
   
+  // Load cart when auth state is ready
   useEffect(() => {
+    if (authLoading) return // Wait for auth to finish loading
+    
     const fetchCart = async () => {
+      setCartLoading(true)
       try {
         const cartData = await loadCart(user?.id || null)
         setCart(cartData)
       } catch (error) {
         console.error('Error loading cart:', error)
+      } finally {
+        setCartLoading(false)
       }
     }
     
     fetchCart()
+  }, [user?.id, authLoading]) // Only depend on user.id and authLoading
+  
+  // Pre-populate customer info when user/profile changes
+  useEffect(() => {
+    if (authLoading) return
     
-    // Pre-populate customer info if user is logged in
     if (user && profile) {
       setCustomerInfo({
         name: profile.full_name || user.email?.split('@')[0] || '',
@@ -63,7 +74,7 @@ export default function CheckoutPage() {
         phone: profile.phone || ''
       })
     }
-  }, [user, profile])
+  }, [user, profile, authLoading])
   
   const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0)
@@ -169,6 +180,20 @@ export default function CheckoutPage() {
     }
   }
   
+  // Show loading state while cart is being loaded
+  if (authLoading || cartLoading) {
+    return (
+      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
+        <Card className="text-center py-12 max-w-md">
+          <div className="relative w-12 h-12 mx-auto mb-4">
+            <Package className="w-12 h-12 text-green-500 animate-pulse" />
+          </div>
+          <p className="text-gray-700">Loading checkout...</p>
+        </Card>
+      </div>
+    )
+  }
+
   if (cart.length === 0) {
     return (
       <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
