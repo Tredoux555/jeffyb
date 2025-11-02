@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
 import { User } from '@supabase/supabase-js'
 import { createClient } from '../supabase'
 import { UserProfile } from '@/types/database'
@@ -23,19 +23,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Create supabase client with error handling
-  let supabase: ReturnType<typeof createClient> | undefined
-  try {
-    supabase = createClient()
-  } catch (error) {
-    console.error('Failed to initialize Supabase client:', error)
-    supabase = undefined
-    // Set loading to false even if Supabase fails to initialize
-    // This prevents the app from hanging
-  }
+  // Create supabase client with error handling - use useMemo to ensure stability
+  const supabase = useMemo(() => {
+    try {
+      return createClient()
+    } catch (error) {
+      console.error('Failed to initialize Supabase client:', error)
+      return undefined
+    }
+  }, [])
 
-  // Fetch user profile from user_profiles table
-  const fetchProfile = async (userId: string) => {
+  // Fetch user profile from user_profiles table - memoized with useCallback
+  const fetchProfile = useCallback(async (userId: string) => {
     if (!supabase) return null
     
     try {
@@ -56,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Error fetching profile:', error)
       return null
     }
-  }
+  }, [supabase])
 
   // Initialize auth state
   useEffect(() => {
@@ -65,34 +64,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
+    let mounted = true
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return
+      
       setUser(session?.user ?? null)
       if (session?.user) {
-        fetchProfile(session.user.id).then(setProfile)
+        fetchProfile(session.user.id).then((profile) => {
+          if (mounted) setProfile(profile)
+        })
       }
       setLoading(false)
     }).catch((error) => {
       console.error('Error getting session:', error)
-      setLoading(false)
+      if (mounted) setLoading(false)
     })
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return
+      
       setUser(session?.user ?? null)
       if (session?.user) {
         const userProfile = await fetchProfile(session.user.id)
-        setProfile(userProfile)
+        if (mounted) setProfile(userProfile)
       } else {
         setProfile(null)
       }
       setLoading(false)
     })
 
-    return () => subscription.unsubscribe()
-  }, [])
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
+  }, [supabase, fetchProfile])
 
   const signIn = async (email: string, password: string) => {
     if (!supabase) throw new Error('Supabase client not initialized')
