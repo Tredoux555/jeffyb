@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { Button } from '@/components/Button'
 import { Product, ProductVariant, CartItem } from '@/types/database'
 import { createClient } from '@/lib/supabase'
+import { useCart } from '@/lib/hooks/useCart'
 import { 
   ArrowLeft, 
   ShoppingCart, 
@@ -29,7 +30,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [selectedVariants, setSelectedVariants] = useState<Record<string, number>>({}) // variant_id: quantity
-  const [cart, setCart] = useState<CartItem[]>([])
+  const { addToCart } = useCart()
   const [showNotification, setShowNotification] = useState(false)
   const [notificationMessage, setNotificationMessage] = useState('')
   const [touchStartX, setTouchStartX] = useState<number | null>(null)
@@ -39,7 +40,6 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     fetchProduct()
-    loadCart()
   }, [productId])
 
   // Monitor state changes for debugging
@@ -99,37 +99,8 @@ export default function ProductDetailPage() {
     }
   }
 
-  const loadCart = () => {
-    if (typeof window !== 'undefined') {
-      const savedCart = localStorage.getItem('jeffy-cart')
-      if (savedCart) {
-        try {
-          const parsedCart = JSON.parse(savedCart)
-          if (Array.isArray(parsedCart)) {
-            setCart(parsedCart)
-          } else {
-            setCart([])
-          }
-        } catch (error) {
-          console.error('Error parsing cart data:', error)
-          setCart([])
-        }
-      }
-    }
-  }
-
-  const saveCart = (newCart: CartItem[]) => {
-    setCart(newCart)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('jeffy-cart', JSON.stringify(newCart))
-    }
-  }
-
-
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return
-
-    const currentCart = Array.isArray(cart) ? cart : []
     
     // If product has variants, add selected variant
     if (product.has_variants && variants.length > 0) {
@@ -159,20 +130,7 @@ export default function ProductDetailPage() {
         image_url: variant.image_url || product.images?.[0] || product.image_url || undefined
       }
 
-      // Check if this exact variant already exists
-      const existingIndex = currentCart.findIndex(
-        item => item.product_id === product.id && item.variant_id === variant.id
-      )
-
-      if (existingIndex >= 0) {
-        // Update existing variant quantity
-        currentCart[existingIndex].quantity += quantity
-      } else {
-        // Add new variant
-        currentCart.push(cartItem)
-      }
-
-      saveCart(currentCart)
+      await addToCart(cartItem)
       
       // Show notification
       setNotificationMessage(`Added ${quantity} ${variantDisplay} to cart!`)
@@ -182,32 +140,19 @@ export default function ProductDetailPage() {
       // Reset selection after adding
       setSelectedVariants({})
     } else {
-      // Product without variants - use old logic
-      const quantity = 1 // Default quantity for non-variant products
-      const existingItem = currentCart.find(item => 
-        item.product_id === product.id && !item.variant_id
-      )
-      
-      if (existingItem) {
-        const updatedCart = currentCart.map(item =>
-          item.product_id === product.id && !item.variant_id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        )
-        saveCart(updatedCart)
-      } else {
-        const newItem: CartItem = {
-          product_id: product.id,
-          product_name: product.name,
-          price: product.price,
-          quantity: quantity,
-          image_url: product.images?.[0] || product.image_url || undefined
-        }
-        saveCart([...currentCart, newItem])
+      // Product without variants
+      const newItem: CartItem = {
+        product_id: product.id,
+        product_name: product.name,
+        price: product.price,
+        quantity: 1,
+        image_url: product.images?.[0] || product.image_url || undefined
       }
       
+      await addToCart(newItem)
+      
       // Show notification
-      setNotificationMessage(`Added ${quantity} ${product.name}(s) to cart!`)
+      setNotificationMessage(`Added ${product.name} to cart!`)
       setShowNotification(true)
       setTimeout(() => setShowNotification(false), 3000)
     }

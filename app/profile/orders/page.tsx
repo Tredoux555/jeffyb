@@ -6,8 +6,9 @@ import { useAuth } from '@/lib/contexts/AuthContext'
 import { createClient } from '@/lib/supabase'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
+import { OrderCard } from '@/components/OrderCard'
 import { Order } from '@/types/database'
-import { Package, ArrowLeft, Search, Filter, Clock, MapPin } from 'lucide-react'
+import { Package, ArrowLeft, Search, Filter } from 'lucide-react'
 import Link from 'next/link'
 
 type OrderStatus = 'all' | 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
@@ -77,23 +78,6 @@ export default function OrdersPage() {
     return filtered
   }, [orders, statusFilter, searchQuery])
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'delivered':
-        return 'bg-green-100 text-green-700'
-      case 'confirmed':
-      case 'processing':
-        return 'bg-blue-100 text-blue-700'
-      case 'shipped':
-        return 'bg-purple-100 text-purple-700'
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-700'
-      case 'cancelled':
-        return 'bg-red-100 text-red-700'
-      default:
-        return 'bg-gray-100 text-gray-700'
-    }
-  }
 
   if (authLoading || loading) {
     return (
@@ -189,59 +173,7 @@ export default function OrdersPage() {
         ) : (
           <div className="space-y-4">
             {filteredOrders.map((order) => (
-              <Link key={order.id} href={`/profile/orders/${order.id}`}>
-                <Card className="p-4 sm:p-6 hover:shadow-jeffy-lg transition-all duration-300 cursor-pointer">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold text-gray-900">Order #{order.id.slice(0, 8)}</h3>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(
-                            order.status
-                          )}`}
-                        >
-                          {order.status}
-                        </span>
-                        {order.payment_status && (
-                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                            {order.payment_status === 'paid' ? 'Paid' : order.payment_status}
-                          </span>
-                        )}
-                      </div>
-                      <div className="space-y-1 text-sm text-gray-600">
-                        <p className="flex items-center gap-2">
-                          <Clock className="w-4 h-4" />
-                          {new Date(order.created_at).toLocaleDateString('en-ZA', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </p>
-                        <p className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4" />
-                          {order.delivery_info?.address || 'No address'}
-                        </p>
-                        <p>
-                          {order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? 's' : ''}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg sm:text-2xl font-bold text-jeffy-yellow">
-                        R{order.total?.toFixed(2) || '0.00'}
-                      </p>
-                      <Button variant="outline" size="sm" className="mt-2" onClick={(e) => {
-                        e.preventDefault()
-                        router.push(`/profile/orders/${order.id}`)
-                      }}>
-                        View Details
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              </Link>
+              <OrderCard key={order.id} order={order} />
             ))}
           </div>
         )}

@@ -6,6 +6,7 @@ import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
 import { Product, CartItem } from '@/types/database'
 import { createClient } from '@/lib/supabase'
+import { useCart } from '@/lib/hooks/useCart'
 import { Search, Filter, Package } from 'lucide-react'
 
 interface CategoryPageProps {
@@ -20,13 +21,12 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [cart, setCart] = useState<CartItem[]>([])
+  const { addToCart } = useCart()
   
   const categoryName = resolvedParams.category.charAt(0).toUpperCase() + resolvedParams.category.slice(1)
   
   useEffect(() => {
     fetchProducts()
-    loadCart()
   }, [resolvedParams.category])
   
   useEffect(() => {
@@ -52,34 +52,6 @@ export default function CategoryPage({ params }: CategoryPageProps) {
     }
   }
   
-  const loadCart = () => {
-    if (typeof window !== 'undefined') {
-      const savedCart = localStorage.getItem('jeffy-cart')
-      if (savedCart) {
-        try {
-          const parsedCart = JSON.parse(savedCart)
-          // Ensure it's an array
-          if (Array.isArray(parsedCart)) {
-            setCart(parsedCart)
-          } else {
-            console.warn('Cart data is not an array, resetting to empty array')
-            setCart([])
-          }
-        } catch (error) {
-          console.error('Error parsing cart data:', error)
-          setCart([])
-        }
-      }
-    }
-  }
-  
-  const saveCart = (newCart: CartItem[]) => {
-    setCart(newCart)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('jeffy-cart', JSON.stringify(newCart))
-    }
-  }
-  
   const filterProducts = () => {
     if (!searchTerm) {
       setFilteredProducts(products)
@@ -92,20 +64,8 @@ export default function CategoryPage({ params }: CategoryPageProps) {
     }
   }
   
-  const handleAddToCart = (product: Product) => {
-    // Ensure cart is always an array
-    const currentCart = Array.isArray(cart) ? cart : []
-    
-    const existingItem = currentCart.find(item => item.product_id === product.id)
-    
-    if (existingItem) {
-      const updatedCart = currentCart.map(item =>
-        item.product_id === product.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      )
-      saveCart(updatedCart)
-    } else {
+  const handleAddToCart = async (product: Product) => {
+    try {
       const newItem: CartItem = {
         product_id: product.id,
         product_name: product.name,
@@ -113,7 +73,10 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         quantity: 1,
         image_url: product.image_url || undefined
       }
-      saveCart([...currentCart, newItem])
+      await addToCart(newItem)
+    } catch (error) {
+      console.error('Error adding to cart:', error)
+      alert('Failed to add item to cart')
     }
   }
   

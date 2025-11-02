@@ -6,7 +6,8 @@ import { useAuth } from '@/lib/contexts/AuthContext'
 import { createClient } from '@/lib/supabase'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
-import { Favorite, Product } from '@/types/database'
+import { Favorite, Product, CartItem } from '@/types/database'
+import { useCart } from '@/lib/hooks/useCart'
 import { Package, Heart, ArrowLeft, ShoppingCart } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -14,6 +15,7 @@ import Image from 'next/image'
 export default function FavoritesPage() {
   const router = useRouter()
   const { user, loading: authLoading } = useAuth()
+  const { addToCart } = useCart()
   const [favorites, setFavorites] = useState<(Favorite & { product?: Product })[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<string>('all')
@@ -71,32 +73,17 @@ export default function FavoritesPage() {
     }
   }
 
-  const handleAddToCart = (product: Product) => {
-    if (typeof window === 'undefined') return
-
+  const handleAddToCart = async (product: Product) => {
     try {
-      const savedCart = localStorage.getItem('jeffy-cart')
-      const cart: any[] = savedCart ? JSON.parse(savedCart) : []
-
-      const existingItem = cart.find((item) => item.product_id === product.id && !item.variant_id)
-
-      if (existingItem) {
-        existingItem.quantity += 1
-      } else {
-        cart.push({
-          product_id: product.id,
-          product_name: product.name,
-          price: product.price,
-          quantity: 1,
-          image_url: product.images?.[0] || product.image_url,
-        })
+      const newItem: CartItem = {
+        product_id: product.id,
+        product_name: product.name,
+        price: product.price || 0,
+        quantity: 1,
+        image_url: product.images?.[0] || product.image_url || undefined,
       }
-
-      localStorage.setItem('jeffy-cart', JSON.stringify(cart))
       
-      // Trigger cart update event
-      window.dispatchEvent(new Event('storage'))
-      
+      await addToCart(newItem)
       alert('Added to cart!')
     } catch (error) {
       console.error('Error adding to cart:', error)

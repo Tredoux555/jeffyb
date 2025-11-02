@@ -8,6 +8,7 @@ import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
 import { Product, CartItem } from '@/types/database'
 import { createClient } from '@/lib/supabase'
+import { useCart } from '@/lib/hooks/useCart'
 import { Search, Filter, Grid, List, Package } from 'lucide-react'
 
 export default function ProductsPage() {
@@ -17,7 +18,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const [cart, setCart] = useState<CartItem[]>([])
+  const { addToCart } = useCart()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   
   const categories = [
@@ -32,7 +33,6 @@ export default function ProductsPage() {
   
   useEffect(() => {
     fetchProducts()
-    loadCart()
   }, [])
   
   useEffect(() => {
@@ -63,46 +63,6 @@ export default function ProductsPage() {
     }
   }
   
-  const loadCart = () => {
-    if (typeof window !== 'undefined') {
-      const savedCart = localStorage.getItem('jeffy-cart')
-      if (savedCart) {
-        try {
-          const parsedCart = JSON.parse(savedCart)
-          // Ensure it's an array
-          if (Array.isArray(parsedCart)) {
-            setCart(parsedCart)
-          } else {
-            console.warn('Cart data is not an array, resetting to empty array')
-            setCart([])
-          }
-        } catch (error) {
-          console.error('Error parsing cart data:', error)
-          setCart([])
-        }
-      }
-    }
-  }
-  
-  const saveCart = (newCart: CartItem[]) => {
-    try {
-      setCart(newCart)
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('jeffy-cart', JSON.stringify(newCart))
-        console.log('[Cart] Saved successfully. Items:', newCart.length)
-      }
-    } catch (error) {
-      console.error('[Cart] Failed to save to localStorage:', error)
-      // Still update state even if localStorage fails
-      setCart(newCart)
-      
-      // Check if it's a quota error
-      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
-        alert('Cart storage is full. Please checkout or clear your cart.')
-      }
-    }
-  }
-  
   const filterProducts = () => {
     let filtered = products
     
@@ -122,7 +82,7 @@ export default function ProductsPage() {
     setFilteredProducts(filtered)
   }
   
-  const handleAddToCart = (product: Product) => {
+  const handleAddToCart = async (product: Product) => {
     // If product has variants, redirect to detail page
     if (product.has_variants) {
       router.push(`/products/${product.id}`)
@@ -130,30 +90,15 @@ export default function ProductsPage() {
     }
     
     try {
-      // Ensure cart is always an array
-      const currentCart = Array.isArray(cart) ? cart : []
-      
-      const existingItem = currentCart.find(item => item.product_id === product.id && !item.variant_id)
-      
-      if (existingItem) {
-        const updatedCart = currentCart.map(item =>
-          item.product_id === product.id && !item.variant_id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-        saveCart(updatedCart)
-      } else {
-        const newItem: CartItem = {
-          product_id: product.id,
-          product_name: product.name,
-          price: product.price,
-          quantity: 1,
-          image_url: product.images?.[0] || product.image_url || undefined
-        }
-        saveCart([...currentCart, newItem])
+      const newItem: CartItem = {
+        product_id: product.id,
+        product_name: product.name,
+        price: product.price,
+        quantity: 1,
+        image_url: product.images?.[0] || product.image_url || undefined
       }
       
-      // Show success feedback
+      await addToCart(newItem)
       console.log('[Cart] Item added successfully:', product.name)
     } catch (error) {
       console.error('[Cart] Failed to add item:', error)
