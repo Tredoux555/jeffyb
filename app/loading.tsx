@@ -12,7 +12,7 @@ export default function Loading() {
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-2">
               <div className="relative w-8 h-8">
-                <Package className="w-8 h-8 text-green-500 animate-[spin_3s_linear_infinite]" />
+                <Package className="w-8 h-8 text-green-500 animate-pulse" />
               </div>
               <span className="text-xl font-bold text-white">Jeffy</span>
               <span className="text-sm text-jeffy-yellow-light">in a Jiffy</span>
@@ -25,7 +25,7 @@ export default function Loading() {
       <div className="container mx-auto px-4 py-12">
         <div className="flex flex-col items-center justify-center">
           <div className="relative w-12 h-12 mx-auto mb-4">
-            <Package className="w-12 h-12 text-green-500 animate-[spin_3s_linear_infinite]" />
+            <Package className="w-12 h-12 text-green-500 animate-bounce" />
           </div>
           <p className="text-gray-800 font-medium">Loading…</p>
         </div>

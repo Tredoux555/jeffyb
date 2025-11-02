@@ -481,7 +481,7 @@ export default function AdminProductsPage() {
       <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
         <div className="text-center">
           <div className="relative w-12 h-12 mx-auto mb-4">
-            <Package className="w-12 h-12 text-green-500 animate-[spin_3s_linear_infinite]" />
+            <Package className="w-12 h-12 text-green-500 animate-bounce" />
           </div>
           <p className="text-gray-700">Loading products...</p>
         </div>

@@ -41,7 +41,7 @@ export function Button({
     >
       {loading ? (
         <div className="flex items-center justify-center">
-          <Package className="w-4 h-4 text-green-500 animate-[spin_3s_linear_infinite] mr-2" />
+          <Package className="w-4 h-4 text-green-500 animate-spin mr-2" />
           Loading...
         </div>
       ) : (

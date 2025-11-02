@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { DeliveryMap } from './DeliveryMap'
+import { StatusTimeline } from './StatusTimeline'
+import { DriverInfo } from './DriverInfo'
 import { createClient } from '@/lib/supabase'
 import { DeliveryAssignment, Driver, Order } from '@/types/database'
 import { Card } from './Card'
-import { Truck, MapPin, Clock, Package, CheckCircle, Navigation, XCircle } from 'lucide-react'
+import { MapPin, Clock, Package, CheckCircle } from 'lucide-react'
 
 interface OrderTrackingProps {
   order: Order
@@ -222,158 +224,12 @@ export function OrderTracking({
       </Card>
 
       {/* Driver Information */}
-      {driver && (
-        <Card className="p-4 sm:p-6">
-          <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <Truck className="w-5 h-5" />
-            Driver Information
-          </h3>
-          <div className="space-y-3">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Driver Name</p>
-              <p className="font-semibold text-gray-900">{driver.name}</p>
-            </div>
-            {driver.phone && (
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Phone</p>
-                <a
-                  href={`tel:${driver.phone}`}
-                  className="font-semibold text-jeffy-yellow hover:underline"
-                >
-                  {driver.phone}
-                </a>
-              </div>
-            )}
-            {driver.vehicle_type && (
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Vehicle</p>
-                <p className="font-semibold text-gray-900 capitalize">{driver.vehicle_type}</p>
-              </div>
-            )}
-            {driver.current_location && (
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Current Location</p>
-                <p className="text-xs font-mono text-gray-700">
-                  {driver.current_location.lat.toFixed(6)}, {driver.current_location.lng.toFixed(6)}
-                </p>
-                {driver.last_location_update && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    Updated {new Date(driver.last_location_update).toLocaleTimeString()}
-                  </p>
-                )}
-              </div>
-            )}
-            {driver.current_location && order.delivery_info?.latitude && order.delivery_info?.longitude && (
-              <a
-                href={`https://www.google.com/maps/dir/?api=1&destination=${order.delivery_info.latitude},${order.delivery_info.longitude}&origin=${driver.current_location.lat},${driver.current_location.lng}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-jeffy-yellow text-gray-900 rounded-lg font-medium hover:bg-yellow-400 transition-colors"
-              >
-                <Navigation className="w-4 h-4" />
-                Open in Google Maps
-              </a>
-            )}
-          </div>
-        </Card>
-      )}
+      {driver && <DriverInfo driver={driver} order={order} />}
 
       {/* Status Timeline */}
       <Card className="p-4 sm:p-6">
         <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Delivery Status</h3>
-        <div className="space-y-4">
-          <div className="flex items-start gap-3">
-            {(assignment.status as string) === 'delivered' ? (
-              <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-            ) : (assignment.status as string) === 'failed' ? (
-              <XCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
-            ) : (
-              <Clock className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
-            )}
-            <div>
-              <p className="font-semibold text-gray-900">Order Confirmed</p>
-              <p className="text-xs text-gray-600">
-                {new Date(order.created_at).toLocaleString()}
-              </p>
-            </div>
-          </div>
-
-          {(assignment.status as string) === 'assigned' || (assignment.status as string) === 'picked_up' || (assignment.status as string) === 'in_transit' || (assignment.status as string) === 'delivered' ? (
-            <div className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-semibold text-gray-900">Driver Assigned</p>
-                {assignment.assigned_at && (
-                  <p className="text-xs text-gray-600">
-                    {new Date(assignment.assigned_at).toLocaleString()}
-                  </p>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-start gap-3">
-              <Clock className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium text-gray-500">Awaiting Driver Assignment</p>
-              </div>
-            </div>
-          )}
-
-          {(assignment.status as string) === 'picked_up' || (assignment.status as string) === 'in_transit' || (assignment.status as string) === 'delivered' ? (
-            <div className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-semibold text-gray-900">Picked Up</p>
-                {assignment.picked_up_at && (
-                  <p className="text-xs text-gray-600">
-                    {new Date(assignment.picked_up_at).toLocaleString()}
-                  </p>
-                )}
-              </div>
-            </div>
-          ) : (assignment.status as string) === 'assigned' ? (
-            <div className="flex items-start gap-3">
-              <Clock className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium text-gray-500">Awaiting Pickup</p>
-              </div>
-            </div>
-          ) : null}
-
-          {(assignment.status as string) === 'in_transit' && (
-            <div className="flex items-start gap-3">
-              <Truck className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0 animate-pulse" />
-              <div>
-                <p className="font-semibold text-blue-600">In Transit</p>
-                <p className="text-xs text-gray-600">On the way to you</p>
-                {eta && (
-                  <p className="text-xs text-jeffy-yellow font-medium mt-1">ETA: {eta}</p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {(assignment.status as string) === 'delivered' ? (
-            <div className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-semibold text-green-600">Delivered</p>
-                {assignment.delivered_at && (
-                  <p className="text-xs text-gray-600">
-                    {new Date(assignment.delivered_at).toLocaleString()}
-                  </p>
-                )}
-              </div>
-            </div>
-          ) : (assignment.status as string) === 'in_transit' ? (
-            <div className="flex items-start gap-3">
-              <Clock className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium text-gray-500">Awaiting Delivery</p>
-              </div>
-            </div>
-          ) : null}
-        </div>
+        <StatusTimeline order={order} assignment={assignment} eta={eta} />
       </Card>
     </div>
   )

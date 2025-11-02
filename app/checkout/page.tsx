@@ -12,6 +12,7 @@ import { useAuth } from '@/lib/contexts/AuthContext'
 import { CartItem, SavedAddress, SavedPaymentMethod } from '@/types/database'
 import { createClient } from '@/lib/supabase'
 import { generateOrderQRCode } from '@/lib/qrcode'
+import { loadCart, clearCart as clearCartFromDB } from '@/lib/cart'
 import { CreditCard } from 'lucide-react'
 
 export default function CheckoutPage() {
@@ -43,7 +44,16 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'paypal' | 'mock'>('mock')
   
   useEffect(() => {
-    loadCart()
+    const fetchCart = async () => {
+      try {
+        const cartData = await loadCart(user?.id || null)
+        setCart(cartData)
+      } catch (error) {
+        console.error('Error loading cart:', error)
+      }
+    }
+    
+    fetchCart()
     
     // Pre-populate customer info if user is logged in
     if (user && profile) {
@@ -54,15 +64,6 @@ export default function CheckoutPage() {
       })
     }
   }, [user, profile])
-  
-  const loadCart = () => {
-    if (typeof window !== 'undefined') {
-      const savedCart = localStorage.getItem('jeffy-cart')
-      if (savedCart) {
-        setCart(JSON.parse(savedCart))
-      }
-    }
-  }
   
   const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0)
@@ -155,7 +156,7 @@ export default function CheckoutPage() {
       }
       
       // Clear cart
-      localStorage.removeItem('jeffy-cart')
+      await clearCartFromDB(user?.id || null)
       
       // Redirect to success page
       router.push(`/checkout/success?orderId=${data.id}`)

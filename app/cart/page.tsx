@@ -1,10 +1,12 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { CartItem } from '@/types/database'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
+import { useAuth } from '@/lib/contexts/AuthContext'
+import { loadCart, saveCart as saveCartToDB, clearCart as clearCartFromDB } from '@/lib/cart'
 import { 
   ShoppingCart, 
   Plus, 
@@ -15,34 +17,37 @@ import {
 import Image from 'next/image'
 
 export default function CartPage() {
-  const [cart, setCart] = useState<CartItem[]>(() => {
-    if (typeof window !== 'undefined') {
-      const savedCart = localStorage.getItem('jeffy-cart')
-      if (savedCart) {
-        try {
-          const parsedCart = JSON.parse(savedCart)
-          return Array.isArray(parsedCart) ? parsedCart as CartItem[] : []
-        } catch (error) {
-          console.error('Error parsing cart data:', error)
-          return []
-        }
+  const { user, loading: authLoading } = useAuth()
+  const [cart, setCart] = useState<CartItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // Load cart on mount and when user changes
+  useEffect(() => {
+    if (authLoading) return
+
+    const fetchCart = async () => {
+      setLoading(true)
+      try {
+        const cartData = await loadCart(user?.id || null)
+        setCart(cartData)
+      } catch (error) {
+        console.error('Error loading cart:', error)
+      } finally {
+        setLoading(false)
       }
     }
-    return []
-  })
 
-  
+    fetchCart()
+  }, [user, authLoading])
 
-  const saveCart = (newCart: CartItem[]) => {
+  const saveCart = async (newCart: CartItem[]) => {
     setCart(newCart)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('jeffy-cart', JSON.stringify(newCart))
-    }
+    await saveCartToDB(user?.id || null, newCart)
   }
 
-  const handleUpdateQuantity = (productId: string, quantity: number) => {
+  const handleUpdateQuantity = async (productId: string, quantity: number) => {
     if (quantity <= 0) {
-      handleRemoveItem(productId)
+      await handleRemoveItem(productId)
       return
     }
 
@@ -51,24 +56,36 @@ export default function CartPage() {
         ? { ...item, quantity }
         : item
     )
-    saveCart(updatedCart)
+    await saveCart(updatedCart)
   }
 
-  const handleRemoveItem = (productId: string) => {
+  const handleRemoveItem = async (productId: string) => {
     const updatedCart = cart.filter(item => item.product_id !== productId)
-    saveCart(updatedCart)
+    await saveCart(updatedCart)
   }
 
-  const clearCart = () => {
+  const clearCart = async () => {
     if (confirm('Clear entire cart?')) {
-      saveCart([])
+      await saveCart([])
+      await clearCartFromDB(user?.id || null)
     }
   }
 
   const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0)
 
-  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-jeffy-yellow-light flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative w-12 h-12 mx-auto mb-4">
+            <ShoppingCart className="w-12 h-12 text-green-500 animate-pulse" />
+          </div>
+          <p className="text-gray-700">Loading cart...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-jeffy-yellow-light">
