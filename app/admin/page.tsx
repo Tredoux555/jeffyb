@@ -19,7 +19,8 @@ import {
   AlertTriangle,
   BarChart3,
   LayoutDashboard,
-  FileText
+  FileText,
+  MessageSquare
 } from 'lucide-react'
 
 export default function AdminDashboard() {
@@ -344,9 +345,24 @@ export default function AdminDashboard() {
               </Link>
             </div>
           </Card>
+
+          {/* Product Requests */}
+          <Card className="p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Product Requests</h3>
+              <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+            </div>
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">View and manage customer product requests</p>
+            <div className="space-y-2">
+              <Link href="/admin/product-requests">
+                <Button className="w-full text-sm sm:text-base">
+                  <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                  View Requests
+                </Button>
+              </Link>
+            </div>
+          </Card>
         </div>
-        
-        {/* Recent Activity */}
         <Card className="p-4 sm:p-6">
           <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Recent Activity</h3>
           <div className="space-y-2 sm:space-y-3">

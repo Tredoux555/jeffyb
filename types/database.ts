@@ -332,6 +332,35 @@ export interface StockOrder {
   items?: StockOrderItem[]
 }
 
+export interface ComingSoonSignup {
+  id: string
+  email: string
+  name?: string | null
+  created_at: string
+  notified: boolean
+  notification_sent_at?: string | null
+}
+
+export interface ProductRequest {
+  id: string
+  product_name: string
+  description?: string | null
+  category?: string | null
+  estimated_price_range?: string | null
+  quantity_needed?: number | null
+  urgency: 'low' | 'normal' | 'high' | 'urgent'
+  requester_name?: string | null
+  requester_email?: string | null
+  requester_phone?: string | null
+  status: 'pending' | 'reviewing' | 'sourcing' | 'found' | 'unavailable' | 'completed'
+  admin_notes?: string | null
+  admin_response?: string | null
+  created_at: string
+  updated_at: string
+  reviewed_by?: string | null
+  reviewed_at?: string | null
+}
+
 export interface StockOrderItem {
   id: string
   stock_order_id: string

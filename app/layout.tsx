@@ -4,6 +4,8 @@ import "./globals.css";
 import { ClientNavigation } from "../components/ClientNavigation";
 import { AuthProvider } from "../lib/contexts/AuthContext";
 import { NotificationProvider } from "../lib/providers/NotificationProvider";
+import { Footer } from "../components/Footer";
+import { WhatsAppButton } from "../components/WhatsAppButton";
 
 // const inter = Inter({
 //   subsets: ["latin"],
@@ -15,6 +17,18 @@ import { NotificationProvider } from "../lib/providers/NotificationProvider";
 export const metadata: Metadata = {
   title: "Jeffy - In a Jiffy",
   description: "Your mobile-optimized commerce platform for gym, camping, kitchen, and beauty products",
+  openGraph: {
+    title: "Jeffy - In a Jiffy",
+    description: "Your mobile-optimized commerce platform for gym, camping, kitchen, and beauty products",
+    type: "website",
+    locale: "en_ZA",
+    siteName: "Jeffy",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Jeffy - In a Jiffy",
+    description: "Your mobile-optimized commerce platform for gym, camping, kitchen, and beauty products",
+  },
   // viewport and themeColor moved to viewport export below
 };
 
@@ -39,6 +53,8 @@ export default function RootLayout({
             <main className="min-h-screen">
               {children}
             </main>
+            <Footer />
+            <WhatsAppButton />
           </NotificationProvider>
         </AuthProvider>
       </body>
