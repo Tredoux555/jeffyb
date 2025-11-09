@@ -45,7 +45,10 @@ export default function AdminProductsPage() {
     video_url: '',
     video_file_url: '',
     has_variants: false,
-    is_active: true
+    is_active: true,
+    cost: '',
+    reorder_point: '10',
+    reorder_quantity: '50'
   })
   
   const [variants, setVariants] = useState<ProductVariant[]>([])
@@ -335,7 +338,10 @@ export default function AdminProductsPage() {
         video_url: updatedFormData.video_url || null,
         video_file_url: updatedFormData.video_file_url || null,
         has_variants: false,
-        is_active: updatedFormData.is_active
+        is_active: updatedFormData.is_active,
+        cost: updatedFormData.cost ? parseFloat(updatedFormData.cost) : 0,
+        reorder_point: parseInt(updatedFormData.reorder_point) || 10,
+        reorder_quantity: parseInt(updatedFormData.reorder_quantity) || 50
       }
       
       // Submit without variants
@@ -358,7 +364,7 @@ export default function AdminProductsPage() {
       if (!result.success) throw new Error(result.error || 'Failed to save product')
       
       // Reset form and close
-      setFormData({ name: '', description: '', price: '', category: 'gym', stock: '', image_url: '', images: [], video_url: '', video_file_url: '', has_variants: false, is_active: true })
+      setFormData({ name: '', description: '', price: '', category: 'gym', stock: '', image_url: '', images: [], video_url: '', video_file_url: '', has_variants: false, is_active: true, cost: '', reorder_point: '10', reorder_quantity: '50' })
       setVariants([])
       setEditingProduct(null)
       setIsModalOpen(false)
@@ -378,7 +384,10 @@ export default function AdminProductsPage() {
         video_url: formData.video_url || null,
         video_file_url: formData.video_file_url || null,
         has_variants: formData.has_variants,
-        is_active: formData.is_active
+        is_active: formData.is_active,
+        cost: formData.cost ? parseFloat(formData.cost) : 0,
+        reorder_point: parseInt(formData.reorder_point) || 10,
+        reorder_quantity: parseInt(formData.reorder_quantity) || 50
       }
       
       let response
@@ -493,7 +502,7 @@ export default function AdminProductsPage() {
           fetchProducts() // Refresh product list in background
           
           // Close modal after showing toast
-          setFormData({ name: '', description: '', price: '', category: 'gym', stock: '', image_url: '', images: [], video_url: '', video_file_url: '', has_variants: false, is_active: true })
+          setFormData({ name: '', description: '', price: '', category: 'gym', stock: '', image_url: '', images: [], video_url: '', video_file_url: '', has_variants: false, is_active: true, cost: '', reorder_point: '10', reorder_quantity: '50' })
           setVariants([])
           setEditingProduct(null)
           setIsModalOpen(false)
@@ -525,7 +534,10 @@ export default function AdminProductsPage() {
         video_url: '',
         video_file_url: '',
         has_variants: false,
-        is_active: true
+        is_active: true,
+        cost: '',
+        reorder_point: '10',
+        reorder_quantity: '50'
       })
       setVariants([])
       setEditingProduct(null)
@@ -584,7 +596,10 @@ export default function AdminProductsPage() {
       video_url: product.video_url || '',
       video_file_url: product.video_file_url || '',
       has_variants: product.has_variants || false,
-      is_active: product.is_active !== undefined ? product.is_active : true
+      is_active: product.is_active !== undefined ? product.is_active : true,
+      cost: product.cost?.toString() || '',
+      reorder_point: product.reorder_point?.toString() || '10',
+      reorder_quantity: product.reorder_quantity?.toString() || '50'
     })
     
     // Load variants from database
@@ -641,7 +656,10 @@ export default function AdminProductsPage() {
       video_url: '',
       video_file_url: '',
       has_variants: false,
-      is_active: true
+      is_active: true,
+      cost: '',
+      reorder_point: '10',
+      reorder_quantity: '50'
     })
     setVariants([])
     setIsModalOpen(true)
@@ -649,12 +667,10 @@ export default function AdminProductsPage() {
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
+      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center px-4">
         <div className="text-center">
-          <div className="relative w-12 h-12 mx-auto mb-4">
-            <Package className="w-12 h-12 text-green-500 animate-bounce" />
-          </div>
-          <p className="text-gray-700">Loading products...</p>
+          <Package className="w-12 h-12 sm:w-16 sm:h-16 text-green-500 animate-bounce mx-auto mb-4" />
+          <p className="text-sm sm:text-base text-gray-700">Loading products...</p>
         </div>
       </div>
     )
@@ -932,6 +948,38 @@ export default function AdminProductsPage() {
                 placeholder="0"
                 required
               />
+            </div>
+            
+            {/* Cost and Reorder Settings */}
+            <div className="border-t border-gray-200 pt-4">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">Cost & Inventory Management</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Input
+                  label="Cost per Unit"
+                  type="number"
+                  step="0.01"
+                  value={formData.cost}
+                  onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
+                  placeholder="0.00"
+                  helperText="Product cost for profit calculation"
+                />
+                <Input
+                  label="Reorder Point"
+                  type="number"
+                  value={formData.reorder_point}
+                  onChange={(e) => setFormData({ ...formData, reorder_point: e.target.value })}
+                  placeholder="10"
+                  helperText="Alert when stock falls below this"
+                />
+                <Input
+                  label="Reorder Quantity"
+                  type="number"
+                  value={formData.reorder_quantity}
+                  onChange={(e) => setFormData({ ...formData, reorder_quantity: e.target.value })}
+                  placeholder="50"
+                  helperText="Suggested reorder amount"
+                />
+              </div>
             </div>
             
             {/* Category */}

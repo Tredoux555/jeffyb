@@ -12,6 +12,9 @@ export interface Product {
   stock: number
   has_variants: boolean
   is_active: boolean // Whether the product is visible to customers
+  cost?: number // Cost per unit for profit calculation
+  reorder_point?: number // Stock level that triggers reorder alert
+  reorder_quantity?: number // Default quantity to reorder when stock is low
   variants?: ProductVariant[] // Loaded when needed
   created_at: string
   updated_at: string
@@ -25,6 +28,9 @@ export interface ProductVariant {
   price: number | null // null means use product base price
   stock: number
   image_url: string | null
+  cost?: number | null // Cost per unit for this variant (overrides product cost if set)
+  reorder_point?: number | null // Stock level that triggers reorder (inherits from product if null)
+  reorder_quantity?: number | null // Quantity to reorder (inherits from product if null)
   created_at: string
   updated_at: string
 }
@@ -57,8 +63,10 @@ export interface Order {
 export interface OrderItem {
   product_id: string
   product_name: string
+  variant_id?: string // Variant ID if product has variants
   quantity: number
   price: number
+  cost?: number // Cost at time of sale for profit calculation
 }
 
 export interface DeliveryInfo {
@@ -225,4 +233,63 @@ export interface DriverLocationHistory {
   driver_id: string
   location: { lat: number; lng: number }
   created_at: string
+}
+
+// Commerce Management System Types
+export interface StockHistory {
+  id: string
+  product_id: string
+  variant_id: string | null
+  change_type: 'sale' | 'purchase' | 'adjustment' | 'return' | 'reorder'
+  quantity_change: number // Positive for increases, negative for decreases
+  previous_stock: number
+  new_stock: number
+  reason: string | null
+  order_id: string | null
+  created_at: string
+  created_by: string | null
+}
+
+export interface FinancialTransaction {
+  id: string
+  order_id: string | null
+  transaction_type: 'sale' | 'refund' | 'adjustment'
+  amount: number // Total transaction amount (revenue)
+  tax_amount: number
+  cost_amount: number // Total cost of goods sold
+  import_vat_amount: number // Import VAT (15% on cost, reclaimable)
+  corporate_tax_amount: number // Corporate income tax (27% on profit)
+  profit_amount: number // Profit before corporate tax (amount - cost_amount - tax_amount)
+  net_profit_after_tax: number // Net profit after corporate tax
+  currency: string
+  created_at: string
+}
+
+export interface TaxConfiguration {
+  id: string
+  tax_name: string
+  tax_rate: number // e.g., 15.00 for 15%
+  import_vat_rate: number // Import VAT rate (on cost)
+  corporate_tax_rate: number // Corporate income tax rate (on profit)
+  is_active: boolean
+  applies_to_all: boolean
+  tax_inclusive: boolean // Whether prices include tax
+  created_at: string
+  updated_at: string
+}
+
+export interface ReorderRequest {
+  id: string
+  product_id: string
+  variant_id: string | null
+  current_stock: number
+  reorder_point: number
+  suggested_quantity: number
+  status: 'pending' | 'ordered' | 'received' | 'cancelled'
+  notes: string | null
+  created_at: string
+  fulfilled_at: string | null
+  created_by: string | null
+  product?: Product
+  variant?: ProductVariant
 }

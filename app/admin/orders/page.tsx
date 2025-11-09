@@ -17,7 +17,8 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Printer
+  Printer,
+  ShoppingCart
 } from 'lucide-react'
 import { ShippingLabelPDF } from '@/components/ShippingLabel'
 import { pdf } from '@react-pdf/renderer'
@@ -165,12 +166,10 @@ export default function AdminOrdersPage() {
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
+      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center px-4">
         <div className="text-center">
-          <div className="relative w-12 h-12 mx-auto mb-4">
-            <Package className="w-12 h-12 text-green-500 animate-spin" />
-          </div>
-          <p className="text-gray-700">Loading orders...</p>
+          <ShoppingCart className="w-12 h-12 sm:w-16 sm:h-16 text-blue-500 animate-bounce mx-auto mb-4" />
+          <p className="text-sm sm:text-base text-gray-700">Loading orders...</p>
         </div>
       </div>
     )

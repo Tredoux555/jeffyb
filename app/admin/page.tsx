@@ -14,7 +14,11 @@ import {
   Edit, 
   DollarSign,
   MapPin,
-  Tag
+  Tag,
+  Calculator,
+  AlertTriangle,
+  BarChart3,
+  LayoutDashboard
 } from 'lucide-react'
 
 export default function AdminDashboard() {
@@ -24,7 +28,8 @@ export default function AdminDashboard() {
     totalProducts: 0,
     totalOrders: 0,
     pendingDeliveries: 0,
-    totalRevenue: 0
+    totalRevenue: 0,
+    lowStockItems: 0
   })
   
   useEffect(() => {
@@ -70,11 +75,33 @@ export default function AdminDashboard() {
       
       const revenue = orders?.reduce((sum, order) => sum + order.total, 0) || 0
       
+      // Fetch low stock items count (simplified - check stock < 10 or reorder_point)
+      const { data: allProducts } = await supabase
+        .from('products')
+        .select('id, stock, reorder_point')
+        .eq('is_active', true)
+      
+      const lowStockCount = allProducts?.filter(p => {
+        const reorderPoint = p.reorder_point || 10
+        return p.stock < reorderPoint
+      }).length || 0
+      
+      // Check variants with low stock
+      const { data: allVariants } = await supabase
+        .from('product_variants')
+        .select('id, stock, reorder_point, product:products(reorder_point)')
+      
+      const lowStockVariantsCount = allVariants?.filter(v => {
+        const reorderPoint = v.reorder_point || (v.product as any)?.reorder_point || 10
+        return v.stock < reorderPoint
+      }).length || 0
+      
       setStats({
         totalProducts: productsCount || 0,
         totalOrders: ordersCount || 0,
         pendingDeliveries: deliveriesCount || 0,
-        totalRevenue: revenue
+        totalRevenue: revenue,
+        lowStockItems: lowStockCount + lowStockVariantsCount
       })
     } catch (error) {
       console.error('Error fetching stats:', error)
@@ -90,14 +117,10 @@ export default function AdminDashboard() {
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
+      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center px-4">
         <div className="text-center">
-          {/* Slow spinning loader */}
-          <div className="relative w-12 h-12 mx-auto mb-4">
-            <Package className="w-12 h-12 text-green-500 animate-bounce" />
-          </div>
-          <p className="text-gray-700">Loading dashboard...</p>
-          <style jsx>{``}</style>
+          <LayoutDashboard className="w-12 h-12 sm:w-16 sm:h-16 text-blue-500 animate-bounce mx-auto mb-4" />
+          <p className="text-sm sm:text-base text-gray-700">Loading dashboard...</p>
         </div>
       </div>
     )
@@ -204,6 +227,59 @@ export default function AdminDashboard() {
             </div>
           </Card>
           
+          <Card className="p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Accounting</h3>
+              <Calculator className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+            </div>
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Track costs, profits, taxes, and financial reports</p>
+            <div className="space-y-2">
+              <Link href="/admin/accounting">
+                <Button className="w-full text-sm sm:text-base">
+                  <Calculator className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                  View Accounting
+                </Button>
+              </Link>
+            </div>
+          </Card>
+
+          <Card className="p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Reorder Management</h3>
+              <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+            </div>
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Track low stock items and manage reorders</p>
+            <div className="space-y-2">
+              <Link href="/admin/reorders">
+                <Button className="w-full text-sm sm:text-base">
+                  <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                  {stats.lowStockItems > 0 && (
+                    <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full ml-2">
+                      {stats.lowStockItems}
+                    </span>
+                  )}
+                  Manage Reorders
+                </Button>
+              </Link>
+            </div>
+          </Card>
+          
+          <Card className="p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Analytics</h3>
+              <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+            </div>
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">View sales insights, best sellers, and performance metrics</p>
+            <div className="space-y-2">
+              <Link href="/admin/analytics">
+                <Button className="w-full text-sm sm:text-base">
+                  <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                  View Analytics
+                </Button>
+              </Link>
+            </div>
+          </Card>
+
           <Card className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <h3 className="text-base sm:text-lg font-semibold text-gray-900">Order Management</h3>

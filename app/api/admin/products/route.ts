@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, description, price, category, stock, image_url, images, video_url, video_file_url, has_variants, is_active } = body
+    const { name, description, price, category, stock, image_url, images, video_url, video_file_url, has_variants, is_active, cost, reorder_point, reorder_quantity } = body
 
     // Validate required fields
     if (!name || !price || !category) {
@@ -36,7 +36,10 @@ export async function POST(request: NextRequest) {
       video_url: video_url || null,
       video_file_url: video_file_url || null,
       has_variants: has_variants || false,
-      is_active: is_active !== undefined ? is_active : true // Default to true for backward compatibility
+      is_active: is_active !== undefined ? is_active : true,
+      cost: cost !== undefined ? parseFloat(cost) : 0,
+      reorder_point: reorder_point !== undefined ? parseInt(reorder_point) : 10,
+      reorder_quantity: reorder_quantity !== undefined ? parseInt(reorder_quantity) : 50
     }
 
     console.log('[API] Creating product with data:', JSON.stringify(productData, null, 2))
@@ -100,7 +103,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, name, description, price, category, stock, image_url, images, video_url, video_file_url, has_variants, is_active } = body
+    const { id, name, description, price, category, stock, image_url, images, video_url, video_file_url, has_variants, is_active, cost, reorder_point, reorder_quantity } = body
 
     if (!id) {
       return NextResponse.json(
@@ -133,6 +136,9 @@ export async function PUT(request: NextRequest) {
     if (video_file_url !== undefined) productData.video_file_url = video_file_url || null
     if (has_variants !== undefined) productData.has_variants = has_variants || false
     if (is_active !== undefined) productData.is_active = is_active
+    if (cost !== undefined) productData.cost = parseFloat(cost) || 0
+    if (reorder_point !== undefined) productData.reorder_point = parseInt(reorder_point) || 10
+    if (reorder_quantity !== undefined) productData.reorder_quantity = parseInt(reorder_quantity) || 50
 
     let data, error
     try {

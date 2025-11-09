@@ -13,7 +13,7 @@ import { CartItem, SavedAddress, SavedPaymentMethod } from '@/types/database'
 import { createClient } from '@/lib/supabase'
 import { generateOrderQRCode } from '@/lib/qrcode'
 import { loadCart, clearCart as clearCartFromDB } from '@/lib/cart'
-import { CreditCard, Package } from 'lucide-react'
+import { CreditCard, ShoppingCart } from 'lucide-react'
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -90,21 +90,55 @@ export default function CheckoutPage() {
     setLoading(true)
     
     try {
-      // Create order in Supabase
+      // Fetch product/variant costs for profit calculation
       const supabase = createClient()
-      const { data, error } = await supabase
-        .from('orders')
-        .insert({
-          user_id: user?.id || null, // Add user_id if logged in
-          user_email: customerInfo.email,
-          items: cart.map(item => ({
+      const itemsWithCosts = await Promise.all(
+        cart.map(async (item) => {
+          let cost = 0
+          
+          if (item.variant_id) {
+            // Fetch variant cost
+            const { data: variantData } = await supabase
+              .from('product_variants')
+              .select('cost, product:products(cost)')
+              .eq('id', item.variant_id)
+              .single()
+            
+            const variant = variantData as any
+            cost = variant?.cost ?? variant?.product?.cost ?? 0
+          } else {
+            // Fetch product cost
+            const { data: product } = await supabase
+              .from('products')
+              .select('cost')
+              .eq('id', item.product_id)
+              .single()
+            
+            cost = product?.cost ?? 0
+          }
+          
+          return {
             product_id: item.product_id,
             product_name: item.product_name,
+            variant_id: item.variant_id,
             quantity: item.quantity,
-            price: item.price
-          })),
+            price: item.price,
+            cost: cost
+          }
+        })
+      )
+      
+      // Create order via API route (handles stock decrement and financial transactions)
+      const orderResponse = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: user?.id || null,
+          user_email: customerInfo.email,
+          items: itemsWithCosts,
           total: total,
-          status: 'pending',
           delivery_info: {
             name: customerInfo.name,
             phone: customerInfo.phone,
@@ -117,10 +151,20 @@ export default function CheckoutPage() {
             })
           }
         })
-        .select()
-        .single()
+      })
       
-      if (error) throw error
+      if (!orderResponse.ok) {
+        const errorData = await orderResponse.json()
+        throw new Error(errorData.error || 'Failed to create order')
+      }
+      
+      const orderResult = await orderResponse.json()
+      
+      if (!orderResult.success || !orderResult.data) {
+        throw new Error(orderResult.error || 'Failed to create order')
+      }
+      
+      const order = orderResult.data
       
       // Process payment - ALL payment methods use mock payment for testing
       // This bypasses real payment processing and marks order as ready_for_delivery
@@ -130,7 +174,7 @@ export default function CheckoutPage() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            orderId: data.id,
+            orderId: order.id,
             amount: total
           })
         })
@@ -154,7 +198,7 @@ export default function CheckoutPage() {
       // Generate QR code for order tracking
       let qrCode = null
       try {
-        qrCode = await generateOrderQRCode(data.id)
+        qrCode = await generateOrderQRCode(order.id)
       } catch (qrError) {
         console.error('Error generating QR code:', qrError)
         // Continue even if QR generation fails
@@ -165,7 +209,7 @@ export default function CheckoutPage() {
         await supabase
           .from('orders')
           .update({ qr_code: qrCode })
-          .eq('id', data.id)
+          .eq('id', order.id)
       }
       
       // Save address if user is logged in and checkbox is checked
@@ -221,7 +265,7 @@ export default function CheckoutPage() {
       await clearCartFromDB(user?.id || null)
       
       // Redirect to success page
-      router.push(`/checkout/success?orderId=${data.id}`)
+      router.push(`/checkout/success?orderId=${order.id}`)
       
     } catch (error) {
       console.error('Error creating order:', error)
@@ -234,12 +278,10 @@ export default function CheckoutPage() {
   // Show loading state while cart is being loaded
   if (authLoading || cartLoading) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
-        <Card className="text-center py-12 max-w-md">
-          <div className="relative w-12 h-12 mx-auto mb-4">
-            <Package className="w-12 h-12 text-green-500 animate-pulse" />
-          </div>
-          <p className="text-gray-700">Loading checkout...</p>
+      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center px-4">
+        <Card className="text-center py-12 max-w-md w-full">
+          <ShoppingCart className="w-12 h-12 sm:w-16 sm:h-16 text-green-500 animate-bounce mx-auto mb-4" />
+          <p className="text-sm sm:text-base text-gray-700">Loading checkout...</p>
         </Card>
       </div>
     )

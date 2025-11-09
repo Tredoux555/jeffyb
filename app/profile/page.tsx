@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/contexts/AuthContext'
 import { createClient } from '@/lib/supabase'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
-import { Package, ShoppingBag, Heart, MapPin, CreditCard, Settings, ArrowRight, Clock, Bell } from 'lucide-react'
+import { Package, ShoppingBag, Heart, MapPin, CreditCard, Settings, ArrowRight, Clock, Bell, User } from 'lucide-react'
 import { Order, Favorite } from '@/types/database'
 import Link from 'next/link'
 import { getUnreadNotifications } from '@/lib/notifications'
@@ -113,12 +113,10 @@ export default function ProfilePage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
+      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center px-4">
         <div className="text-center">
-          <div className="relative w-12 h-12 mx-auto mb-4">
-            <Package className="w-12 h-12 text-green-500 animate-bounce" />
-          </div>
-          <p className="text-gray-700">Loading profile...</p>
+          <User className="w-12 h-12 sm:w-16 sm:h-16 text-purple-500 animate-bounce mx-auto mb-4" />
+          <p className="text-sm sm:text-base text-gray-700">Loading profile...</p>
         </div>
       </div>
     )
