@@ -363,13 +363,58 @@ export default function AdminProductsPage() {
       const result = await response.json()
       if (!result.success) throw new Error(result.error || 'Failed to save product')
       
-      // Reset form and close
-      setFormData({ name: '', description: '', price: '', category: 'gym', stock: '', image_url: '', images: [], video_url: '', video_file_url: '', has_variants: false, is_active: true, cost: '', reorder_point: '10', reorder_quantity: '50' })
-      setVariants([])
-      setEditingProduct(null)
-      setIsModalOpen(false)
+      // Show success toast
+      setToast({ 
+        isVisible: true, 
+        message: editingProduct ? 'Product Successfully Updated' : 'Product Successfully Added' 
+      })
+      
+      // Refresh product list in background
       fetchProducts()
-      return
+      
+      // If editing, refresh the form with updated product data and keep modal open
+      if (editingProduct) {
+        // Fetch updated product data to refresh the form
+        const supabase = createClient()
+        const { data: updatedProduct } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', editingProduct.id)
+          .single()
+        
+        if (updatedProduct) {
+          // Update form with fresh data
+          setFormData({
+            name: updatedProduct.name,
+            description: updatedProduct.description || '',
+            price: updatedProduct.price.toString(),
+            category: updatedProduct.category,
+            stock: updatedProduct.stock.toString(),
+            image_url: updatedProduct.image_url || '',
+            images: updatedProduct.images || [],
+            video_url: updatedProduct.video_url || '',
+            video_file_url: updatedProduct.video_file_url || '',
+            has_variants: updatedProduct.has_variants || false,
+            is_active: updatedProduct.is_active !== undefined ? updatedProduct.is_active : true,
+            cost: updatedProduct.cost?.toString() || '',
+            reorder_point: updatedProduct.reorder_point?.toString() || '10',
+            reorder_quantity: updatedProduct.reorder_quantity?.toString() || '50'
+          })
+          
+          // Update editingProduct state
+          setEditingProduct(updatedProduct)
+        }
+        
+        // Keep modal open - don't close it
+        return
+      } else {
+        // For new products, close modal and reset form
+        setFormData({ name: '', description: '', price: '', category: 'gym', stock: '', image_url: '', images: [], video_url: '', video_file_url: '', has_variants: false, is_active: true, cost: '', reorder_point: '10', reorder_quantity: '50' })
+        setVariants([])
+        setEditingProduct(null)
+        setIsModalOpen(false)
+        return
+      }
     }
     
     try {
@@ -493,20 +538,70 @@ export default function AdminProductsPage() {
           
           console.log('[FRONTEND] Variants saved successfully!')
           
-          // Show success toast and close modal
+          // Show success toast
           setToast({ 
             isVisible: true, 
             message: editingProduct ? 'Product Successfully Updated' : 'Product Successfully Added' 
           })
           
-          fetchProducts() // Refresh product list in background
+          // Refresh product list in background
+          fetchProducts()
           
-          // Close modal after showing toast
-          setFormData({ name: '', description: '', price: '', category: 'gym', stock: '', image_url: '', images: [], video_url: '', video_file_url: '', has_variants: false, is_active: true, cost: '', reorder_point: '10', reorder_quantity: '50' })
-          setVariants([])
-          setEditingProduct(null)
-          setIsModalOpen(false)
-          return // Exit the function
+          // If editing, refresh the form with updated product data and keep modal open
+          if (editingProduct) {
+            // Fetch updated product data to refresh the form
+            const supabase = createClient()
+            const { data: updatedProduct } = await supabase
+              .from('products')
+              .select('*')
+              .eq('id', productId)
+              .single()
+            
+            if (updatedProduct) {
+              // Update form with fresh data
+              setFormData({
+                name: updatedProduct.name,
+                description: updatedProduct.description || '',
+                price: updatedProduct.price.toString(),
+                category: updatedProduct.category,
+                stock: updatedProduct.stock.toString(),
+                image_url: updatedProduct.image_url || '',
+                images: updatedProduct.images || [],
+                video_url: updatedProduct.video_url || '',
+                video_file_url: updatedProduct.video_file_url || '',
+                has_variants: updatedProduct.has_variants || false,
+                is_active: updatedProduct.is_active !== undefined ? updatedProduct.is_active : true,
+                cost: updatedProduct.cost?.toString() || '',
+                reorder_point: updatedProduct.reorder_point?.toString() || '10',
+                reorder_quantity: updatedProduct.reorder_quantity?.toString() || '50'
+              })
+              
+              // Update editingProduct state
+              setEditingProduct(updatedProduct)
+              
+              // Reload variants if product has variants
+              if (updatedProduct.has_variants) {
+                const { data: variantsData } = await supabase
+                  .from('product_variants')
+                  .select('*')
+                  .eq('product_id', productId)
+                  .order('created_at')
+                setVariants(variantsData || [])
+              } else {
+                setVariants([])
+              }
+            }
+            
+            // Keep modal open - don't close it
+            return
+          } else {
+            // For new products, close modal and reset form
+            setFormData({ name: '', description: '', price: '', category: 'gym', stock: '', image_url: '', images: [], video_url: '', video_file_url: '', has_variants: false, is_active: true, cost: '', reorder_point: '10', reorder_quantity: '50' })
+            setVariants([])
+            setEditingProduct(null)
+            setIsModalOpen(false)
+            return
+          }
         } catch (variantError) {
           console.error('[FRONTEND] Error saving variants:', variantError)
           throw new Error(`Failed to save variants: ${variantError instanceof Error ? variantError.message : 'Unknown error'}`)
@@ -515,34 +610,73 @@ export default function AdminProductsPage() {
         console.log('[FRONTEND] No variants to save (has_variants=false or variants empty)')
       }
       
-      // If no variants or product without variants, close modal normally
-      // Show success toast and close modal
+      // If no variants or product without variants
+      // Show success toast
       setToast({ 
         isVisible: true, 
         message: editingProduct ? 'Product Successfully Updated' : 'Product Successfully Added' 
       })
       
-      // Reset form and close modal
-      setFormData({
-        name: '',
-        description: '',
-        price: '',
-        category: 'gym',
-        stock: '',
-        image_url: '',
-        images: [],
-        video_url: '',
-        video_file_url: '',
-        has_variants: false,
-        is_active: true,
-        cost: '',
-        reorder_point: '10',
-        reorder_quantity: '50'
-      })
-      setVariants([])
-      setEditingProduct(null)
-      setIsModalOpen(false)
+      // Refresh product list in background
       fetchProducts()
+      
+      // If editing, refresh the form with updated product data and keep modal open
+      if (editingProduct) {
+        // Fetch updated product data to refresh the form
+        const supabase = createClient()
+        const { data: updatedProduct } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', editingProduct.id)
+          .single()
+        
+        if (updatedProduct) {
+          // Update form with fresh data
+          setFormData({
+            name: updatedProduct.name,
+            description: updatedProduct.description || '',
+            price: updatedProduct.price.toString(),
+            category: updatedProduct.category,
+            stock: updatedProduct.stock.toString(),
+            image_url: updatedProduct.image_url || '',
+            images: updatedProduct.images || [],
+            video_url: updatedProduct.video_url || '',
+            video_file_url: updatedProduct.video_file_url || '',
+            has_variants: updatedProduct.has_variants || false,
+            is_active: updatedProduct.is_active !== undefined ? updatedProduct.is_active : true,
+            cost: updatedProduct.cost?.toString() || '',
+            reorder_point: updatedProduct.reorder_point?.toString() || '10',
+            reorder_quantity: updatedProduct.reorder_quantity?.toString() || '50'
+          })
+          
+          // Update editingProduct state
+          setEditingProduct(updatedProduct)
+        }
+        
+        // Keep modal open - don't close it
+        return
+      } else {
+        // For new products, close modal and reset form
+        setFormData({
+          name: '',
+          description: '',
+          price: '',
+          category: 'gym',
+          stock: '',
+          image_url: '',
+          images: [],
+          video_url: '',
+          video_file_url: '',
+          has_variants: false,
+          is_active: true,
+          cost: '',
+          reorder_point: '10',
+          reorder_quantity: '50'
+        })
+        setVariants([])
+        setEditingProduct(null)
+        setIsModalOpen(false)
+      }
     } catch (error) {
       console.error('[FRONTEND] Error saving product:', error)
       console.error('[FRONTEND] Error stack:', error instanceof Error ? error.stack : 'No stack')
