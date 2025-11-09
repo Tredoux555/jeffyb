@@ -56,30 +56,29 @@ export default function Home() {
           <p className="text-base sm:text-lg text-gray-600 font-medium">
             Jeffy in a Jiffy
           </p>
-          {/* White container that wraps the CTA and the two lines */}
-          {/* Send / Receive functionality hidden temporarily - can be restored later */}
-          {/* 
-          <div className="mt-4 sm:mt-6">
-            <Card className="max-w-xl sm:max-w-2xl mx-auto p-4 sm:p-6 bg-white">
-              {/* Green box wrapping the Send / Receive text */}
-              <div className="flex justify-center">
-                <Link href="/delivery" className="inline-block">
-                  <div className="px-4 sm:px-6 py-2 sm:py-3 rounded-md bg-green-500 text-black font-semibold inline-flex items-center gap-2">
-                    <span>Send</span>
-                    <ArrowLeftRight className="w-4 h-4 text-black" />
-                    <span>Receive</span>
-                  </div>
-                </Link>
-              </div>
-              {/* Promo line under the CTA inside the same white box */}
-              <div className="mt-3 sm:mt-4 text-center">
-                <p className="text-sm sm:text-base text-gray-700 w-[40ch] mx-auto">
-                  Send or Recieve a package in town for R20
-                </p>
-              </div>
-            </Card>
-          </div>
-          */}
+          {/* Send / Receive functionality hidden temporarily - can be restored later by setting SHOW_SEND_RECEIVE to true */}
+          {false && (
+            <div className="mt-4 sm:mt-6">
+              <Card className="max-w-xl sm:max-w-2xl mx-auto p-4 sm:p-6 bg-white">
+                {/* Green box wrapping the Send / Receive text */}
+                <div className="flex justify-center">
+                  <Link href="/delivery" className="inline-block">
+                    <div className="px-4 sm:px-6 py-2 sm:py-3 rounded-md bg-green-500 text-black font-semibold inline-flex items-center gap-2">
+                      <span>Send</span>
+                      <ArrowLeftRight className="w-4 h-4 text-black" />
+                      <span>Receive</span>
+                    </div>
+                  </Link>
+                </div>
+                {/* Promo line under the CTA inside the same white box */}
+                <div className="mt-3 sm:mt-4 text-center">
+                  <p className="text-sm sm:text-base text-gray-700 w-[40ch] mx-auto">
+                    Send or Recieve a package in town for R20
+                  </p>
+                </div>
+              </Card>
+            </div>
+          )}
         </div>
         
         {/* Call to Action moved into hero above */}
