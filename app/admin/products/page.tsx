@@ -153,6 +153,8 @@ export default function AdminProductsPage() {
       
       const productImagesBucket = buckets?.find(b => b.id === 'product-images')
       if (!productImagesBucket) {
+        const errorMessage = `Product images storage bucket not found.\n\nTo fix this:\n1. Go to your Supabase Dashboard → SQL Editor\n2. Run the migration file: migrations/migration-create-product-images-bucket.sql\n3. Refresh this page and try again.\n\nAlternatively, create the bucket manually:\n- Go to Storage → Create Bucket\n- Name: product-images\n- Public: Yes`
+        alert(errorMessage)
         throw new Error('Product images storage bucket not found. Please run the migration to create it.')
       }
       
