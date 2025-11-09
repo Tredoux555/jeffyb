@@ -403,6 +403,18 @@ export default function AdminProductsPage() {
           
           // Update editingProduct state
           setEditingProduct(updatedProduct)
+          
+          // Reload variants if product has variants
+          if (updatedProduct.has_variants) {
+            const { data: variantsData } = await supabase
+              .from('product_variants')
+              .select('*')
+              .eq('product_id', editingProduct.id)
+              .order('created_at')
+            setVariants(variantsData || [])
+          } else {
+            setVariants([])
+          }
         }
         
         // Keep modal open - don't close it
@@ -651,6 +663,18 @@ export default function AdminProductsPage() {
           
           // Update editingProduct state
           setEditingProduct(updatedProduct)
+          
+          // Reload variants if product has variants
+          if (updatedProduct.has_variants) {
+            const { data: variantsData } = await supabase
+              .from('product_variants')
+              .select('*')
+              .eq('product_id', editingProduct.id)
+              .order('created_at')
+            setVariants(variantsData || [])
+          } else {
+            setVariants([])
+          }
         }
         
         // Keep modal open - don't close it
