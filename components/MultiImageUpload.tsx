@@ -2,12 +2,13 @@
 
 import React, { useCallback, useState, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { X, Image as ImageIcon, Camera, Plus, Package } from 'lucide-react'
+import { X, Image as ImageIcon, Camera, Plus, Package, GripVertical } from 'lucide-react'
 import { Button } from '@/components/Button'
 
 interface MultiImageUploadProps {
   onUpload: (files: File[]) => Promise<void>
   onRemove: (index: number) => void
+  onReorder?: (fromIndex: number, toIndex: number) => void
   currentImages: string[]
   className?: string
   disabled?: boolean
@@ -16,13 +17,15 @@ interface MultiImageUploadProps {
 
 export function MultiImageUpload({ 
   onUpload, 
-  onRemove, 
+  onRemove,
+  onReorder,
   currentImages, 
   className, 
   disabled = false,
   maxFiles = 10 
 }: MultiImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
@@ -70,6 +73,33 @@ export function MultiImageUpload({
   }
   
   const canAddMore = currentImages.length < maxFiles && !disabled && !isUploading
+
+  // Drag and drop handlers for reordering
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    if (disabled || !onReorder) return
+    setDraggedIndex(index)
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/html', index.toString())
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    if (disabled || !onReorder) return
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    if (disabled || !onReorder) return
+    e.preventDefault()
+    if (draggedIndex !== null && draggedIndex !== dropIndex) {
+      onReorder(draggedIndex, dropIndex)
+    }
+    setDraggedIndex(null)
+  }
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null)
+  }
   
   return (
     <div className={className}>
@@ -77,17 +107,38 @@ export function MultiImageUpload({
       {currentImages.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
           {currentImages.map((imageUrl, index) => (
-            <div key={index} className="relative group">
+            <div
+              key={index}
+              draggable={!disabled && onReorder !== undefined}
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, index)}
+              onDragEnd={handleDragEnd}
+              className={`relative group ${
+                draggedIndex === index ? 'opacity-50 scale-95' : ''
+              } ${onReorder && !disabled ? 'cursor-move' : 'cursor-default'} transition-all duration-200`}
+            >
               <img
                 src={imageUrl}
                 alt={`Product image ${index + 1}`}
                 className="w-full h-24 sm:h-32 object-cover rounded-lg border border-gray-200"
               />
+              {/* Drag handle indicator */}
+              {onReorder && !disabled && (
+                <div className="absolute top-1 left-1 bg-black/60 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  <GripVertical className="w-3 h-3" />
+                </div>
+              )}
+              {/* Image number badge */}
+              <div className="absolute top-1 right-1 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded font-medium">
+                {index + 1}
+              </div>
               <button
                 type="button"
                 onClick={() => onRemove(index)}
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-10"
                 disabled={disabled}
+                title="Remove image"
               >
                 <X className="w-3 h-3" />
               </button>

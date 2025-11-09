@@ -212,6 +212,20 @@ export default function AdminProductsPage() {
     })
   }
 
+  const handleImageReorder = (fromIndex: number, toIndex: number) => {
+    setFormData(prev => {
+      const newImages = [...prev.images]
+      const [movedImage] = newImages.splice(fromIndex, 1)
+      newImages.splice(toIndex, 0, movedImage)
+      
+      return {
+        ...prev,
+        images: newImages,
+        image_url: newImages[0] || '' // Update primary image if first image changed
+      }
+    })
+  }
+
   const handleVideoUpload = async (file: File) => {
     setUploading(true)
     try {
@@ -794,6 +808,7 @@ export default function AdminProductsPage() {
               <MultiImageUpload
                 onUpload={handleImageUpload}
                 onRemove={handleImageRemove}
+                onReorder={handleImageReorder}
                 currentImages={formData.images}
                 disabled={uploading}
                 maxFiles={10}
