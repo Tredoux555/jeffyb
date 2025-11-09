@@ -18,9 +18,11 @@ import {
   ChevronRight,
   Plus,
   Minus,
-  Package
+  Package,
+  ZoomIn
 } from 'lucide-react'
 import { FavoriteButton } from '@/components/FavoriteButton'
+import { ImageZoom } from '@/components/ImageZoom'
 
 export default function ProductDetailPage() {
   const params = useParams()
@@ -35,6 +37,7 @@ export default function ProductDetailPage() {
   const [notificationMessage, setNotificationMessage] = useState('')
   const [touchStartX, setTouchStartX] = useState<number | null>(null)
   const [touchEndX, setTouchEndX] = useState<number | null>(null)
+  const [isZoomOpen, setIsZoomOpen] = useState(false)
 
   const productId = params.id as string
 

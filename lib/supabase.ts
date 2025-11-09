@@ -1,4 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
 // Client-side Supabase client
 export const createClient = () => {
@@ -24,18 +25,44 @@ export const createClient = () => {
   return createBrowserClient(supabaseUrl, supabaseAnonKey)
 }
 
-// Admin client for server-side operations
+// Admin client for server-side operations (API routes)
+// Uses service role key to bypass RLS policies
 export const createAdminClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
+  // Log environment variable status (without exposing values)
+  console.log('[Admin Client] Checking environment variables...')
+  console.log('[Admin Client] SUPABASE_URL present:', !!supabaseUrl)
+  console.log('[Admin Client] SERVICE_ROLE_KEY present:', !!serviceKey)
+  console.log('[Admin Client] SERVICE_ROLE_KEY length:', serviceKey?.length || 0)
+
   if (!supabaseUrl) {
-    throw new Error('Supabase URL is missing. Please check NEXT_PUBLIC_SUPABASE_URL environment variable.')
+    const error = 'Supabase URL is missing. Please check NEXT_PUBLIC_SUPABASE_URL environment variable.'
+    console.error('[Admin Client]', error)
+    throw new Error(error)
   }
 
   if (!serviceKey) {
-    throw new Error('Service role key is missing. Please check SUPABASE_SERVICE_ROLE_KEY environment variable.')
+    const error = 'Service role key is missing. Please check SUPABASE_SERVICE_ROLE_KEY environment variable.'
+    console.error('[Admin Client]', error)
+    throw new Error(error)
   }
 
-  return createBrowserClient(supabaseUrl, serviceKey)
+  try {
+    // Use createClient from @supabase/supabase-js for server-side operations
+    // This is the correct way to create a client with service role key in API routes
+    const client = createSupabaseClient(supabaseUrl, serviceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    })
+    console.log('[Admin Client] Client created successfully')
+    return client
+  } catch (error: any) {
+    console.error('[Admin Client] Failed to create client:', error?.message)
+    console.error('[Admin Client] Error stack:', error?.stack)
+    throw error
+  }
 }

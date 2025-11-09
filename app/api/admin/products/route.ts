@@ -14,7 +14,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = createAdminClient()
+    let supabase
+    try {
+      supabase = createAdminClient()
+    } catch (error: any) {
+      console.error('[API] Failed to create admin client:', error.message)
+      return NextResponse.json(
+        { success: false, error: `Configuration error: ${error.message}` },
+        { status: 500 }
+      )
+    }
     
     const productData = {
       name,
@@ -33,17 +42,34 @@ export async function POST(request: NextRequest) {
     console.log('[API] Creating product with data:', JSON.stringify(productData, null, 2))
     console.log('[API] has_variants value:', has_variants, 'Type:', typeof has_variants)
 
-    const { data, error } = await supabase
-      .from('products')
-      .insert(productData)
-      .select()
-      .single()
+    let data, error
+    try {
+      const result = await supabase
+        .from('products')
+        .insert(productData)
+        .select()
+        .single()
+      data = result.data
+      error = result.error
+    } catch (supabaseError: any) {
+      console.error('[API] Supabase operation failed:', supabaseError)
+      console.error('[API] Error type:', typeof supabaseError)
+      console.error('[API] Error message:', supabaseError?.message)
+      console.error('[API] Error stack:', supabaseError?.stack)
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: `Database operation failed: ${supabaseError?.message || 'Unknown error'}` 
+        },
+        { status: 500 }
+      )
+    }
 
     if (error) {
       console.error('[API] Error creating product:', JSON.stringify(error, null, 2))
       console.error('[API] Full error object:', error)
       return NextResponse.json(
-        { success: false, error: error.message },
+        { success: false, error: error.message || 'Failed to create product' },
         { status: 500 }
       )
     }
@@ -54,10 +80,18 @@ export async function POST(request: NextRequest) {
       success: true,
       product: data
     })
-  } catch (error) {
-    console.error('Product creation failed:', error)
+  } catch (error: any) {
+    console.error('[API] Product creation failed with exception:', error)
+    console.error('[API] Error type:', typeof error)
+    console.error('[API] Error message:', error?.message)
+    console.error('[API] Error stack:', error?.stack)
+    console.error('[API] Error name:', error?.name)
     return NextResponse.json(
-      { success: false, error: 'Product creation failed' },
+      { 
+        success: false, 
+        error: error?.message || 'Product creation failed',
+        details: process.env.NODE_ENV === 'development' ? error?.stack : undefined
+      },
       { status: 500 }
     )
   }
@@ -75,7 +109,16 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const supabase = createAdminClient()
+    let supabase
+    try {
+      supabase = createAdminClient()
+    } catch (error: any) {
+      console.error('[API] Failed to create admin client:', error.message)
+      return NextResponse.json(
+        { success: false, error: `Configuration error: ${error.message}` },
+        { status: 500 }
+      )
+    }
     
     // Build productData object, only including fields that are provided
     const productData: any = {}
@@ -91,17 +134,34 @@ export async function PUT(request: NextRequest) {
     if (has_variants !== undefined) productData.has_variants = has_variants || false
     if (is_active !== undefined) productData.is_active = is_active
 
-    const { data, error } = await supabase
-      .from('products')
-      .update(productData)
-      .eq('id', id)
-      .select()
-      .single()
+    let data, error
+    try {
+      const result = await supabase
+        .from('products')
+        .update(productData)
+        .eq('id', id)
+        .select()
+        .single()
+      data = result.data
+      error = result.error
+    } catch (supabaseError: any) {
+      console.error('[API] Supabase update operation failed:', supabaseError)
+      console.error('[API] Error type:', typeof supabaseError)
+      console.error('[API] Error message:', supabaseError?.message)
+      console.error('[API] Error stack:', supabaseError?.stack)
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: `Database operation failed: ${supabaseError?.message || 'Unknown error'}` 
+        },
+        { status: 500 }
+      )
+    }
 
     if (error) {
-      console.error('Error updating product:', error)
+      console.error('[API] Error updating product:', error)
       return NextResponse.json(
-        { success: false, error: error.message },
+        { success: false, error: error.message || 'Failed to update product' },
         { status: 500 }
       )
     }
@@ -110,10 +170,18 @@ export async function PUT(request: NextRequest) {
       success: true,
       product: data
     })
-  } catch (error) {
-    console.error('Product update failed:', error)
+  } catch (error: any) {
+    console.error('[API] Product update failed with exception:', error)
+    console.error('[API] Error type:', typeof error)
+    console.error('[API] Error message:', error?.message)
+    console.error('[API] Error stack:', error?.stack)
+    console.error('[API] Error name:', error?.name)
     return NextResponse.json(
-      { success: false, error: 'Product update failed' },
+      { 
+        success: false, 
+        error: error?.message || 'Product update failed',
+        details: process.env.NODE_ENV === 'development' ? error?.stack : undefined
+      },
       { status: 500 }
     )
   }
@@ -131,7 +199,16 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const supabase = createAdminClient()
+    let supabase
+    try {
+      supabase = createAdminClient()
+    } catch (error: any) {
+      console.error('[API] Failed to create admin client:', error.message)
+      return NextResponse.json(
+        { success: false, error: `Configuration error: ${error.message}` },
+        { status: 500 }
+      )
+    }
 
     const { error } = await supabase
       .from('products')

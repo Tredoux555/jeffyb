@@ -576,6 +576,7 @@ export default function AdminProductsPage() {
       setVariants([])
     }
     
+    // Open the modal
     setIsModalOpen(true)
   }
   

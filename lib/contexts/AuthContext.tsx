@@ -1,6 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
+import { usePathname } from 'next/navigation'
 import { User } from '@supabase/supabase-js'
 import { createClient } from '../supabase'
 import { UserProfile } from '@/types/database'
@@ -22,6 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const pathname = usePathname()
 
   // Create supabase client with error handling - use useMemo to ensure stability
   const supabase = useMemo(() => {
@@ -93,22 +95,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
+    // Skip auth initialization in admin routes
+    if (pathname?.startsWith('/admin')) {
+      setLoading(false)
+      return
+    }
+
     let mounted = true
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (!mounted) return
       
-      setUser(session?.user ?? null)
-      if (session?.user) {
+      // Only set user if we have a valid session
+      if (session?.user && !error) {
+        setUser(session.user)
         fetchProfile(session.user.id).then((profile) => {
           if (mounted) setProfile(profile)
+        }).catch((err) => {
+          // Silently handle profile fetch errors (e.g., RLS issues)
+          if (mounted) setProfile(null)
         })
+      } else {
+        setUser(null)
+        setProfile(null)
       }
       setLoading(false)
     }).catch((error) => {
-      console.error('Error getting session:', error)
-      if (mounted) setLoading(false)
+      // Silently handle session errors (e.g., network issues, no auth)
+      if (mounted) {
+        setUser(null)
+        setProfile(null)
+        setLoading(false)
+      }
     })
 
     // Listen for auth changes
@@ -117,11 +136,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return
       
-      setUser(session?.user ?? null)
       if (session?.user) {
-        const userProfile = await fetchProfile(session.user.id)
-        if (mounted) setProfile(userProfile)
+        setUser(session.user)
+        try {
+          const userProfile = await fetchProfile(session.user.id)
+          if (mounted) setProfile(userProfile)
+        } catch (err) {
+          // Silently handle profile fetch errors
+          if (mounted) setProfile(null)
+        }
       } else {
+        setUser(null)
         setProfile(null)
       }
       setLoading(false)
@@ -131,7 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [supabase, fetchProfile])
+  }, [supabase, fetchProfile, pathname])
 
   const signIn = async (email: string, password: string) => {
     if (!supabase) throw new Error('Supabase client not initialized')
