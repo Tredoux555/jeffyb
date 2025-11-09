@@ -695,36 +695,40 @@ export default function StockOrdersPage() {
                 <div key={product.id}>
                   {product.has_variants && product.variants && product.variants.length > 0 ? (
                     product.variants.map((variant) => (
-                      <Card
+                      <div
                         key={variant.id}
-                        className="p-3 cursor-pointer hover:bg-gray-50 mb-2"
                         onClick={() => handleAddProduct(product, variant)}
+                        className="cursor-pointer mb-2"
                       >
+                        <Card className="p-3 hover:bg-gray-50">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">{product.name}</p>
+                              <p className="text-sm text-gray-600">
+                                {Object.entries(variant.variant_attributes).map(([key, value]) => `${key}: ${value}`).join(', ')}
+                              </p>
+                              <p className="text-xs text-gray-500">SKU: {variant.sku || 'N/A'}</p>
+                            </div>
+                            <Button size="sm">Add</Button>
+                          </div>
+                        </Card>
+                      </div>
+                    ))
+                  ) : (
+                    <div
+                      onClick={() => handleAddProduct(product)}
+                      className="cursor-pointer mb-2"
+                    >
+                      <Card className="p-3 hover:bg-gray-50">
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="font-medium">{product.name}</p>
-                            <p className="text-sm text-gray-600">
-                              {Object.entries(variant.variant_attributes).map(([key, value]) => `${key}: ${value}`).join(', ')}
-                            </p>
-                            <p className="text-xs text-gray-500">SKU: {variant.sku || 'N/A'}</p>
+                            <p className="text-xs text-gray-500">Cost: R{product.cost?.toFixed(2) || '0.00'}</p>
                           </div>
                           <Button size="sm">Add</Button>
                         </div>
                       </Card>
-                    ))
-                  ) : (
-                    <Card
-                      className="p-3 cursor-pointer hover:bg-gray-50 mb-2"
-                      onClick={() => handleAddProduct(product)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">{product.name}</p>
-                          <p className="text-xs text-gray-500">Cost: R{product.cost?.toFixed(2) || '0.00'}</p>
-                        </div>
-                        <Button size="sm">Add</Button>
-                      </div>
-                    </Card>
+                    </div>
                   )}
                 </div>
               ))}
