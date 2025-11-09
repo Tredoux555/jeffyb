@@ -1,20 +1,17 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
-import { DeliveryMap } from './DeliveryMap'
-import { StatusTimeline } from './StatusTimeline'
-import { DriverInfo } from './DriverInfo'
-import { createClient } from '@/lib/supabase'
-import { DeliveryAssignment, Driver, Order } from '@/types/database'
-import { Card } from './Card'
-import { MapPin, Clock, Package, CheckCircle } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { Card } from '@/components/Card'
+import { DeliveryMap } from '@/components/DeliveryMap'
+import { Order, DeliveryAssignment, Driver } from '@/types/database'
+import { Truck, MapPin, Clock, CheckCircle, User, Phone, Package } from 'lucide-react'
 
 interface OrderTrackingProps {
   order: Order
   assignment: DeliveryAssignment | null
   driver: Driver | null
-  onDriverUpdate?: (driver: Driver | null) => void
-  onAssignmentUpdate?: (assignment: DeliveryAssignment | null) => void
+  onDriverUpdate?: (driver: Driver) => void
+  onAssignmentUpdate?: (assignment: DeliveryAssignment) => void
 }
 
 export function OrderTracking({
@@ -25,139 +22,56 @@ export function OrderTracking({
   onAssignmentUpdate,
 }: OrderTrackingProps) {
   const [eta, setEta] = useState<string | null>(null)
-  const [distance, setDistance] = useState<string | null>(null)
 
-  // Real-time subscription for driver location updates
+  // Calculate ETA if driver and locations are available
   useEffect(() => {
-    if (!assignment?.driver_id || !driver) return
-
-    const supabase = createClient()
-
-    const channel = supabase
-      .channel(`driver-location-${assignment.driver_id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'drivers',
-          filter: `id=eq.${assignment.driver_id}`,
-        },
-        async (payload) => {
-          const updatedDriver = payload.new as Driver
-          if (onDriverUpdate) {
-            onDriverUpdate(updatedDriver)
-          }
-
-          // Calculate ETA when driver location updates
-          if (
-            updatedDriver.current_location &&
-            order.delivery_info?.latitude &&
-            order.delivery_info?.longitude
-          ) {
-            await calculateETA(
-              updatedDriver.current_location.lat,
-              updatedDriver.current_location.lng,
-              order.delivery_info.latitude,
-              order.delivery_info.longitude
-            )
-          }
-        }
-      )
-      .subscribe()
-
-    // Initial ETA calculation
-    if (
-      driver.current_location &&
-      order.delivery_info?.latitude &&
-      order.delivery_info?.longitude
-    ) {
-      calculateETA(
+    if (driver?.current_location && order.delivery_info?.latitude && order.delivery_info?.longitude) {
+      // Simple ETA calculation (can be enhanced with Google Maps Directions API)
+      const distance = calculateDistance(
         driver.current_location.lat,
         driver.current_location.lng,
         order.delivery_info.latitude,
         order.delivery_info.longitude
       )
+      const estimatedMinutes = Math.ceil(distance / 0.5) // Assuming average speed of 30km/h
+      setEta(`${estimatedMinutes} minutes`)
     }
+  }, [driver, order])
 
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [assignment?.driver_id, driver, order.delivery_info])
-
-  const calculateETA = async (
-    driverLat: number,
-    driverLng: number,
-    deliveryLat: number,
-    deliveryLng: number
-  ) => {
-    try {
-      // Use Google Maps Distance Matrix API
-      const response = await fetch(
-        `/api/maps/eta?origin=${driverLat},${driverLng}&destination=${deliveryLat},${deliveryLng}`
-      )
-
-      if (response.ok) {
-        const data = await response.json()
-        if (data.duration) {
-          setEta(data.duration.text)
-          setDistance(data.distance?.text || null)
-        }
-      }
-    } catch (error) {
-      console.error('Error calculating ETA:', error)
-      // Fallback: Calculate rough ETA based on distance
-      const roughEta = calculateRoughETA(driverLat, driverLng, deliveryLat, deliveryLng)
-      setEta(roughEta)
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'delivered':
+        return 'bg-green-100 text-green-700 border-green-300'
+      case 'in_transit':
+        return 'bg-blue-100 text-blue-700 border-blue-300'
+      case 'picked_up':
+        return 'bg-purple-100 text-purple-700 border-purple-300'
+      case 'assigned':
+        return 'bg-yellow-100 text-yellow-700 border-yellow-300'
+      default:
+        return 'bg-gray-100 text-gray-700 border-gray-300'
     }
   }
 
-  const calculateRoughETA = (
-    lat1: number,
-    lng1: number,
-    lat2: number,
-    lng2: number
-  ): string => {
-    // Haversine formula for distance
-    const R = 6371 // Earth's radius in km
-    const dLat = ((lat2 - lat1) * Math.PI) / 180
-    const dLng = ((lng2 - lng1) * Math.PI) / 180
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLng / 2) *
-        Math.sin(dLng / 2)
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    const distanceKm = R * c
-
-    // Rough estimate: 40km/h average speed in city
-    const minutes = Math.round((distanceKm / 40) * 60)
-    if (minutes < 60) {
-      return `${minutes} minutes`
-    } else {
-      const hours = Math.floor(minutes / 60)
-      const mins = minutes % 60
-      return `${hours}h ${mins}m`
-    }
+  const getStatusLabel = (status: string) => {
+    return status
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
   }
 
-  const getDriverLocation = () => {
-    if (!driver?.current_location) return null
-    return {
-      lat: driver.current_location.lat,
-      lng: driver.current_location.lng,
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'delivered':
+        return <CheckCircle className="w-5 h-5" />
+      case 'in_transit':
+      case 'picked_up':
+        return <Truck className="w-5 h-5" />
+      case 'assigned':
+        return <Package className="w-5 h-5" />
+      default:
+        return <Clock className="w-5 h-5" />
     }
-  }
-
-  const getDeliveryCoords = () => {
-    if (order.delivery_info?.latitude && order.delivery_info?.longitude) {
-      return {
-        lat: order.delivery_info.latitude,
-        lng: order.delivery_info.longitude,
-      }
-    }
-    return undefined
   }
 
   if (!assignment) {
@@ -165,25 +79,8 @@ export function OrderTracking({
       <Card className="p-4 sm:p-6">
         <div className="text-center py-8">
           <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No Driver Assigned Yet</h3>
-          <p className="text-gray-600">
-            Your order is being processed. A driver will be assigned soon.
-          </p>
-        </div>
-      </Card>
-    )
-  }
-
-  if ((assignment.status as string) === 'delivered') {
-    return (
-      <Card className="p-4 sm:p-6">
-        <div className="text-center py-8">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Order Delivered!</h3>
-          <p className="text-gray-600">
-            {assignment.delivered_at &&
-              `Delivered on ${new Date(assignment.delivered_at).toLocaleString()}`}
-          </p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Waiting for Driver Assignment</h3>
+          <p className="text-gray-600">Your order is ready and waiting to be assigned to a driver.</p>
         </div>
       </Card>
     )
@@ -191,47 +88,144 @@ export function OrderTracking({
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* ETA Card */}
-      {(assignment.status as string) === 'in_transit' && driver?.current_location && eta && (
-        <Card className="p-4 sm:p-6 bg-jeffy-yellow-light border-2 border-jeffy-yellow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Estimated Arrival</p>
-              <p className="text-2xl sm:text-3xl font-bold text-gray-900">{eta}</p>
-              {distance && (
-                <p className="text-sm text-gray-600 mt-1">About {distance} away</p>
-              )}
-            </div>
-            <Clock className="w-12 h-12 text-jeffy-yellow" />
-          </div>
-        </Card>
-      )}
-
-      {/* Map */}
+      {/* Status Card */}
       <Card className="p-4 sm:p-6">
-        <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
-          <MapPin className="w-5 h-5" />
-          Delivery Route
-        </h3>
-        <div className="rounded-lg overflow-hidden border border-gray-200" style={{ height: '400px' }}>
-          <DeliveryMap
-            pickupAddress="123 Main Street, Johannesburg, 2000"
-            deliveryAddress={order.delivery_info?.address || 'N/A'}
-            deliveryCoords={getDeliveryCoords()}
-            driverLocation={getDriverLocation() || undefined}
-          />
+        <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <Truck className="w-5 h-5" />
+          Delivery Status
+        </h2>
+        <div className="space-y-4">
+          {/* Status Badge */}
+          <div className="flex items-center justify-between">
+            <span
+              className={`px-4 py-2 rounded-full text-sm font-medium capitalize border-2 ${getStatusColor(
+                assignment.status
+              )}`}
+            >
+              <span className="flex items-center gap-2">
+                {getStatusIcon(assignment.status)}
+                {getStatusLabel(assignment.status)}
+              </span>
+            </span>
+            {eta && (
+              <div className="flex items-center gap-2 text-jeffy-yellow">
+                <Clock className="w-4 h-4" />
+                <span className="font-semibold">ETA: {eta}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Driver Info */}
+          {driver && (
+            <div className="pt-4 border-t border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <User className="w-4 h-4" />
+                Driver Information
+              </h3>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Name:</span>
+                  <span className="font-medium text-gray-900">{driver.name}</span>
+                </div>
+                {driver.phone && (
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4 text-gray-400" />
+                    <span className="text-sm text-gray-600">{driver.phone}</span>
+                  </div>
+                )}
+                {driver.vehicle_type && (
+                  <div className="flex items-center gap-2">
+                    <Truck className="w-4 h-4 text-gray-400" />
+                    <span className="text-sm text-gray-600 capitalize">{driver.vehicle_type}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Timestamps */}
+          <div className="pt-4 border-t border-gray-200 space-y-2">
+            {assignment.assigned_at && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">Assigned:</span>
+                <span className="text-gray-900">
+                  {new Date(assignment.assigned_at).toLocaleString()}
+                </span>
+              </div>
+            )}
+            {assignment.picked_up_at && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">Picked Up:</span>
+                <span className="text-gray-900">
+                  {new Date(assignment.picked_up_at).toLocaleString()}
+                </span>
+              </div>
+            )}
+            {assignment.delivered_at && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">Delivered:</span>
+                <span className="text-green-600 font-semibold">
+                  {new Date(assignment.delivered_at).toLocaleString()}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </Card>
 
-      {/* Driver Information */}
-      {driver && <DriverInfo driver={driver} order={order} />}
+      {/* Delivery Map */}
+      {driver?.current_location &&
+        order.delivery_info?.latitude &&
+        order.delivery_info?.longitude && (
+          <Card className="p-0 overflow-hidden">
+            <div className="p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <MapPin className="w-5 h-5" />
+                Delivery Route
+              </h2>
+            </div>
+            <div className="rounded-lg overflow-hidden">
+              <DeliveryMap
+                pickupAddress="Driver Location"
+                deliveryAddress={order.delivery_info.address || 'Delivery Address'}
+                pickupCoords={driver.current_location}
+                deliveryCoords={{
+                  lat: order.delivery_info.latitude,
+                  lng: order.delivery_info.longitude,
+                }}
+                driverLocation={driver.current_location}
+              />
+            </div>
+          </Card>
+        )}
 
-      {/* Status Timeline */}
-      <Card className="p-4 sm:p-6">
-        <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Delivery Status</h3>
-        <StatusTimeline order={order} assignment={assignment} eta={eta} />
-      </Card>
+      {/* Delivery Notes */}
+      {assignment.delivery_notes && (
+        <Card className="p-4 sm:p-6">
+          <h3 className="text-sm font-semibold text-gray-900 mb-2">Delivery Notes</h3>
+          <p className="text-sm text-gray-600">{assignment.delivery_notes}</p>
+        </Card>
+      )}
     </div>
   )
 }
 
+// Helper function to calculate distance between two coordinates (Haversine formula)
+function calculateDistance(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number {
+  const R = 6371 // Radius of the Earth in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLon = ((lon2 - lon1) * Math.PI) / 180
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return R * c // Distance in km
+}

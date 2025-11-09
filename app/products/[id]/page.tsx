@@ -225,6 +225,22 @@ export default function ProductDetailPage() {
     )
   }
 
+  // Check if product is inactive - allow viewing but show warning
+  if (product.is_active === false) {
+    // Product exists but is hidden - show 404 to prevent direct access
+    return (
+      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
+          <p className="text-gray-600 mb-4">This product is no longer available.</p>
+          <Link href="/products">
+            <Button>Back to Products</Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   const images = product.images && product.images.length > 0 ? product.images : 
                  product.image_url ? [product.image_url] : []
 
@@ -321,6 +337,45 @@ export default function ProductDetailPage() {
               </div>
             )}
           </div>
+
+          {/* Video Section */}
+          {(product.video_url || product.video_file_url) && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Product Video</h3>
+              {product.video_url ? (
+                // External video (YouTube/Vimeo)
+                <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
+                  {product.video_url.includes('youtube.com') || product.video_url.includes('youtu.be') ? (
+                    <iframe
+                      src={product.video_url
+                        .replace('watch?v=', 'embed/')
+                        .replace('youtu.be/', 'youtube.com/embed/')
+                        .replace('youtube.com/watch/', 'youtube.com/embed/')}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      title={`${product.name} video`}
+                    />
+                  ) : product.video_url.includes('vimeo.com') ? (
+                    <iframe
+                      src={`https://player.vimeo.com/video/${product.video_url.split('/').pop()?.split('?')[0]}`}
+                      className="w-full h-full"
+                      allow="autoplay; fullscreen; picture-in-picture"
+                      allowFullScreen
+                      title={`${product.name} video`}
+                    />
+                  ) : (
+                    <video src={product.video_url} controls className="w-full h-full" />
+                  )}
+                </div>
+              ) : product.video_file_url ? (
+                // Uploaded video file
+                <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
+                  <video src={product.video_file_url} controls className="w-full h-full" />
+                </div>
+              ) : null}
+            </div>
+          )}
 
           {/* Product Details */}
           <div className="space-y-6">

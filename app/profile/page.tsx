@@ -6,11 +6,12 @@ import { useAuth } from '@/lib/contexts/AuthContext'
 import { createClient } from '@/lib/supabase'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
-import { Package, ShoppingBag, Heart, MapPin, CreditCard, Settings, ArrowRight, Clock } from 'lucide-react'
+import { Package, ShoppingBag, Heart, MapPin, CreditCard, Settings, ArrowRight, Clock, Bell } from 'lucide-react'
 import { Order, Favorite } from '@/types/database'
 import Link from 'next/link'
+import { getUnreadNotifications } from '@/lib/notifications'
 
-type TabType = 'overview' | 'orders' | 'favorites' | 'addresses' | 'payment' | 'settings'
+type TabType = 'overview' | 'orders' | 'favorites' | 'addresses' | 'payment' | 'settings' | 'notifications'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -24,6 +25,7 @@ export default function ProfilePage() {
   })
   const [recentOrders, setRecentOrders] = useState<Order[]>([])
   const [recentFavorites, setRecentFavorites] = useState<Favorite[]>([])
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0)
 
   useEffect(() => {
     if (authLoading) return
@@ -34,7 +36,19 @@ export default function ProfilePage() {
     }
 
     fetchDashboardData()
+    fetchUnreadNotificationsCount()
   }, [user, authLoading])
+
+  const fetchUnreadNotificationsCount = async () => {
+    if (!user) return
+
+    try {
+      const unread = await getUnreadNotifications(user.id)
+      setUnreadNotificationsCount(unread.length)
+    } catch (error) {
+      console.error('Error fetching unread notifications count:', error)
+    }
+  }
 
   const fetchDashboardData = async () => {
     if (!user) return
@@ -87,12 +101,13 @@ export default function ProfilePage() {
     }
   }
 
-  const tabs: { id: TabType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  const tabs: { id: TabType; label: string; icon: React.ComponentType<{ className?: string }>; badge?: number }[] = [
     { id: 'overview', label: 'Overview', icon: Package },
     { id: 'orders', label: 'Orders', icon: ShoppingBag },
     { id: 'favorites', label: 'Favorites', icon: Heart },
     { id: 'addresses', label: 'Addresses', icon: MapPin },
     { id: 'payment', label: 'Payment', icon: CreditCard },
+    { id: 'notifications', label: 'Notifications', icon: Bell, badge: unreadNotificationsCount },
     { id: 'settings', label: 'Settings', icon: Settings },
   ]
 
@@ -133,8 +148,13 @@ export default function ProfilePage() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 font-medium text-sm sm:text-base transition-colors border-b-2 ${
+                  onClick={() => {
+                    setActiveTab(tab.id)
+                    if (tab.id === 'notifications') {
+                      fetchUnreadNotificationsCount()
+                    }
+                  }}
+                  className={`relative flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 font-medium text-sm sm:text-base transition-colors border-b-2 ${
                     isActive
                       ? 'border-jeffy-yellow text-gray-900'
                       : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
@@ -142,6 +162,11 @@ export default function ProfilePage() {
                 >
                   <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span className="whitespace-nowrap">{tab.label}</span>
+                  {tab.badge && tab.badge > 0 && (
+                    <span className="ml-1 px-1.5 py-0.5 text-xs font-bold text-white bg-red-500 rounded-full min-w-[1.25rem] text-center">
+                      {tab.badge > 99 ? '99+' : tab.badge}
+                    </span>
+                  )}
                 </button>
               )
             })}
@@ -446,12 +471,34 @@ export default function ProfilePage() {
             </div>
           )}
 
+          {activeTab === 'notifications' && (
+            <div>
+              <Card className="p-4 sm:p-6">
+                <div className="text-center py-8">
+                  <p className="text-gray-600 mb-4">View and manage your notifications</p>
+                  <Link href="/profile/notifications">
+                    <Button>
+                      <Bell className="w-4 h-4 mr-2" />
+                      View Notifications
+                    </Button>
+                  </Link>
+                </div>
+              </Card>
+            </div>
+          )}
+
           {activeTab === 'settings' && (
             <div>
               <Card className="p-4 sm:p-6">
-                <p className="text-gray-600 text-center py-8">
-                  Settings page will be implemented in Phase 3
-                </p>
+                <div className="text-center py-8">
+                  <p className="text-gray-600 mb-4">Manage your account settings</p>
+                  <Link href="/profile/settings">
+                    <Button>
+                      <Settings className="w-4 h-4 mr-2" />
+                      Go to Settings
+                    </Button>
+                  </Link>
+                </div>
               </Card>
             </div>
           )}

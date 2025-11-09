@@ -1,10 +1,12 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { ShoppingCart, Menu, X, User, Package, Truck, LogOut, Settings, Heart, ShoppingBag } from 'lucide-react'
+import { ShoppingCart, Menu, X, User, Package, Truck, LogOut, Settings, Heart, ShoppingBag, Bell } from 'lucide-react'
 import { useAuth } from '@/lib/contexts/AuthContext'
+import { createClient } from '@/lib/supabase'
+import { getUnreadNotifications } from '@/lib/notifications'
 
 interface NavigationProps {
   cartItemCount?: number
@@ -13,9 +15,52 @@ interface NavigationProps {
 export function Navigation({ cartItemCount = 0 }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0)
   const pathname = usePathname()
   const router = useRouter()
   const { user, profile, signOut } = useAuth()
+
+  // Fetch unread notifications count
+  useEffect(() => {
+    if (!user) {
+      setUnreadNotificationsCount(0)
+      return
+    }
+
+    const fetchUnreadCount = async () => {
+      try {
+        const unread = await getUnreadNotifications(user.id)
+        setUnreadNotificationsCount(unread.length)
+      } catch (error) {
+        console.error('Error fetching unread notifications count:', error)
+      }
+    }
+
+    fetchUnreadCount()
+
+    // Set up real-time subscription
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`user-notifications-nav-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'order_notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          // Refetch count on any notification change
+          fetchUnreadCount()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user])
   
   const navItems = [
     { href: '/', label: 'Jeffy', icon: Package },
@@ -81,12 +126,19 @@ export function Navigation({ cartItemCount = 0 }: NavigationProps) {
               <div className="relative">
                 <button
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                  className="flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors text-white hover:bg-jeffy-yellow-light hover:text-gray-900"
+                  className="flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors text-white hover:bg-jeffy-yellow-light hover:text-gray-900 relative"
                 >
-                  <div className="w-8 h-8 rounded-full bg-jeffy-yellow flex items-center justify-center">
-                    <span className="text-gray-900 font-semibold text-sm">
-                      {profile?.full_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
-                    </span>
+                  <div className="relative">
+                    <div className="w-8 h-8 rounded-full bg-jeffy-yellow flex items-center justify-center">
+                      <span className="text-gray-900 font-semibold text-sm">
+                        {profile?.full_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                    {unreadNotificationsCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg">
+                        {unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount}
+                      </span>
+                    )}
                   </div>
                   <span className="hidden md:block text-sm">{profile?.full_name || user.email?.split('@')[0]}</span>
                 </button>
@@ -129,6 +181,19 @@ export function Navigation({ cartItemCount = 0 }: NavigationProps) {
                         >
                           <Heart className="w-4 h-4" />
                           <span>Favorites</span>
+                        </Link>
+                        <Link
+                          href="/profile/notifications"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                          className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-jeffy-yellow-light transition-colors relative"
+                        >
+                          <Bell className="w-4 h-4" />
+                          <span>Notifications</span>
+                          {unreadNotificationsCount > 0 && (
+                            <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                              {unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount}
+                            </span>
+                          )}
                         </Link>
                         <Link
                           href="/profile/settings"

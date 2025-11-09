@@ -26,6 +26,8 @@ export default function CheckoutPage() {
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null)
   const [useSavedAddress, setUseSavedAddress] = useState(false)
   const [useSavedPayment, setUseSavedPayment] = useState(false)
+  const [saveAddressForFuture, setSaveAddressForFuture] = useState(false)
+  const [savePaymentForFuture, setSavePaymentForFuture] = useState(false)
   
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
@@ -164,6 +166,55 @@ export default function CheckoutPage() {
           .from('orders')
           .update({ qr_code: qrCode })
           .eq('id', data.id)
+      }
+      
+      // Save address if user is logged in and checkbox is checked
+      if (user && saveAddressForFuture && !selectedAddressId) {
+        try {
+          const { error: addressError } = await supabase
+            .from('saved_addresses')
+            .insert({
+              user_id: user.id,
+              label: 'Home',
+              address: deliveryInfo.address,
+              city: deliveryInfo.city || null,
+              postal_code: deliveryInfo.postal_code || null,
+              country: deliveryInfo.country || 'South Africa',
+              latitude: deliveryInfo.latitude || null,
+              longitude: deliveryInfo.longitude || null,
+              is_default: false,
+            })
+          
+          if (addressError) {
+            console.error('Error saving address:', addressError)
+          }
+        } catch (error) {
+          console.error('Error saving address:', error)
+        }
+      }
+      
+      // Save payment method if user is logged in and checkbox is checked
+      if (user && savePaymentForFuture && paymentMethod !== 'mock') {
+        try {
+          const { error: paymentError } = await supabase
+            .from('saved_payment_methods')
+            .insert({
+              user_id: user.id,
+              type: paymentMethod === 'stripe' ? 'card' : paymentMethod === 'paypal' ? 'paypal' : 'other',
+              last4: null,
+              brand: paymentMethod === 'stripe' ? 'card' : 'paypal',
+              expiry_month: null,
+              expiry_year: null,
+              is_default: false,
+              stripe_payment_method_id: null,
+            })
+          
+          if (paymentError) {
+            console.error('Error saving payment method:', paymentError)
+          }
+        } catch (error) {
+          console.error('Error saving payment method:', error)
+        }
       }
       
       // Clear cart
@@ -348,6 +399,17 @@ export default function CheckoutPage() {
                           onChange={(e) => setDeliveryInfo({...deliveryInfo, country: e.target.value})}
                           placeholder="Enter your country"
                         />
+                        {user && (
+                          <label className="flex items-center mt-4">
+                            <input
+                              type="checkbox"
+                              checked={saveAddressForFuture}
+                              onChange={(e) => setSaveAddressForFuture(e.target.checked)}
+                              className="rounded border-gray-300 text-jeffy-yellow focus:ring-jeffy-yellow"
+                            />
+                            <span className="ml-2 text-sm text-gray-700">Save this address for future orders</span>
+                          </label>
+                        )}
                       </>
                     )}
                   </div>
@@ -414,6 +476,18 @@ export default function CheckoutPage() {
                           For now, orders will be processed and you&apos;ll be contacted for payment.
                         </p>
                       </div>
+                    )}
+                    
+                    {user && (paymentMethod === 'stripe' || paymentMethod === 'paypal') && (
+                      <label className="flex items-center mt-4">
+                        <input
+                          type="checkbox"
+                          checked={savePaymentForFuture}
+                          onChange={(e) => setSavePaymentForFuture(e.target.checked)}
+                          className="rounded border-gray-300 text-jeffy-yellow focus:ring-jeffy-yellow"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">Save this payment method for future orders</span>
+                      </label>
                     )}
                   </div>
                 </Card>

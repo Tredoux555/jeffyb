@@ -9,8 +9,8 @@ module.exports = {
     extend: {
       colors: {
         jeffy: {
-          yellow: '#FCD34D',      // Primary yellow
-          'yellow-light': '#FEF3C7', // Light yellow for function boxes
+          yellow: '#EAB308',      // Primary yellow - darker pure yellow
+          'yellow-light': '#FEF08A', // Light yellow for function boxes
           grey: '#9CA3AF',       // Grey for text backgrounds
           'grey-light': '#F3F4F6', // Light grey
         },
@@ -29,8 +29,8 @@ module.exports = {
         '2xl': '1.5rem',
       },
       boxShadow: {
-        'jeffy': '0 4px 6px -1px rgba(252, 211, 77, 0.1), 0 2px 4px -1px rgba(252, 211, 77, 0.06)',
-        'jeffy-lg': '0 10px 15px -3px rgba(252, 211, 77, 0.1), 0 4px 6px -2px rgba(252, 211, 77, 0.05)',
+        'jeffy': '0 4px 6px -1px rgba(234, 179, 8, 0.1), 0 2px 4px -1px rgba(234, 179, 8, 0.06)',
+        'jeffy-lg': '0 10px 15px -3px rgba(234, 179, 8, 0.1), 0 4px 6px -2px rgba(234, 179, 8, 0.05)',
       }
     },
   },

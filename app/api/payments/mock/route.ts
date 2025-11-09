@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase'
+import { notifyPaymentReceived, notifyOrderStatusChange } from '@/lib/notifications'
 
 /**
  * Mock Payment API Route
@@ -20,8 +21,17 @@ export async function POST(request: NextRequest) {
     // Simulate realistic payment processing delay
     await new Promise(resolve => setTimeout(resolve, 1500))
 
-    // Update order with successful payment status
+    // Get order before update to get user_id and old status
     const supabase = createAdminClient()
+    const { data: orderData } = await supabase
+      .from('orders')
+      .select('user_id, status')
+      .eq('id', orderId)
+      .single()
+
+    const oldStatus = orderData?.status || 'pending'
+
+    // Update order with successful payment status
     const { error } = await supabase
       .from('orders')
       .update({
@@ -38,6 +48,17 @@ export async function POST(request: NextRequest) {
         { success: false, error: 'Payment processing failed' },
         { status: 500 }
       )
+    }
+
+    // Create notifications if user_id exists
+    if (orderData?.user_id) {
+      // Notify payment received
+      await notifyPaymentReceived(orderData.user_id, orderId)
+      
+      // Notify status change if status changed
+      if (oldStatus !== 'confirmed') {
+        await notifyOrderStatusChange(orderData.user_id, orderId, oldStatus, 'confirmed')
+      }
     }
 
     // Return success response with mock payment details

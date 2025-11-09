@@ -6,18 +6,25 @@ import { useAuth } from '@/lib/contexts/AuthContext'
 import { createClient } from '@/lib/supabase'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
-import { Order, DeliveryAssignment } from '@/types/database'
-import { Package, ArrowLeft, MapPin, Phone, Calendar, DollarSign, Truck, CheckCircle } from 'lucide-react'
+import { OrderTracking } from '@/components/OrderTracking'
+import { Order, DeliveryAssignment, Driver } from '@/types/database'
+import { Package, ArrowLeft, MapPin, Phone, Calendar, DollarSign, Truck, CheckCircle, Download, ShoppingCart } from 'lucide-react'
 import Link from 'next/link'
+import { downloadInvoice } from '@/lib/invoice'
+import { useCart } from '@/lib/hooks/useCart'
 
 export default function OrderDetailPage() {
   const router = useRouter()
   const params = useParams()
   const { user, loading: authLoading } = useAuth()
+  const { addToCart } = useCart()
   const orderId = params.id as string
   const [order, setOrder] = useState<Order | null>(null)
   const [assignment, setAssignment] = useState<DeliveryAssignment | null>(null)
+  const [driver, setDriver] = useState<Driver | null>(null)
   const [loading, setLoading] = useState(true)
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false)
+  const [reordering, setReordering] = useState(false)
 
   useEffect(() => {
     if (authLoading) return
@@ -28,7 +35,94 @@ export default function OrderDetailPage() {
     }
 
     fetchOrderDetails()
+
+    // Real-time subscriptions will be set up after order is loaded
   }, [user, authLoading, orderId])
+
+  // Real-time subscription for order status and delivery assignment
+  useEffect(() => {
+    if (!order || !user) return
+
+    const supabase = createClient()
+
+    // Subscribe to order status updates
+    const orderChannel = supabase
+      .channel(`order-${order.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          filter: `id=eq.${order.id}`,
+        },
+        (payload) => {
+          const updatedOrder = payload.new as Order
+          setOrder(updatedOrder)
+        }
+      )
+      .subscribe()
+
+    // Subscribe to delivery assignment updates
+    const assignmentChannel = supabase
+      .channel(`assignment-${order.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'delivery_assignments',
+          filter: `order_id=eq.${order.id}`,
+        },
+        async (payload) => {
+          const updatedAssignment = payload.new as DeliveryAssignment
+          setAssignment(updatedAssignment)
+
+          // Fetch driver info if assignment exists
+          if (updatedAssignment.driver_id) {
+            const { data: driverData } = await supabase
+              .from('drivers')
+              .select('*')
+              .eq('id', updatedAssignment.driver_id)
+              .single()
+
+            if (driverData) {
+              setDriver(driverData as Driver)
+            }
+          }
+        }
+      )
+      .subscribe()
+
+    // Subscribe to driver location updates if driver is assigned
+    let driverChannel: ReturnType<typeof supabase.channel> | null = null
+    if (assignment?.driver_id) {
+      driverChannel = supabase
+        .channel(`driver-location-${assignment.driver_id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'drivers',
+            filter: `id=eq.${assignment.driver_id}`,
+          },
+          (payload) => {
+            const updatedDriver = payload.new as Driver
+            setDriver(updatedDriver)
+          }
+        )
+        .subscribe()
+    }
+
+    return () => {
+      supabase.removeChannel(orderChannel)
+      supabase.removeChannel(assignmentChannel)
+      if (driverChannel) {
+        supabase.removeChannel(driverChannel)
+      }
+    }
+  }, [order, assignment, user])
 
   const fetchOrderDetails = async () => {
     if (!user || !orderId) return
@@ -51,12 +145,25 @@ export default function OrderDetailPage() {
       // Fetch delivery assignment if exists
       const { data: assignmentData } = await supabase
         .from('delivery_assignments')
-        .select('*, driver:drivers(*)')
+        .select('*')
         .eq('order_id', orderId)
         .single()
 
       if (assignmentData) {
         setAssignment(assignmentData as DeliveryAssignment)
+        
+        // Fetch driver info if assignment exists
+        if (assignmentData.driver_id) {
+          const { data: driverData } = await supabase
+            .from('drivers')
+            .select('*')
+            .eq('id', assignmentData.driver_id)
+            .single()
+
+          if (driverData) {
+            setDriver(driverData as Driver)
+          }
+        }
       }
     } catch (error: any) {
       console.error('Error fetching order details:', error)
@@ -224,60 +331,15 @@ export default function OrderDetailPage() {
               </div>
             </Card>
 
-            {/* Delivery Assignment (if exists) */}
-            {assignment && (
-              <Card className="p-4 sm:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <Truck className="w-5 h-5" />
-                  Delivery Status
-                </h2>
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm text-gray-600">Status</p>
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-sm font-medium capitalize mt-1 ${
-                        assignment.status === 'delivered'
-                          ? 'bg-green-100 text-green-700'
-                          : assignment.status === 'in_transit'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-yellow-100 text-yellow-700'
-                      }`}
-                    >
-                      {assignment.status.replace('_', ' ')}
-                    </span>
-                  </div>
-                  {assignment.driver && (
-                    <div>
-                      <p className="text-sm text-gray-600">Driver</p>
-                      <p className="font-semibold text-gray-900">
-                        {(assignment.driver as any).name || 'N/A'}
-                      </p>
-                    </div>
-                  )}
-                  {assignment.assigned_at && (
-                    <div>
-                      <p className="text-sm text-gray-600">Assigned At</p>
-                      <p className="font-semibold text-gray-900">
-                        {new Date(assignment.assigned_at).toLocaleString()}
-                      </p>
-                    </div>
-                  )}
-                  {assignment.delivered_at && (
-                    <div>
-                      <p className="text-sm text-gray-600">Delivered At</p>
-                      <p className="font-semibold text-gray-900">
-                        {new Date(assignment.delivered_at).toLocaleString()}
-                      </p>
-                    </div>
-                  )}
-                  <Link href={`/tracking/${order.id}`}>
-                    <Button className="w-full mt-4">
-                      <Truck className="w-4 h-4 mr-2" />
-                      Track Package
-                    </Button>
-                  </Link>
-                </div>
-              </Card>
+            {/* Real-Time Package Tracking */}
+            {assignment && order && (
+              <OrderTracking
+                order={order}
+                assignment={assignment}
+                driver={driver}
+                onDriverUpdate={setDriver}
+                onAssignmentUpdate={setAssignment}
+              />
             )}
           </div>
 
@@ -320,6 +382,72 @@ export default function OrderDetailPage() {
                     </span>
                   </div>
                 )}
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="space-y-3 pt-4 border-t border-gray-200 mt-4">
+                <Button
+                  onClick={async () => {
+                    if (!order) return
+                    setDownloadingInvoice(true)
+                    try {
+                      await downloadInvoice(order)
+                    } catch (error) {
+                      console.error('Error downloading invoice:', error)
+                    } finally {
+                      setDownloadingInvoice(false)
+                    }
+                  }}
+                  disabled={downloadingInvoice || !order}
+                  loading={downloadingInvoice}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  {downloadingInvoice ? 'Generating...' : 'Download Invoice'}
+                </Button>
+                
+                <Button
+                  onClick={async () => {
+                    if (!order) return
+                    setReordering(true)
+                    try {
+                      // Add all items from order to cart
+                      for (const item of order.items) {
+                        const cartItem: any = {
+                          product_id: item.product_id,
+                          product_name: item.product_name,
+                          price: item.price,
+                          quantity: item.quantity,
+                          image_url: undefined,
+                        }
+                        
+                        // Add variant info if it exists (OrderItem might have these fields in practice)
+                        if ('variant_id' in item && item.variant_id) {
+                          cartItem.variant_id = item.variant_id
+                        }
+                        if ('variant_display' in item && item.variant_display) {
+                          cartItem.variant_display = item.variant_display
+                        }
+                        
+                        await addToCart(cartItem)
+                      }
+                      // Navigate to cart
+                      router.push('/cart')
+                    } catch (error) {
+                      console.error('Error reordering:', error)
+                      alert('Error adding items to cart. Please try again.')
+                    } finally {
+                      setReordering(false)
+                    }
+                  }}
+                  disabled={reordering || !order || order.items.length === 0}
+                  loading={reordering}
+                  className="w-full"
+                >
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  {reordering ? 'Adding to Cart...' : 'Reorder Items'}
+                </Button>
               </div>
             </Card>
           </div>

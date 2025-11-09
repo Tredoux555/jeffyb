@@ -13,7 +13,8 @@ import {
   Plus, 
   Edit, 
   DollarSign,
-  MapPin
+  MapPin,
+  Tag
 } from 'lucide-react'
 
 export default function AdminDashboard() {
@@ -182,6 +183,22 @@ export default function AdminDashboard() {
                 <Button className="w-full text-sm sm:text-base">
                   <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                   Manage Products
+                </Button>
+              </Link>
+            </div>
+          </Card>
+
+          <Card className="p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Category Management</h3>
+              <Tag className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+            </div>
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Add, edit, and manage product categories</p>
+            <div className="space-y-2">
+              <Link href="/admin/categories">
+                <Button className="w-full text-sm sm:text-base">
+                  <Tag className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                  Manage Categories
                 </Button>
               </Link>
             </div>

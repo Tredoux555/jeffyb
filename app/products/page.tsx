@@ -20,19 +20,11 @@ export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const { addToCart } = useCart()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  
-  const categories = [
-    { value: 'all', label: 'All Categories' },
-    { value: 'gym', label: 'Gym' },
-    { value: 'camping', label: 'Camping' },
-    { value: 'kitchen', label: 'Kitchen' },
-    { value: 'beauty', label: 'Beauty' },
-    { value: 'baby-toys', label: 'Baby Toys' },
-    { value: 'archery', label: 'Archery' }
-  ]
+  const [categories, setCategories] = useState<{ value: string; label: string }[]>([])
   
   useEffect(() => {
     fetchProducts()
+    fetchCategories()
   }, [])
   
   useEffect(() => {
@@ -46,6 +38,7 @@ export default function ProductsPage() {
       const { data, error } = await supabase
         .from('products')
         .select('*')
+        .eq('is_active', true)
         .order('created_at', { ascending: false })
       
       if (error) {
@@ -60,6 +53,41 @@ export default function ProductsPage() {
       console.error('Error fetching products:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchCategories = async () => {
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('name')
+      
+      if (error) throw error
+      
+      const categoryOptions = [
+        { value: 'all', label: 'All Categories' },
+        ...(data?.map(cat => ({
+          value: cat.slug,
+          label: cat.name
+        })) || [])
+      ]
+      
+      setCategories(categoryOptions)
+    } catch (error) {
+      console.error('Error fetching categories:', error)
+      // Fallback to hardcoded if database fails
+      setCategories([
+        { value: 'all', label: 'All Categories' },
+        { value: 'gym', label: 'Gym' },
+        { value: 'camping', label: 'Camping' },
+        { value: 'kitchen', label: 'Kitchen' },
+        { value: 'beauty', label: 'Beauty' },
+        { value: 'baby-toys', label: 'Baby Toys' },
+        { value: 'archery', label: 'Archery' }
+      ])
     }
   }
   

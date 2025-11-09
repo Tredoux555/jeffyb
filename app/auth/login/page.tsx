@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import React, { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
@@ -11,11 +11,21 @@ import { Package } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
-  const { signIn } = useAuth()
+  const searchParams = useSearchParams()
+  const { signIn, user, loading: authLoading } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (authLoading) return
+    if (user) {
+      const redirectTo = searchParams.get('redirect') || '/profile'
+      router.push(redirectTo)
+    }
+  }, [user, authLoading, searchParams, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -24,7 +34,9 @@ export default function LoginPage() {
 
     try {
       await signIn(email, password)
-      router.push('/profile')
+      // Get redirect URL from query params or default to profile
+      const redirectTo = searchParams.get('redirect') || '/profile'
+      router.push(redirectTo)
     } catch (error: any) {
       console.error('Login error:', error)
       setError(error.message || 'Invalid email or password')

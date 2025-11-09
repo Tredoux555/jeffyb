@@ -41,6 +41,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         .from('products')
         .select('*')
         .eq('category', resolvedParams.category)
+        .eq('is_active', true)
         .order('created_at', { ascending: false })
       
       if (error) throw error

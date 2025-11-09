@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ClientNavigation } from "../components/ClientNavigation";
 import { AuthProvider } from "../lib/contexts/AuthContext";
+import { NotificationProvider } from "../lib/providers/NotificationProvider";
 
 // const inter = Inter({
 //   subsets: ["latin"],
@@ -21,7 +22,7 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#FCD34D',
+  themeColor: '#EAB308',
 };
 
 export default function RootLayout({
@@ -33,10 +34,12 @@ export default function RootLayout({
     <html lang="en">
       <body className={`font-sans antialiased`}>
         <AuthProvider>
-          <ClientNavigation />
-          <main className="min-h-screen">
-            {children}
-          </main>
+          <NotificationProvider>
+            <ClientNavigation />
+            <main className="min-h-screen">
+              {children}
+            </main>
+          </NotificationProvider>
         </AuthProvider>
       </body>
     </html>

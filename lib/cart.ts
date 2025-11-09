@@ -53,15 +53,41 @@ export async function getDatabaseCart(userId: string): Promise<CartItem[]> {
       .eq('user_id', userId)
       .single()
 
-    if (error && error.code !== 'PGRST116') {
-      // PGRST116 = no rows returned, cart doesn't exist yet
-      console.error('Error fetching cart from database:', error)
+    if (error) {
+      // PGRST116 = no rows returned, cart doesn't exist yet - this is OK
+      if (error.code === 'PGRST116') {
+        return []
+      }
+      try {
+        console.error('Error fetching cart from database:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          errorString: JSON.stringify(error, Object.getOwnPropertyNames(error))
+        })
+      } catch (stringifyError) {
+        // Fallback if JSON.stringify fails
+        console.error('Error fetching cart from database:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          errorType: typeof error,
+          errorConstructor: error?.constructor?.name,
+          errorKeys: error ? Object.keys(error) : []
+        })
+      }
       return []
     }
 
     return (data?.items as CartItem[]) || []
   } catch (error) {
-    console.error('Error fetching cart from database:', error)
+    console.error('Unexpected error fetching cart from database:', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      errorObject: error
+    })
     return []
   }
 }
@@ -78,16 +104,41 @@ export async function saveDatabaseCart(userId: string, items: CartItem[]): Promi
         user_id: userId,
         items: items,
         updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'user_id'
       })
 
     if (error) {
-      console.error('Error saving cart to database:', error)
+      try {
+        console.error('Error saving cart to database:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          errorString: JSON.stringify(error, Object.getOwnPropertyNames(error))
+        })
+      } catch (stringifyError) {
+        // Fallback if JSON.stringify fails
+        console.error('Error saving cart to database:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          errorType: typeof error,
+          errorConstructor: error?.constructor?.name,
+          errorKeys: error ? Object.keys(error) : []
+        })
+      }
       return false
     }
 
     return true
   } catch (error) {
-    console.error('Error saving cart to database:', error)
+    console.error('Unexpected error saving cart to database:', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      errorObject: error
+    })
     return false
   }
 }

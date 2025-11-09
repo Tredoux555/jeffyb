@@ -44,15 +44,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('id', userId)
         .single()
 
-      if (error && error.code !== 'PGRST116') {
-        // PGRST116 = no rows returned, profile might not exist yet
-        console.error('Error fetching profile:', error)
+      if (error) {
+        // PGRST116 = no rows returned, profile might not exist yet - this is OK
+        if (error.code === 'PGRST116') {
+          // Profile doesn't exist yet, return null (will be created by trigger on signup)
+          return null
+        }
+        // Log other errors with more detail
+        try {
+          console.error('Error fetching profile:', {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            errorString: JSON.stringify(error, Object.getOwnPropertyNames(error))
+          })
+        } catch (stringifyError) {
+          // Fallback if JSON.stringify fails
+          console.error('Error fetching profile:', {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            errorType: typeof error,
+            errorConstructor: error?.constructor?.name,
+            errorKeys: error ? Object.keys(error) : []
+          })
+        }
         return null
       }
 
       return data as UserProfile | null
     } catch (error) {
-      console.error('Error fetching profile:', error)
+      // Handle unexpected errors
+      console.error('Unexpected error fetching profile:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        errorObject: error
+      })
       return null
     }
   }, [supabase])

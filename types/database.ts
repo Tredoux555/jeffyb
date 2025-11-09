@@ -7,8 +7,11 @@ export interface Product {
   category: string
   image_url: string | null
   images: string[] // Array of image URLs
+  video_url: string | null // URL to external video (YouTube, Vimeo, etc.)
+  video_file_url: string | null // URL to uploaded video file in storage
   stock: number
   has_variants: boolean
+  is_active: boolean // Whether the product is visible to customers
   variants?: ProductVariant[] // Loaded when needed
   created_at: string
   updated_at: string
@@ -31,6 +34,9 @@ export interface Category {
   name: string
   slug: string
   icon: string
+  is_active: boolean // Whether the category is visible to customers
+  created_at: string
+  updated_at: string
 }
 
 export interface Order {

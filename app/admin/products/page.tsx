@@ -9,6 +9,7 @@ import { Input } from '@/components/Input'
 import { Modal } from '@/components/Modal'
 import { MultiImageUpload } from '@/components/MultiImageUpload'
 import { SimpleVariantManager } from '@/components/SimpleVariantManager'
+import { Toggle } from '@/components/Toggle'
 import { createClient } from '@/lib/supabase'
 import { Product, ProductVariant } from '@/types/database'
 import { 
@@ -31,6 +32,7 @@ export default function AdminProductsPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [uploading, setUploading] = useState(false)
   const [toast, setToast] = useState({ isVisible: false, message: '' })
+  const [updatingProduct, setUpdatingProduct] = useState<string | null>(null)
   
   const [formData, setFormData] = useState({
     name: '',
@@ -40,23 +42,19 @@ export default function AdminProductsPage() {
     stock: '',
     image_url: '',
     images: [] as string[],
-    has_variants: false
+    video_url: '',
+    video_file_url: '',
+    has_variants: false,
+    is_active: true
   })
   
   const [variants, setVariants] = useState<ProductVariant[]>([])
-  
-  const categories = [
-    { value: 'gym', label: 'Gym' },
-    { value: 'camping', label: 'Camping' },
-    { value: 'kitchen', label: 'Kitchen' },
-    { value: 'beauty', label: 'Beauty' },
-    { value: 'baby-toys', label: 'Baby Toys' },
-    { value: 'archery', label: 'Archery' }
-  ]
+  const [categories, setCategories] = useState<{ value: string; label: string }[]>([])
   
   useEffect(() => {
     checkAuth()
     fetchProducts()
+    fetchCategories()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   
@@ -89,6 +87,38 @@ export default function AdminProductsPage() {
       console.error('Error fetching products:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchCategories = async () => {
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('name')
+      
+      if (error) throw error
+      
+      // Transform to dropdown format
+      const categoryOptions = data?.map(cat => ({
+        value: cat.slug,
+        label: cat.name
+      })) || []
+      
+      setCategories(categoryOptions)
+    } catch (error) {
+      console.error('Error fetching categories:', error)
+      // Fallback to hardcoded if database fails
+      setCategories([
+        { value: 'gym', label: 'Gym' },
+        { value: 'camping', label: 'Camping' },
+        { value: 'kitchen', label: 'Kitchen' },
+        { value: 'beauty', label: 'Beauty' },
+        { value: 'baby-toys', label: 'Baby Toys' },
+        { value: 'archery', label: 'Archery' }
+      ])
     }
   }
   
@@ -181,6 +211,57 @@ export default function AdminProductsPage() {
       }
     })
   }
+
+  const handleVideoUpload = async (file: File) => {
+    setUploading(true)
+    try {
+      const supabase = createClient()
+      
+      // Validate file size (max 100MB)
+      if (file.size > 100 * 1024 * 1024) {
+        alert('Video file must be less than 100MB')
+        return
+      }
+      
+      // Validate file type
+      const validTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo']
+      if (!validTypes.includes(file.type)) {
+        alert('Please upload a valid video file (MP4, WebM, MOV, AVI)')
+        return
+      }
+      
+      const fileExt = file.name.split('.').pop()
+      const fileName = `videos/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`
+      
+      const { error } = await supabase.storage
+        .from('product-videos')
+        .upload(fileName, file)
+      
+      if (error) throw error
+      
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-videos')
+        .getPublicUrl(fileName)
+      
+      setFormData(prev => ({
+        ...prev,
+        video_file_url: publicUrl
+      }))
+      
+      setToast({ 
+        isVisible: true, 
+        message: 'Video uploaded successfully' 
+      })
+    } catch (error) {
+      console.error('Error uploading video:', error)
+      setToast({ 
+        isVisible: true, 
+        message: `Video upload error: ${error instanceof Error ? error.message : 'Unknown error'}` 
+      })
+    } finally {
+      setUploading(false)
+    }
+  }
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -210,7 +291,10 @@ export default function AdminProductsPage() {
         stock: parseInt(updatedFormData.stock),
         image_url: updatedFormData.image_url || null,
         images: updatedFormData.images,
-        has_variants: false
+        video_url: updatedFormData.video_url || null,
+        video_file_url: updatedFormData.video_file_url || null,
+        has_variants: false,
+        is_active: updatedFormData.is_active
       }
       
       // Submit without variants
@@ -233,7 +317,7 @@ export default function AdminProductsPage() {
       if (!result.success) throw new Error(result.error || 'Failed to save product')
       
       // Reset form and close
-      setFormData({ name: '', description: '', price: '', category: 'gym', stock: '', image_url: '', images: [], has_variants: false })
+      setFormData({ name: '', description: '', price: '', category: 'gym', stock: '', image_url: '', images: [], video_url: '', video_file_url: '', has_variants: false, is_active: true })
       setVariants([])
       setEditingProduct(null)
       setIsModalOpen(false)
@@ -250,7 +334,10 @@ export default function AdminProductsPage() {
         stock: parseInt(formData.stock),
         image_url: formData.image_url || null,
         images: formData.images,
-        has_variants: formData.has_variants
+        video_url: formData.video_url || null,
+        video_file_url: formData.video_file_url || null,
+        has_variants: formData.has_variants,
+        is_active: formData.is_active
       }
       
       let response
@@ -365,7 +452,7 @@ export default function AdminProductsPage() {
           fetchProducts() // Refresh product list in background
           
           // Close modal after showing toast
-          setFormData({ name: '', description: '', price: '', category: 'gym', stock: '', image_url: '', images: [], has_variants: false })
+          setFormData({ name: '', description: '', price: '', category: 'gym', stock: '', image_url: '', images: [], video_url: '', video_file_url: '', has_variants: false, is_active: true })
           setVariants([])
           setEditingProduct(null)
           setIsModalOpen(false)
@@ -394,7 +481,10 @@ export default function AdminProductsPage() {
         stock: '',
         image_url: '',
         images: [],
-        has_variants: false
+        video_url: '',
+        video_file_url: '',
+        has_variants: false,
+        is_active: true
       })
       setVariants([])
       setEditingProduct(null)
@@ -407,6 +497,39 @@ export default function AdminProductsPage() {
     }
   }
   
+  const handleToggleProduct = async (productId: string, isActive: boolean) => {
+    setUpdatingProduct(productId)
+    try {
+      const response = await fetch('/api/admin/products', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: productId, is_active: isActive })
+      })
+      
+      const result = await response.json()
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update product')
+      }
+      
+      // Refresh products list
+      fetchProducts()
+      
+      // Show success toast
+      setToast({ 
+        isVisible: true, 
+        message: isActive ? 'Product is now visible' : 'Product is now hidden' 
+      })
+    } catch (error) {
+      console.error('Error toggling product:', error)
+      setToast({ 
+        isVisible: true, 
+        message: `Error: ${error instanceof Error ? error.message : 'Unknown error'}` 
+      })
+    } finally {
+      setUpdatingProduct(null)
+    }
+  }
+
   const handleEdit = async (product: Product) => {
     setEditingProduct(product)
     setFormData({
@@ -417,7 +540,10 @@ export default function AdminProductsPage() {
       stock: product.stock.toString(),
       image_url: product.image_url || '',
       images: product.images || [],
-      has_variants: product.has_variants || false
+      video_url: product.video_url || '',
+      video_file_url: product.video_file_url || '',
+      has_variants: product.has_variants || false,
+      is_active: product.is_active !== undefined ? product.is_active : true
     })
     
     // Load variants from database
@@ -470,7 +596,10 @@ export default function AdminProductsPage() {
       stock: '',
       image_url: '',
       images: [],
-      has_variants: false
+      video_url: '',
+      video_file_url: '',
+      has_variants: false,
+      is_active: true
     })
     setVariants([])
     setIsModalOpen(true)
@@ -578,12 +707,18 @@ export default function AdminProductsPage() {
                       Low Stock
                     </div>
                   )}
+                  {/* Hidden Product Badge */}
+                  {product.is_active === false && (
+                    <div className="absolute top-2 left-2 bg-gray-600 text-white text-xs px-2 py-1 rounded-full">
+                      Hidden
+                    </div>
+                  )}
                 </div>
                 
                 {/* Product Info */}
                 <div className="space-y-2 sm:space-y-3">
                   <div>
-                    <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-1">
+                    <h3 className={`font-semibold text-base sm:text-lg mb-1 ${product.is_active === false ? 'text-gray-400' : 'text-gray-900'}`}>
                       {product.name}
                     </h3>
                     <p className="text-gray-600 text-xs sm:text-sm line-clamp-2">
@@ -603,6 +738,17 @@ export default function AdminProductsPage() {
                     <span className="text-xs bg-jeffy-yellow-light text-gray-700 px-2 py-1 rounded-full self-start sm:self-auto">
                       {product.category}
                     </span>
+                  </div>
+                  
+                  {/* Visibility Toggle */}
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                    <span className="text-xs text-gray-600">Visible to customers</span>
+                    <Toggle
+                      checked={product.is_active !== undefined ? product.is_active : true}
+                      onChange={(checked) => handleToggleProduct(product.id, checked)}
+                      disabled={updatingProduct === product.id}
+                      size="sm"
+                    />
                   </div>
                   
                   {/* Action Buttons */}
@@ -655,6 +801,49 @@ export default function AdminProductsPage() {
               {uploading && (
                 <p className="text-sm text-gray-500 mt-2">Uploading images...</p>
               )}
+            </div>
+
+            {/* Video URL Input */}
+            <Input
+              label="Video URL (Optional)"
+              value={formData.video_url}
+              onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
+              placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..."
+              helperText="YouTube, Vimeo, or other video platform URL"
+            />
+
+            {/* Video Upload */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Upload Video (Optional)
+              </label>
+              <input
+                type="file"
+                accept="video/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    handleVideoUpload(file)
+                  }
+                }}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-jeffy-yellow"
+                disabled={uploading}
+              />
+              {formData.video_file_url && (
+                <div className="flex items-center gap-2 mt-2 p-3 bg-gray-50 rounded-lg">
+                  <video src={formData.video_file_url} controls className="max-w-xs h-24 rounded" />
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, video_file_url: '' })}
+                    className="text-red-600 hover:text-red-700 text-sm font-medium"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+              <p className="text-xs text-gray-500">
+                Maximum file size: 100MB. Supported formats: MP4, WebM, MOV, AVI
+              </p>
             </div>
             
             {/* Product Name */}
@@ -719,6 +908,18 @@ export default function AdminProductsPage() {
                   </option>
                 ))}
               </select>
+            </div>
+            
+            {/* Visibility Toggle */}
+            <div className="flex items-center justify-between py-3 border-t border-gray-200">
+              <label className="text-sm font-medium text-gray-700">
+                Product Visibility
+              </label>
+              <Toggle
+                checked={formData.is_active}
+                onChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                size="md"
+              />
             </div>
             
             {/* Variants Management */}

@@ -18,7 +18,7 @@
 }
 
 :root {
-  --background: #FCD34D; /* Jeffy yellow background */
+  --background: #EAB308; /* Jeffy yellow background - darker pure yellow */
   --foreground: #1F2937; /* Dark grey text */
 }
 
@@ -79,16 +79,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #FEF3C7;
+  background: #FEF08A;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #FCD34D;
+  background: #EAB308;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #F59E0B;
+  background: #CA8A04;
 }
 
 /* Mobile-first responsive utilities */
