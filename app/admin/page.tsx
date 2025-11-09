@@ -18,7 +18,8 @@ import {
   Calculator,
   AlertTriangle,
   BarChart3,
-  LayoutDashboard
+  LayoutDashboard,
+  FileText
 } from 'lucide-react'
 
 export default function AdminDashboard() {
@@ -264,6 +265,22 @@ export default function AdminDashboard() {
             </div>
           </Card>
           
+          <Card className="p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Stock Orders</h3>
+              <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+            </div>
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Create purchase orders for suppliers with shipping-compliant documents</p>
+            <div className="space-y-2">
+              <Link href="/admin/stock-orders">
+                <Button className="w-full text-sm sm:text-base">
+                  <FileText className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                  Manage Stock Orders
+                </Button>
+              </Link>
+            </div>
+          </Card>
+
           <Card className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <h3 className="text-base sm:text-lg font-semibold text-gray-900">Analytics</h3>

@@ -293,3 +293,78 @@ export interface ReorderRequest {
   product?: Product
   variant?: ProductVariant
 }
+
+// Stock Orders System Types
+export interface StockOrder {
+  id: string
+  order_number: string // PO-2024-001 format
+  supplier_name: string
+  supplier_email?: string | null
+  supplier_phone?: string | null
+  supplier_address?: string | null
+  supplier_city?: string | null
+  supplier_postal_code?: string | null
+  supplier_country?: string | null
+  
+  // Shipping information
+  shipping_address: string
+  shipping_city: string
+  shipping_postal_code: string
+  shipping_country?: string | null
+  shipping_contact_name?: string | null
+  shipping_contact_phone?: string | null
+  shipping_method?: string | null
+  expected_delivery_date?: string | null
+  
+  // Order details
+  order_date: string
+  order_status: 'draft' | 'submitted' | 'confirmed' | 'in_transit' | 'received' | 'cancelled'
+  notes?: string | null
+  total_quantity: number
+  total_cost: number
+  
+  // Metadata
+  created_by?: string | null
+  created_at: string
+  updated_at: string
+  
+  // Relations
+  items?: StockOrderItem[]
+}
+
+export interface StockOrderItem {
+  id: string
+  stock_order_id: string
+  product_id?: string | null
+  variant_id?: string | null
+  
+  // Product details (stored for reference)
+  product_name: string
+  product_sku?: string | null
+  product_description?: string | null
+  
+  // Variant details (if applicable)
+  variant_attributes?: Record<string, string> | null
+  
+  // Ordering details
+  quantity: number
+  unit_cost: number
+  line_total: number
+  
+  // Shipping details (for shipping calculations)
+  unit_weight_kg?: number | null
+  unit_length_cm?: number | null
+  unit_width_cm?: number | null
+  unit_height_cm?: number | null
+  
+  // Status
+  received_quantity: number
+  notes?: string | null
+  
+  created_at: string
+  updated_at: string
+  
+  // Relations
+  product?: Product
+  variant?: ProductVariant
+}
