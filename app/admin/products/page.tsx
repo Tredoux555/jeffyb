@@ -77,7 +77,10 @@ export default function AdminProductsPage() {
   
   const fetchProducts = async () => {
     try {
-      setLoading(true)
+      // Don't set loading to true when fetching in background (during edit)
+      if (!isModalOpen || !editingProduct) {
+        setLoading(true)
+      }
       const supabase = createClient()
       const { data, error } = await supabase
         .from('products')
@@ -89,7 +92,9 @@ export default function AdminProductsPage() {
     } catch (error) {
       console.error('Error fetching products:', error)
     } finally {
-      setLoading(false)
+      if (!isModalOpen || !editingProduct) {
+        setLoading(false)
+      }
     }
   }
 
@@ -1001,7 +1006,7 @@ export default function AdminProductsPage() {
           title={editingProduct ? 'Edit Product' : 'Add New Product'}
           size="lg"
         >
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={(e) => { e.preventDefault(); handleSubmit(e); }} className="space-y-6">
             {/* Product Images */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1206,7 +1211,11 @@ export default function AdminProductsPage() {
               >
                 Cancel
               </Button>
-              <Button type="submit" className="flex-1 order-1 sm:order-2">
+              <Button 
+                type="button"
+                onClick={handleSubmit}
+                className="flex-1 order-1 sm:order-2"
+              >
                 {editingProduct ? 'Update Product' : 'Add Product'}
               </Button>
             </div>
