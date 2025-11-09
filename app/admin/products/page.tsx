@@ -566,12 +566,15 @@ export default function AdminProductsPage() {
           
           // If editing, refresh the form with updated product data and keep modal open
           if (editingProduct) {
+            // Store the product ID before fetching
+            const currentProductId = editingProduct.id
+            
             // Fetch updated product data to refresh the form
             const supabase = createClient()
             const { data: updatedProduct } = await supabase
               .from('products')
               .select('*')
-              .eq('id', productId)
+              .eq('id', currentProductId)
               .single()
             
             if (updatedProduct) {
@@ -601,7 +604,7 @@ export default function AdminProductsPage() {
                 const { data: variantsData } = await supabase
                   .from('product_variants')
                   .select('*')
-                  .eq('product_id', productId)
+                  .eq('product_id', currentProductId)
                   .order('created_at')
                 setVariants(variantsData || [])
               } else {
