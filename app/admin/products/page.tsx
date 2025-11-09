@@ -143,6 +143,19 @@ export default function AdminProductsPage() {
     setUploading(true)
     try {
       const supabase = createClient()
+      
+      // Check if bucket exists and is accessible
+      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets()
+      if (bucketError) {
+        console.error('[Upload] Error checking buckets:', bucketError)
+        throw new Error(`Storage access error: ${bucketError.message}`)
+      }
+      
+      const productImagesBucket = buckets?.find(b => b.id === 'product-images')
+      if (!productImagesBucket) {
+        throw new Error('Product images storage bucket not found. Please run the migration to create it.')
+      }
+      
       const uploadedUrls: string[] = []
       const failedFiles: string[] = []
       for (const file of files) {
@@ -164,21 +177,32 @@ export default function AdminProductsPage() {
           try {
             const fileExt = file.name.split('.').pop()
             const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`
-            const { error } = await supabase.storage
+            const { data: uploadData, error: uploadError } = await supabase.storage
               .from('product-images')
-              .upload(fileName, file)
-            if (error) throw error
+              .upload(fileName, file, {
+                cacheControl: '3600',
+                upsert: false
+              })
+            
+            if (uploadError) {
+              console.error(`[Upload] Attempt ${attempt} error:`, uploadError)
+              throw uploadError
+            }
+            
             const { data: { publicUrl } } = supabase.storage
               .from('product-images')
               .getPublicUrl(fileName)
+            
             uploadedUrls.push(publicUrl)
+            console.log('[Upload] Success:', publicUrl)
             break
-          } catch (error) {
-            console.error(`Attempt ${attempt} failed:`, error)
+          } catch (error: any) {
+            console.error(`[Upload] Attempt ${attempt} failed:`, error)
+            const errorMessage = error?.message || 'Unknown error'
             if (attempt < 3) {
               await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
             } else {
-              failedFiles.push(`${file.name}`)
+              failedFiles.push(`${file.name} (${errorMessage})`)
             }
           }
         }
@@ -193,9 +217,10 @@ export default function AdminProductsPage() {
       if (failedFiles.length > 0) {
         alert(`Uploaded ${uploadedUrls.length} images. Failed: ${failedFiles.join(', ')}`)
       }
-    } catch (error) {
-      console.error('Error:', error)
-      alert(`Upload error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } catch (error: any) {
+      console.error('[Upload] Error:', error)
+      const errorMessage = error?.message || 'Unknown error'
+      alert(`Upload error: ${errorMessage}`)
     } finally {
       setUploading(false)
     }
