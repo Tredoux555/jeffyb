@@ -100,12 +100,14 @@ export async function POST(request: NextRequest) {
 
     // Generate order number
     const year = new Date().getFullYear()
-    const { data: existingOrders, error: fetchError } = await supabase
+    const { data: existingOrders, error: existingOrdersError } = await supabase
       .from('stock_orders')
       .select('order_number')
       .like('order_number', `PO-${year}-%`)
       .order('order_number', { ascending: false })
       .limit(1)
+
+    if (existingOrdersError) throw existingOrdersError
 
     let order_number: string
     if (existingOrders && existingOrders.length > 0) {
@@ -173,13 +175,13 @@ export async function POST(request: NextRequest) {
     if (itemsError) throw itemsError
 
     // Fetch complete order with items
-    const { data: completeOrder, error: fetchError } = await supabase
+    const { data: completeOrder, error: completeOrderError } = await supabase
       .from('stock_orders')
       .select('*')
       .eq('id', order.id)
       .single()
 
-    if (fetchError) throw fetchError
+    if (completeOrderError) throw completeOrderError
 
     return NextResponse.json({
       success: true,
@@ -254,13 +256,13 @@ export async function PUT(request: NextRequest) {
     }
 
     // Fetch complete order with items
-    const { data: completeOrder, error: fetchError } = await supabase
+    const { data: completeOrder, error: completeOrderError } = await supabase
       .from('stock_orders')
       .select('*')
       .eq('id', id)
       .single()
 
-    if (fetchError) throw fetchError
+    if (completeOrderError) throw completeOrderError
 
     const { data: items } = await supabase
       .from('stock_order_items')
