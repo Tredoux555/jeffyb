@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Toast } from "@/components/Toast"
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/Card'
@@ -30,6 +30,7 @@ export default function AdminProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const isEditingRef = useRef(false) // Track if we're in edit mode
   const [uploading, setUploading] = useState(false)
   const [toast, setToast] = useState({ isVisible: false, message: '' })
   const [updatingProduct, setUpdatingProduct] = useState<string | null>(null)
@@ -453,7 +454,7 @@ export default function AdminProductsPage() {
       }
       
       let response
-      if (editingProduct) {
+      if (isEditingRef.current && editingProduct) {
         // Update existing product
         response = await fetch('/api/admin/products', {
           method: 'PUT',
@@ -520,7 +521,7 @@ export default function AdminProductsPage() {
         
         try {
           // First, delete existing variants if editing
-          if (editingProduct) {
+          if (isEditingRef.current && editingProduct) {
             console.log('[FRONTEND] Deleting old variants for product:', productId)
             const deleteResponse = await fetch(`/api/admin/variants?product_id=${productId}`, {
               method: 'DELETE'
@@ -564,10 +565,10 @@ export default function AdminProductsPage() {
           // Refresh product list in background
           fetchProducts()
           
-          // If editing, refresh the form with updated product data and keep modal open
-          if (editingProduct) {
-            // Store the product ID before fetching
-            const currentProductId = editingProduct.id
+      // If editing, refresh the form with updated product data and keep modal open
+      if (isEditingRef.current && editingProduct) {
+        // Store the product ID before fetching
+        const currentProductId = editingProduct.id
             
             // Fetch updated product data to refresh the form
             const supabase = createClient()
@@ -616,6 +617,7 @@ export default function AdminProductsPage() {
             return
           } else {
             // For new products, close modal and reset form
+            isEditingRef.current = false
             setFormData({ name: '', description: '', price: '', category: 'gym', stock: '', image_url: '', images: [], video_url: '', video_file_url: '', has_variants: false, is_active: true, cost: '', reorder_point: '10', reorder_quantity: '50' })
             setVariants([])
             setEditingProduct(null)
@@ -641,13 +643,16 @@ export default function AdminProductsPage() {
       fetchProducts()
       
       // If editing, refresh the form with updated product data and keep modal open
-      if (editingProduct) {
+      if (isEditingRef.current && editingProduct) {
+        // Store the product ID before fetching
+        const currentProductId = editingProduct.id
+        
         // Fetch updated product data to refresh the form
         const supabase = createClient()
         const { data: updatedProduct } = await supabase
           .from('products')
           .select('*')
-          .eq('id', editingProduct.id)
+          .eq('id', currentProductId)
           .single()
         
         if (updatedProduct) {
@@ -677,7 +682,7 @@ export default function AdminProductsPage() {
             const { data: variantsData } = await supabase
               .from('product_variants')
               .select('*')
-              .eq('product_id', editingProduct.id)
+              .eq('product_id', currentProductId)
               .order('created_at')
             setVariants(variantsData || [])
           } else {
@@ -689,6 +694,7 @@ export default function AdminProductsPage() {
         return
       } else {
         // For new products, close modal and reset form
+        isEditingRef.current = false
         setFormData({
           name: '',
           description: '',
@@ -750,6 +756,7 @@ export default function AdminProductsPage() {
   }
 
   const handleEdit = async (product: Product) => {
+    isEditingRef.current = true // Set edit mode flag
     setEditingProduct(product)
     setFormData({
       name: product.name,
@@ -810,6 +817,7 @@ export default function AdminProductsPage() {
   }
   
   const openAddModal = () => {
+    isEditingRef.current = false // Clear edit mode flag
     setEditingProduct(null)
     setFormData({
       name: '',
@@ -1005,8 +1013,11 @@ export default function AdminProductsPage() {
         {/* Add/Edit Product Modal */}
         <Modal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          title={editingProduct ? 'Edit Product' : 'Add New Product'}
+          onClose={() => {
+            isEditingRef.current = false
+            setIsModalOpen(false)
+          }}
+          title={isEditingRef.current ? 'Edit Product' : 'Add New Product'}
           size="lg"
         >
           <form onSubmit={(e) => { e.preventDefault(); handleSubmit(e); }} className="space-y-6">
