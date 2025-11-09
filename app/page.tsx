@@ -57,6 +57,8 @@ export default function Home() {
             Jeffy in a Jiffy
           </p>
           {/* White container that wraps the CTA and the two lines */}
+          {/* Send / Receive functionality hidden temporarily - can be restored later */}
+          {/* 
           <div className="mt-4 sm:mt-6">
             <Card className="max-w-xl sm:max-w-2xl mx-auto p-4 sm:p-6 bg-white">
               {/* Green box wrapping the Send / Receive text */}
@@ -77,6 +79,7 @@ export default function Home() {
               </div>
             </Card>
           </div>
+          */}
         </div>
         
         {/* Call to Action moved into hero above */}
