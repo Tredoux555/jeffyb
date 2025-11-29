@@ -16,7 +16,8 @@ import {
   BarChart3,
   LayoutDashboard,
   MessageSquare,
-  Globe
+  Globe,
+  Users
 } from 'lucide-react'
 
 export default function AdminDashboard() {
@@ -348,9 +349,26 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        {/* Analytics & Insights - 2 Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          {/* 5. Analytics */}
+        {/* Analytics & Insights - 3 Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          {/* 5. User Management */}
+          <Card className="p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">User Management</h3>
+              <Users className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+            </div>
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Manage user accounts, verify emails, and reset passwords</p>
+            <div className="space-y-2">
+              <Link href="/admin/users">
+                <Button className="w-full text-sm sm:text-base">
+                  <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                  Manage Users
+                </Button>
+              </Link>
+            </div>
+          </Card>
+
+          {/* 6. Analytics */}
           <Card className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <h3 className="text-base sm:text-lg font-semibold text-gray-900">Analytics</h3>
@@ -367,7 +385,7 @@ export default function AdminDashboard() {
             </div>
           </Card>
 
-          {/* 6. Product Requests */}
+          {/* 7. Product Requests */}
           <Card className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <h3 className="text-base sm:text-lg font-semibold text-gray-900">Product Requests</h3>
