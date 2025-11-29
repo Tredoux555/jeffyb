@@ -380,7 +380,12 @@ export default function FranchiseProductDetailPage() {
             {/* Actions */}
             <div className="flex gap-2">
               <FavoriteButton productId={product.id} />
-              <SocialShare product={product} />
+              <SocialShare
+                url={`/franchise/${franchiseCode}/products/${product.id}`}
+                title={product.name}
+                description={product.description}
+                image={product.images?.[0] || product.image_url}
+              />
             </div>
           </div>
         </div>
