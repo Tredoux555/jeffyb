@@ -47,13 +47,15 @@ export function AddressInput({
   // Check if Google Maps is already loaded
   const { isLoaded: googleMapsLoaded, scriptLoaded } = useGoogleMaps()
 
-  // Validate API key format
-  const isValidApiKey = apiKey && 
-                        apiKey !== '' && 
-                        !apiKey.includes('placeholder') &&
-                        !apiKey.includes('your_') &&
-                        !apiKey.includes('YOUR_') &&
-                        apiKey.length > 20
+  // Validate API key format - TEMPORARILY DISABLED to fix checkout
+  const isValidApiKey = false // Disabled until Google Maps API issues are resolved
+  // Original check (commented out):
+  // const isValidApiKey = apiKey && 
+  //                       apiKey !== '' && 
+  //                       !apiKey.includes('placeholder') &&
+  //                       !apiKey.includes('your_') &&
+  //                       !apiKey.includes('YOUR_') &&
+  //                       apiKey.length > 20
 
   // Update mapsLoaded state if Google Maps is already loaded
   useEffect(() => {
