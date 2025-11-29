@@ -7,6 +7,7 @@ import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
 import { useAuth } from '@/lib/contexts/AuthContext'
+import { createClient } from '@/lib/supabase'
 import { Package } from 'lucide-react'
 
 export default function RegisterPage() {
@@ -45,8 +46,19 @@ export default function RegisterPage() {
 
     try {
       await signUp(formData.email, formData.password, formData.fullName)
-      // Redirect to profile after successful signup
-      router.push('/profile')
+      
+      // Check if email confirmation is required
+      // If user is null, email confirmation is required
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        // Email confirmation required
+        router.push('/auth/verify-email?email=' + encodeURIComponent(formData.email))
+      } else {
+        // Auto-confirmed, go to profile
+        router.push('/profile')
+      }
     } catch (error: any) {
       console.error('Registration error:', error)
       setError(error.message || 'Registration failed. Please try again.')

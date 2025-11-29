@@ -183,14 +183,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       },
     })
     if (error) throw error
+    
     // Profile is auto-created by database trigger
     if (data.user) {
-      // Wait a moment for trigger to create profile
-      setTimeout(async () => {
-        const userProfile = await fetchProfile(data.user!.id)
-        setProfile(userProfile)
-      }, 500)
+      // Try to fetch profile, but don't fail if it doesn't exist yet
+      try {
+        // Wait a moment for trigger to create profile
+        setTimeout(async () => {
+          try {
+            const userProfile = await fetchProfile(data.user!.id)
+            setProfile(userProfile)
+          } catch (profileError) {
+            // Silently handle profile fetch errors - profile will be created by trigger
+            console.warn('Profile not yet available, will be created by trigger:', profileError)
+            setProfile(null)
+          }
+        }, 1000) // Increased timeout to 1 second
+      } catch (err) {
+        // Don't fail signup if profile fetch fails
+        console.warn('Could not fetch profile immediately:', err)
+      }
     }
+    
+    // Return data even if profile fetch fails
+    return data
   }
 
   const signOut = async () => {

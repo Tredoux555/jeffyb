@@ -39,7 +39,15 @@ export default function LoginPage() {
       router.push(redirectTo)
     } catch (error: any) {
       console.error('Login error:', error)
-      setError(error.message || 'Invalid email or password')
+      
+      // Provide more helpful error messages
+      if (error.message?.includes('Invalid login credentials')) {
+        setError('Invalid email or password. If you just registered, please check your email to confirm your account.')
+      } else if (error.message?.includes('Email not confirmed') || error.message?.includes('email_not_confirmed')) {
+        setError('Please check your email and click the confirmation link before logging in.')
+      } else {
+        setError(error.message || 'Invalid email or password')
+      }
     } finally {
       setLoading(false)
     }
