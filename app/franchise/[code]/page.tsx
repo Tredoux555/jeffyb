@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { ProductCard } from '@/components/ProductCard'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
-import { Product } from '@/types/database'
+import { Product, CartItem } from '@/types/database'
 import { createClient } from '@/lib/supabase'
 import { useCart } from '@/lib/hooks/useCart'
 import { Search, Filter, Grid, List, Package, MapPin } from 'lucide-react'
@@ -273,7 +273,17 @@ export default function FranchiseProductsPage() {
                     localStorage.setItem('jeffy-franchise-code', franchiseCode)
                     localStorage.setItem('jeffy-franchise-id', franchise?.id || '')
                   }
-                  addToCart(p)
+                  
+                  // Convert Product to CartItem
+                  const cartItem: CartItem = {
+                    product_id: p.id,
+                    product_name: p.name,
+                    price: p.price,
+                    quantity: 1,
+                    image_url: p.images?.[0] || p.image_url || undefined
+                  }
+                  
+                  addToCart(cartItem)
                 }}
                 onViewDetails={(p) => {
                   router.push(`/franchise/${franchiseCode}/products/${p.id}`)
