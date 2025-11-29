@@ -198,7 +198,14 @@ export default function FranchiseProductDetailPage() {
       })
     } else {
       // Simple product without variants
-      addToCart(product)
+      const cartItem: CartItem = {
+        product_id: product.id,
+        product_name: product.name,
+        price: product.price,
+        quantity: 1,
+        image_url: product.images?.[0] || product.image_url || undefined
+      }
+      addToCart(cartItem)
     }
 
     setNotificationMessage('Added to cart!')
