@@ -7,6 +7,12 @@ import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
 import { ProfitMarginBadge } from '@/components/ProfitMarginBadge'
+import ProcurementSection from './components/ProcurementSection'
+import ShipmentsSection from './components/ShipmentsSection'
+import CustomsCalculatorSection from './components/CustomsCalculatorSection'
+import DistributorsSection from './components/DistributorsSection'
+import StockAllocationSection from './components/StockAllocationSection'
+import FranchiseFinancialsSection from './components/FranchiseFinancialsSection'
 import { 
   DollarSign, 
   TrendingUp, 
@@ -17,7 +23,11 @@ import {
   Settings,
   BarChart3,
   PieChart,
-  ArrowLeft
+  ArrowLeft,
+  Truck,
+  Calculator,
+  Users,
+  FileText
 } from 'lucide-react'
 
 interface DashboardStats {
@@ -49,7 +59,7 @@ interface ProductProfit {
 export default function AccountingPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'tax' | 'reports'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'tax' | 'reports' | 'procurement' | 'shipments' | 'customs' | 'distributors' | 'stock-allocation' | 'franchise-financials'>('dashboard')
   const [dateRange, setDateRange] = useState<'today' | 'week' | 'month' | 'year' | 'all'>('month')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
@@ -306,6 +316,12 @@ export default function AccountingPage() {
         <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200">
           {[
             { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+            { id: 'procurement', label: 'Procurement', icon: Package },
+            { id: 'shipments', label: 'Shipments', icon: Truck },
+            { id: 'stock-allocation', label: 'Stock Allocation', icon: Package },
+            { id: 'franchise-financials', label: 'Franchise Financials', icon: BarChart3 },
+            { id: 'customs', label: 'Customs Calculator', icon: Calculator },
+            { id: 'distributors', label: 'Distributors', icon: Users },
             { id: 'products', label: 'Products & Profit', icon: Package },
             { id: 'tax', label: 'Tax Management', icon: Settings },
             { id: 'reports', label: 'Reports', icon: PieChart }
@@ -565,6 +581,36 @@ export default function AccountingPage() {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Financial Reports</h3>
             <p className="text-gray-600">Reports coming soon...</p>
           </Card>
+        )}
+
+        {/* Procurement Tab */}
+        {activeTab === 'procurement' && (
+          <ProcurementSection />
+        )}
+
+        {/* Shipments Tab */}
+        {activeTab === 'shipments' && (
+          <ShipmentsSection />
+        )}
+
+        {/* Customs Calculator Tab */}
+        {activeTab === 'customs' && (
+          <CustomsCalculatorSection />
+        )}
+
+        {/* Distributors Tab */}
+        {activeTab === 'distributors' && (
+          <DistributorsSection />
+        )}
+
+        {/* Stock Allocation Tab */}
+        {activeTab === 'stock-allocation' && (
+          <StockAllocationSection />
+        )}
+
+        {/* Franchise Financials Tab */}
+        {activeTab === 'franchise-financials' && (
+          <FranchiseFinancialsSection />
         )}
       </div>
     </div>

@@ -5,7 +5,7 @@ import { OrderItem } from '@/types/database'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { user_id, user_email, items, total, delivery_info } = body
+    const { user_id, user_email, items, total, delivery_info, franchise_location_id } = body
 
     if (!user_email || !items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
@@ -17,76 +17,160 @@ export async function POST(request: NextRequest) {
     const supabase = createAdminClient()
 
     // Step 1: Validate stock availability and prepare stock updates
+    // If franchise_location_id is provided, check location_stock instead of product stock
     const stockUpdates: Array<{
       product_id: string
       variant_id?: string
       quantity: number
       previous_stock: number
+      is_franchise: boolean
+      location_id?: string
     }> = []
 
     for (const item of items as OrderItem[]) {
-      if (item.variant_id) {
-        // Check variant stock
-        const { data: variant, error: variantError } = await supabase
-          .from('product_variants')
-          .select('stock')
-          .eq('id', item.variant_id)
-          .single()
+      if (franchise_location_id) {
+        // Franchise order - check location_stock
+        if (item.variant_id) {
+          const { data: locationStock, error: stockError } = await supabase
+            .from('location_stock')
+            .select('stock_quantity')
+            .eq('location_id', franchise_location_id)
+            .eq('product_id', item.product_id)
+            .eq('variant_id', item.variant_id)
+            .single()
 
-        if (variantError || !variant) {
-          return NextResponse.json(
-            { success: false, error: `Variant ${item.variant_id} not found` },
-            { status: 400 }
-          )
+          if (stockError || !locationStock) {
+            return NextResponse.json(
+              { success: false, error: `Variant not available at this franchise location` },
+              { status: 400 }
+            )
+          }
+
+          if (locationStock.stock_quantity < item.quantity) {
+            return NextResponse.json(
+              { success: false, error: `Insufficient stock at franchise. Available: ${locationStock.stock_quantity}, Requested: ${item.quantity}` },
+              { status: 400 }
+            )
+          }
+
+          stockUpdates.push({
+            product_id: item.product_id,
+            variant_id: item.variant_id,
+            quantity: item.quantity,
+            previous_stock: locationStock.stock_quantity,
+            is_franchise: true,
+            location_id: franchise_location_id
+          })
+        } else {
+          const { data: locationStock, error: stockError } = await supabase
+            .from('location_stock')
+            .select('stock_quantity')
+            .eq('location_id', franchise_location_id)
+            .eq('product_id', item.product_id)
+            .is('variant_id', null)
+            .single()
+
+          if (stockError || !locationStock) {
+            return NextResponse.json(
+              { success: false, error: `Product not available at this franchise location` },
+              { status: 400 }
+            )
+          }
+
+          // Check if product has variants
+          const { data: product } = await supabase
+            .from('products')
+            .select('has_variants')
+            .eq('id', item.product_id)
+            .single()
+
+          if (product?.has_variants) {
+            return NextResponse.json(
+              { success: false, error: `Product requires variant selection` },
+              { status: 400 }
+            )
+          }
+
+          if (locationStock.stock_quantity < item.quantity) {
+            return NextResponse.json(
+              { success: false, error: `Insufficient stock at franchise. Available: ${locationStock.stock_quantity}, Requested: ${item.quantity}` },
+              { status: 400 }
+            )
+          }
+
+          stockUpdates.push({
+            product_id: item.product_id,
+            quantity: item.quantity,
+            previous_stock: locationStock.stock_quantity,
+            is_franchise: true,
+            location_id: franchise_location_id
+          })
         }
-
-        if (variant.stock < item.quantity) {
-          return NextResponse.json(
-            { success: false, error: `Insufficient stock for variant. Available: ${variant.stock}, Requested: ${item.quantity}` },
-            { status: 400 }
-          )
-        }
-
-        stockUpdates.push({
-          product_id: item.product_id,
-          variant_id: item.variant_id,
-          quantity: item.quantity,
-          previous_stock: variant.stock
-        })
       } else {
-        // Check product stock
-        const { data: product, error: productError } = await supabase
-          .from('products')
-          .select('stock, has_variants')
-          .eq('id', item.product_id)
-          .single()
+        // Regular order - check product/variant stock (existing logic)
+        if (item.variant_id) {
+          const { data: variant, error: variantError } = await supabase
+            .from('product_variants')
+            .select('stock')
+            .eq('id', item.variant_id)
+            .single()
 
-        if (productError || !product) {
-          return NextResponse.json(
-            { success: false, error: `Product ${item.product_id} not found` },
-            { status: 400 }
-          )
+          if (variantError || !variant) {
+            return NextResponse.json(
+              { success: false, error: `Variant ${item.variant_id} not found` },
+              { status: 400 }
+            )
+          }
+
+          if (variant.stock < item.quantity) {
+            return NextResponse.json(
+              { success: false, error: `Insufficient stock for variant. Available: ${variant.stock}, Requested: ${item.quantity}` },
+              { status: 400 }
+            )
+          }
+
+          stockUpdates.push({
+            product_id: item.product_id,
+            variant_id: item.variant_id,
+            quantity: item.quantity,
+            previous_stock: variant.stock,
+            is_franchise: false
+          })
+        } else {
+          const { data: product, error: productError } = await supabase
+            .from('products')
+            .select('stock, has_variants')
+            .eq('id', item.product_id)
+            .single()
+
+          if (productError || !product) {
+            return NextResponse.json(
+              { success: false, error: `Product ${item.product_id} not found` },
+              { status: 400 }
+            )
+          }
+
+          if (product.has_variants) {
+            return NextResponse.json(
+              { success: false, error: `Product requires variant selection` },
+              { status: 400 }
+            )
+          }
+
+          if (product.stock < item.quantity) {
+            return NextResponse.json(
+              { success: false, error: `Insufficient stock for product. Available: ${product.stock}, Requested: ${item.quantity}` },
+              { status: 400 }
+            )
+          }
+
+          stockUpdates.push({
+            product_id: item.product_id,
+            quantity: item.quantity,
+            previous_stock: product.stock,
+            is_franchise: false
+          })
         }
-
-        if (product.has_variants) {
-          return NextResponse.json(
-            { success: false, error: `Product requires variant selection` },
-            { status: 400 }
-          )
-        }
-
-        if (product.stock < item.quantity) {
-          return NextResponse.json(
-            { success: false, error: `Insufficient stock for product. Available: ${product.stock}, Requested: ${item.quantity}` },
-            { status: 400 }
-          )
-        }
-
-        stockUpdates.push({
-          product_id: item.product_id,
-          quantity: item.quantity,
-          previous_stock: product.stock
-        })
       }
     }
 
@@ -99,7 +183,8 @@ export async function POST(request: NextRequest) {
         items,
         total,
         status: 'pending',
-        delivery_info
+        delivery_info,
+        franchise_location_id: franchise_location_id || null
       })
       .select()
       .single()
@@ -114,23 +199,38 @@ export async function POST(request: NextRequest) {
 
     // Step 3: Decrement stock and create stock history entries
     for (const update of stockUpdates) {
-      if (update.variant_id) {
-        // Update variant stock
+      if (update.is_franchise && update.location_id) {
+        // Franchise order - update location_stock
         const newStock = update.previous_stock - update.quantity
-        const { error: stockError } = await supabase
-          .from('product_variants')
-          .update({ stock: newStock })
-          .eq('id', update.variant_id)
+        
+        if (update.variant_id) {
+          const { error: stockError } = await supabase
+            .from('location_stock')
+            .update({ stock_quantity: newStock })
+            .eq('location_id', update.location_id)
+            .eq('product_id', update.product_id)
+            .eq('variant_id', update.variant_id)
 
-        if (stockError) {
-          console.error('[Order API] Error updating variant stock:', stockError)
-          // Continue with other updates, but log error
+          if (stockError) {
+            console.error('[Order API] Error updating franchise variant stock:', stockError)
+          }
+        } else {
+          const { error: stockError } = await supabase
+            .from('location_stock')
+            .update({ stock_quantity: newStock })
+            .eq('location_id', update.location_id)
+            .eq('product_id', update.product_id)
+            .is('variant_id', null)
+
+          if (stockError) {
+            console.error('[Order API] Error updating franchise product stock:', stockError)
+          }
         }
 
         // Create stock history entry
         await supabase.from('stock_history').insert({
           product_id: update.product_id,
-          variant_id: update.variant_id,
+          variant_id: update.variant_id || null,
           change_type: 'sale',
           quantity_change: -update.quantity,
           previous_stock: update.previous_stock,
@@ -139,28 +239,50 @@ export async function POST(request: NextRequest) {
           created_by: 'system'
         })
       } else {
-        // Update product stock
-        const newStock = update.previous_stock - update.quantity
-        const { error: stockError } = await supabase
-          .from('products')
-          .update({ stock: newStock })
-          .eq('id', update.product_id)
+        // Regular order - update product/variant stock (existing logic)
+        if (update.variant_id) {
+          const newStock = update.previous_stock - update.quantity
+          const { error: stockError } = await supabase
+            .from('product_variants')
+            .update({ stock: newStock })
+            .eq('id', update.variant_id)
 
-        if (stockError) {
-          console.error('[Order API] Error updating product stock:', stockError)
+          if (stockError) {
+            console.error('[Order API] Error updating variant stock:', stockError)
+          }
+
+          await supabase.from('stock_history').insert({
+            product_id: update.product_id,
+            variant_id: update.variant_id,
+            change_type: 'sale',
+            quantity_change: -update.quantity,
+            previous_stock: update.previous_stock,
+            new_stock: newStock,
+            order_id: order.id,
+            created_by: 'system'
+          })
+        } else {
+          const newStock = update.previous_stock - update.quantity
+          const { error: stockError } = await supabase
+            .from('products')
+            .update({ stock: newStock })
+            .eq('id', update.product_id)
+
+          if (stockError) {
+            console.error('[Order API] Error updating product stock:', stockError)
+          }
+
+          await supabase.from('stock_history').insert({
+            product_id: update.product_id,
+            variant_id: null,
+            change_type: 'sale',
+            quantity_change: -update.quantity,
+            previous_stock: update.previous_stock,
+            new_stock: newStock,
+            order_id: order.id,
+            created_by: 'system'
+          })
         }
-
-        // Create stock history entry
-        await supabase.from('stock_history').insert({
-          product_id: update.product_id,
-          variant_id: null,
-          change_type: 'sale',
-          quantity_change: -update.quantity,
-          previous_stock: update.previous_stock,
-          new_stock: newStock,
-          order_id: order.id,
-          created_by: 'system'
-        })
       }
     }
 
@@ -223,6 +345,66 @@ export async function POST(request: NextRequest) {
       net_profit_after_tax: netProfitAfterTax,
       currency: 'ZAR'
     })
+
+    // Step 5: Add products to procurement queue (automatic on every sale)
+    for (const item of items as OrderItem[]) {
+      try {
+        // Get product location (if set, otherwise use default Johannesburg)
+        const { data: product } = await supabase
+          .from('products')
+          .select('id, location_id')
+          .eq('id', item.product_id)
+          .single()
+
+        // Get default location (Johannesburg) if product doesn't have location
+        let locationId = product?.location_id || null
+        if (!locationId) {
+          const { data: defaultLocation } = await supabase
+            .from('locations')
+            .select('id')
+            .eq('name', 'Johannesburg')
+            .eq('is_active', true)
+            .single()
+          locationId = defaultLocation?.id || null
+        }
+
+        // Check if item already exists in procurement queue with pending status
+        const { data: existingQueueItem } = await supabase
+          .from('procurement_queue')
+          .select('id, quantity_needed')
+          .eq('product_id', item.product_id)
+          .eq('variant_id', item.variant_id || null)
+          .eq('status', 'pending')
+          .single()
+
+        if (existingQueueItem) {
+          // Update existing queue item - add to quantity needed
+          await supabase
+            .from('procurement_queue')
+            .update({
+              quantity_needed: existingQueueItem.quantity_needed + item.quantity,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', existingQueueItem.id)
+        } else {
+          // Create new queue item
+          await supabase
+            .from('procurement_queue')
+            .insert({
+              product_id: item.product_id,
+              variant_id: item.variant_id || null,
+              location_id: locationId,
+              quantity_needed: item.quantity,
+              status: 'pending',
+              priority: 'normal'
+            })
+        }
+      } catch (procurementError) {
+        // Log error but don't fail the order creation
+        console.error('[Order API] Error adding to procurement queue:', procurementError)
+        // Continue with other items
+      }
+    }
 
     return NextResponse.json({
       success: true,

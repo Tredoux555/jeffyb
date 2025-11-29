@@ -128,6 +128,11 @@ export default function CheckoutPage() {
         })
       )
       
+      // Get franchise location ID from localStorage if available
+      const franchiseLocationId = typeof window !== 'undefined' 
+        ? localStorage.getItem('jeffy-franchise-id') 
+        : null
+
       // Create order via API route (handles stock decrement and financial transactions)
       const orderResponse = await fetch('/api/orders', {
         method: 'POST',
@@ -139,6 +144,7 @@ export default function CheckoutPage() {
           user_email: customerInfo.email,
           items: itemsWithCosts,
           total: total,
+          franchise_location_id: franchiseLocationId || null,
           delivery_info: {
             name: customerInfo.name,
             phone: customerInfo.phone,

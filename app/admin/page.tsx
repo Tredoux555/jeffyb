@@ -10,22 +10,20 @@ import {
   Package, 
   ShoppingCart, 
   Truck, 
-  Plus, 
-  Edit, 
   DollarSign,
   MapPin,
   Tag,
-  Calculator,
-  AlertTriangle,
   BarChart3,
   LayoutDashboard,
-  FileText,
-  MessageSquare
+  MessageSquare,
+  Globe
 } from 'lucide-react'
 
 export default function AdminDashboard() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
+  const [locations, setLocations] = useState<any[]>([])
+  const [selectedLocation, setSelectedLocation] = useState<string>('')
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalOrders: 0,
@@ -36,8 +34,42 @@ export default function AdminDashboard() {
   
   useEffect(() => {
     checkAuth()
+    fetchLocations()
+    loadSelectedLocation()
     fetchStats()
   }, [])
+
+  useEffect(() => {
+    if (selectedLocation) {
+      localStorage.setItem('jeffy-selected-location', selectedLocation)
+      fetchStats() // Refresh stats for selected location
+    }
+  }, [selectedLocation])
+
+  const fetchLocations = async () => {
+    try {
+      const response = await fetch('/api/admin/locations')
+      const result = await response.json()
+      if (result.success) {
+        setLocations(result.data || [])
+        // Set default location if none selected
+        if (!selectedLocation && result.data && result.data.length > 0) {
+          setSelectedLocation(result.data[0].id)
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching locations:', error)
+    }
+  }
+
+  const loadSelectedLocation = () => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('jeffy-selected-location')
+      if (saved) {
+        setSelectedLocation(saved)
+      }
+    }
+  }
   
   const checkAuth = () => {
     if (typeof window !== 'undefined') {
@@ -194,100 +226,137 @@ export default function AdminDashboard() {
             )
           })}
         </div>
+
+        {/* Location Selector */}
+        {locations.length > 1 && (
+          <Card className="mb-6 p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Globe className="w-5 h-5 text-gray-500" />
+                <span className="text-sm font-medium text-gray-700">Location:</span>
+                <select
+                  value={selectedLocation}
+                  onChange={(e) => setSelectedLocation(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jeffy-yellow bg-white"
+                >
+                  {locations.map(location => (
+                    <option key={location.id} value={location.id}>
+                      {location.name} {location.code ? `(${location.code})` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="text-sm text-gray-500">
+                {locations.find(l => l.id === selectedLocation)?.name || 'All Locations'}
+              </div>
+            </div>
+          </Card>
+        )}
         
-        {/* Quick Actions */}
+        {/* Core Management - 4 Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          {/* 1. Products & Categories (Merged) */}
           <Card className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Product Management</h3>
-              <Package className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Products & Categories</h3>
+              <div className="flex gap-2">
+                <Package className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+                <Tag className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+              </div>
             </div>
-            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Add, edit, and manage your product catalog</p>
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Manage your product catalog and categories</p>
             <div className="space-y-2">
               <Link href="/admin/products">
                 <Button className="w-full text-sm sm:text-base">
-                  <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                  <Package className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                   Manage Products
                 </Button>
               </Link>
-            </div>
-          </Card>
-
-          <Card className="p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Category Management</h3>
-              <Tag className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
-            </div>
-            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Add, edit, and manage product categories</p>
-            <div className="space-y-2">
               <Link href="/admin/categories">
-                <Button className="w-full text-sm sm:text-base">
+                <Button variant="outline" className="w-full text-sm sm:text-base">
                   <Tag className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                   Manage Categories
                 </Button>
               </Link>
             </div>
           </Card>
-          
+
+          {/* 2. Orders & Deliveries (Merged) */}
           <Card className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Accounting</h3>
-              <Calculator className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Orders & Deliveries</h3>
+              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
             </div>
-            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Track costs, profits, taxes, and financial reports</p>
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Process orders and manage deliveries</p>
+            <div className="space-y-2">
+              <Link href="/admin/orders">
+                <Button className="w-full text-sm sm:text-base">
+                  <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                  View Orders
+                </Button>
+              </Link>
+              <Link href="/admin/deliveries">
+                <Button variant="outline" className="w-full text-sm sm:text-base">
+                  <Truck className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                  Manage Deliveries
+                </Button>
+              </Link>
+              <Link href="/admin/drivers">
+                <Button variant="outline" className="w-full text-sm sm:text-base">
+                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                  Driver Map
+                </Button>
+              </Link>
+            </div>
+          </Card>
+
+          {/* 3. Financial & Accounting */}
+          <Card className="p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Financial & Accounting</h3>
+              <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+            </div>
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Procurement, shipments, customs, distributors, and financial tracking</p>
             <div className="space-y-2">
               <Link href="/admin/accounting">
                 <Button className="w-full text-sm sm:text-base">
-                  <Calculator className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                  View Accounting
+                  <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                  Open Accounting
                 </Button>
               </Link>
             </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Includes: Procurement Queue (auto-populated), Shipments, Stock Allocation, Customs Calculator, Franchise Financials
+            </p>
           </Card>
 
+          {/* 4. Franchise Management */}
           <Card className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Reorder Management</h3>
-              <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Franchise Management</h3>
+              <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
             </div>
-            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Track low stock items and manage reorders</p>
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Manage franchise locations, stock allocation, and performance</p>
             <div className="space-y-2">
-              <Link href="/admin/reorders">
+              <Link href="/admin/franchises">
                 <Button className="w-full text-sm sm:text-base">
-                  <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                  {stats.lowStockItems > 0 && (
-                    <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full ml-2">
-                      {stats.lowStockItems}
-                    </span>
-                  )}
-                  Manage Reorders
+                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                  Manage Franchises
                 </Button>
               </Link>
             </div>
           </Card>
-          
-          <Card className="p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Stock Orders</h3>
-              <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
-            </div>
-            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Create purchase orders for suppliers with shipping-compliant documents</p>
-            <div className="space-y-2">
-              <Link href="/admin/stock-orders">
-                <Button className="w-full text-sm sm:text-base">
-                  <FileText className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                  Manage Stock Orders
-                </Button>
-              </Link>
-            </div>
-          </Card>
+        </div>
 
+        {/* Analytics & Insights - 2 Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          {/* 5. Analytics */}
           <Card className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <h3 className="text-base sm:text-lg font-semibold text-gray-900">Analytics</h3>
               <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
             </div>
-            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">View sales insights, best sellers, and performance metrics</p>
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Sales insights, best sellers, and performance metrics</p>
             <div className="space-y-2">
               <Link href="/admin/analytics">
                 <Button className="w-full text-sm sm:text-base">
@@ -298,55 +367,7 @@ export default function AdminDashboard() {
             </div>
           </Card>
 
-          <Card className="p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Order Management</h3>
-              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
-            </div>
-            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">View and process customer orders</p>
-            <div className="space-y-2">
-              <Link href="/admin/orders">
-                <Button className="w-full text-sm sm:text-base">
-                  <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                  View Orders
-                </Button>
-              </Link>
-            </div>
-          </Card>
-          
-          <Card className="p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Delivery Management</h3>
-              <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
-            </div>
-            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Manage delivery requests and tracking</p>
-            <div className="space-y-2">
-              <Link href="/admin/deliveries">
-                <Button className="w-full text-sm sm:text-base">
-                  <Truck className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                  Manage Deliveries
-                </Button>
-              </Link>
-            </div>
-          </Card>
-
-          <Card className="p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Driver Locations</h3>
-              <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
-            </div>
-            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Track all delivery drivers in real-time</p>
-            <div className="space-y-2">
-              <Link href="/admin/drivers">
-                <Button className="w-full text-sm sm:text-base">
-                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                  View Driver Map
-                </Button>
-              </Link>
-            </div>
-          </Card>
-
-          {/* Product Requests */}
+          {/* 6. Product Requests */}
           <Card className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <h3 className="text-base sm:text-lg font-semibold text-gray-900">Product Requests</h3>
