@@ -384,7 +384,7 @@ export default function FranchiseProductDetailPage() {
                 url={`/franchise/${franchiseCode}/products/${product.id}`}
                 title={product.name}
                 description={product.description}
-                image={product.images?.[0] || product.image_url}
+                image={product.images?.[0] || product.image_url || undefined}
               />
             </div>
           </div>
@@ -402,6 +402,7 @@ export default function FranchiseProductDetailPage() {
           <ImageZoom
             images={images}
             initialIndex={selectedImageIndex}
+            isOpen={isZoomOpen}
             onClose={() => setIsZoomOpen(false)}
           />
         )}
