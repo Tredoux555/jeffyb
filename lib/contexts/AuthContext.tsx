@@ -204,9 +204,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.warn('Could not fetch profile immediately:', err)
       }
     }
-    
-    // Return data even if profile fetch fails
-    return data
   }
 
   const signOut = async () => {
