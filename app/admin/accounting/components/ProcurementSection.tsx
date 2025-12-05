@@ -6,14 +6,13 @@ import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
 import { Modal } from '@/components/Modal'
 import { ProcurementQueueItem } from '@/types/database'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { 
-  Plus, 
   Search, 
   Package, 
   ExternalLink,
   Send,
   FileText,
-  Download,
   Edit
 } from 'lucide-react'
 
@@ -186,10 +185,7 @@ export default function ProcurementSection() {
 
       {/* Queue Items List */}
       {loading ? (
-        <Card className="p-8 text-center">
-          <Package className="w-12 h-12 text-gray-400 mx-auto mb-4 animate-pulse" />
-          <p className="text-gray-600">Loading procurement queue...</p>
-        </Card>
+        <LoadingSpinner message="Loading procurement queue..." />
       ) : filteredItems.length === 0 ? (
         <Card className="p-8 text-center">
           <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />

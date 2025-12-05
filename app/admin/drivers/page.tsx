@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase'
 import { Driver } from '@/types/database'
 import { DriversMap } from '@/components/DriversMap'
 import { mockDrivers, shouldUseMockDrivers } from '@/lib/mock-drivers'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
 import {
   MapPin,
   Truck,
@@ -17,7 +18,7 @@ import {
   Clock,
   RefreshCw,
   Filter,
-  Package
+  ArrowLeft
 } from 'lucide-react'
 
 type StatusFilter = 'all' | 'active' | 'busy' | 'inactive'
@@ -186,16 +187,7 @@ export default function AdminDriversPage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative w-12 h-12 mx-auto mb-4">
-            <Package className="w-12 h-12 text-green-500 animate-pulse" />
-          </div>
-          <p className="text-gray-700">Loading drivers...</p>
-        </div>
-      </div>
-    )
+    return <LoadingSpinner message="Loading drivers..." fullScreen />
   }
 
   return (
@@ -214,18 +206,16 @@ export default function AdminDriversPage() {
           <div className="flex gap-3">
             <Button
               variant="outline"
-              onClick={handleRefresh}
-              className="flex items-center gap-2"
+              onClick={() => router.push('/admin')}
             >
-              <RefreshCw className="w-4 h-4" />
-              Refresh
+              <ArrowLeft className="w-4 h-4" />
             </Button>
             <Button
               variant="outline"
-              onClick={() => router.push('/admin')}
-              className="w-full sm:w-auto"
+              onClick={handleRefresh}
             >
-              Back to Dashboard
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
             </Button>
           </div>
         </div>
