@@ -14,6 +14,7 @@ import {
   Trash2,
   ArrowLeft
 } from 'lucide-react'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
 import Image from 'next/image'
 
 export default function CartPage() {
@@ -75,18 +76,11 @@ export default function CartPage() {
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0)
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-jeffy-yellow-light flex items-center justify-center px-4">
-        <div className="text-center">
-          <ShoppingCart className="w-12 h-12 sm:w-16 sm:h-16 text-blue-500 animate-bounce mx-auto mb-4" />
-          <p className="text-sm sm:text-base text-gray-700">Loading cart...</p>
-        </div>
-      </div>
-    )
+    return <LoadingSpinner message="Loading your cart..." fullScreen />
   }
 
   return (
-    <div className="min-h-screen bg-jeffy-yellow-light">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">

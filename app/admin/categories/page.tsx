@@ -216,7 +216,7 @@ export default function AdminCategoriesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center px-4">
         <div className="text-center">
           <Tag className="w-12 h-12 sm:w-16 sm:h-16 text-purple-500 animate-bounce mx-auto mb-4" />
           <p className="text-sm sm:text-base text-gray-700">Loading categories...</p>
@@ -226,7 +226,7 @@ export default function AdminCategoriesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-jeffy-yellow">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100">
       <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
@@ -277,7 +277,7 @@ export default function AdminCategoriesPage() {
                       {category.icon && (() => {
                         const IconComponent = getIconComponent(category.icon)
                         return (
-                          <div className="w-8 h-8 flex items-center justify-center bg-jeffy-yellow-light rounded-lg flex-shrink-0">
+                          <div className="w-8 h-8 flex items-center justify-center bg-gradient-to-b from-jeffy-yellow to-amber-100-light rounded-lg flex-shrink-0">
                             <IconComponent className="w-5 h-5 text-gray-700" />
                           </div>
                         )

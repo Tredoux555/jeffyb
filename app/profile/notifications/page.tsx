@@ -139,7 +139,7 @@ export default function NotificationsPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center">
         <div className="text-center">
           <div className="relative w-12 h-12 mx-auto mb-4">
             <Package className="w-12 h-12 text-green-500 animate-[spin_3s_linear_infinite]" />
@@ -155,7 +155,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-jeffy-yellow">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100">
       <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">

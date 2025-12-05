@@ -88,7 +88,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center px-4">
         <div className="text-center">
           <Package className="w-12 h-12 sm:w-16 sm:h-16 text-green-500 animate-bounce mx-auto mb-4" />
           <p className="text-sm sm:text-base text-gray-700">Loading products...</p>
@@ -98,7 +98,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   }
   
   return (
-    <div className="min-h-screen bg-jeffy-yellow">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100">
       <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">

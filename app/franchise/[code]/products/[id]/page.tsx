@@ -215,7 +215,7 @@ export default function FranchiseProductDetailPage() {
 
   if (loading || !product || !franchise) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center">
         <div className="text-center">
           <Package className="w-16 h-16 text-gray-400 mx-auto mb-4 animate-pulse" />
           <p className="text-gray-600">Loading product...</p>
@@ -228,7 +228,7 @@ export default function FranchiseProductDetailPage() {
                  product.image_url ? [product.image_url] : []
 
   return (
-    <div className="min-h-screen bg-jeffy-yellow">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100">
       <div className="container mx-auto px-4 py-6">
         {/* Franchise Header */}
         <div className="mb-4 flex items-center gap-2 text-sm">

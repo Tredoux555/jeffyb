@@ -171,7 +171,7 @@ export default function FranchiseProductsPage() {
 
   if (!franchise) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center">
         <div className="text-center">
           <Package className="w-16 h-16 text-gray-400 mx-auto mb-4 animate-pulse" />
           <p className="text-gray-600">Loading franchise...</p>
@@ -181,7 +181,7 @@ export default function FranchiseProductsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-jeffy-yellow">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100">
       <div className="container mx-auto px-4 py-6 sm:py-8">
         {/* Franchise Header */}
         <Card className="mb-6 p-4 sm:p-6">
@@ -228,13 +228,13 @@ export default function FranchiseProductsPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-jeffy-yellow' : 'bg-gray-100'}`}
+                className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-gradient-to-b from-jeffy-yellow to-amber-100' : 'bg-gray-100'}`}
               >
                 <Grid className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-jeffy-yellow' : 'bg-gray-100'}`}
+                className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-gradient-to-b from-jeffy-yellow to-amber-100' : 'bg-gray-100'}`}
               >
                 <List className="w-5 h-5" />
               </button>

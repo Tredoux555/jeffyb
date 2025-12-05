@@ -44,7 +44,7 @@ function CheckoutSuccessContent() {
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center">
         <div className="text-center">
           <div className="relative w-12 h-12 mx-auto mb-4">
             <Package className="w-12 h-12 text-green-500 animate-pulse" />
@@ -57,7 +57,7 @@ function CheckoutSuccessContent() {
   
   if (!order) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center">
         <Card className="text-center py-12 max-w-md">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">Order Not Found</h2>
           <p className="text-gray-600 mb-6">The order you&apos;re looking for doesn&apos;t exist.</p>
@@ -74,7 +74,7 @@ function CheckoutSuccessContent() {
     : order.total || 0
   
   return (
-    <div className="min-h-screen bg-jeffy-yellow">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           {/* Success Header */}
@@ -188,7 +188,7 @@ function CheckoutSuccessContent() {
 export default function CheckoutSuccessPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center">
         <div className="text-center">
           <div className="relative w-12 h-12 mx-auto mb-4">
             <Package className="w-12 h-12 text-green-500 animate-pulse" />

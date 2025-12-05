@@ -87,9 +87,9 @@ export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCard
   }
 
   return (
-    <Card className="group hover:shadow-jeffy-lg transition-all duration-300 p-3 sm:p-4">
+    <Card className="group hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 overflow-hidden" padding="none">
       {/* Product Image */}
-      <div className="relative w-full h-40 sm:h-48 mb-3 sm:mb-4 rounded-lg overflow-hidden">
+      <div className="relative w-full h-44 sm:h-52 overflow-hidden">
         {images.length > 0 ? (
           <Link href={`/products/${product.id}`}>
             <div 
@@ -160,7 +160,7 @@ export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCard
       </div>
       
       {/* Product Info */}
-      <div className="space-y-2 sm:space-y-3">
+      <div className="p-4 space-y-2 sm:space-y-3">
         <div>
           <Link href={`/products/${product.id}`}>
             <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-1 hover:text-jeffy-grey transition-colors cursor-pointer">

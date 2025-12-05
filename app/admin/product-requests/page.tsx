@@ -124,7 +124,7 @@ export default function ProductRequestsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center px-4">
         <div className="text-center">
           <Package className="w-12 h-12 sm:w-16 sm:h-16 text-green-500 animate-bounce mx-auto mb-4" />
           <p className="text-sm sm:text-base text-gray-700">Loading product requests...</p>
@@ -134,7 +134,7 @@ export default function ProductRequestsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-jeffy-yellow py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 py-8 px-4">
       <div className="container mx-auto max-w-6xl">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Product Requests</h1>

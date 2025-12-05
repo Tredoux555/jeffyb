@@ -156,7 +156,7 @@ export default function AnalyticsPage() {
 
   if (loading && bestSellers.length === 0) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center px-4">
         <div className="text-center">
           <BarChart3 className="w-12 h-12 sm:w-16 sm:h-16 text-blue-500 animate-bounce mx-auto mb-4" />
           <p className="text-sm sm:text-base text-gray-700">Loading analytics...</p>
@@ -166,7 +166,7 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-jeffy-yellow">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100">
       <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
@@ -194,8 +194,8 @@ export default function AnalyticsPage() {
                 onClick={() => setDateRange(range)}
                 className={`px-3 py-1 rounded-lg text-sm transition-colors ${
                   dateRange === range
-                    ? 'bg-jeffy-yellow text-gray-900 font-medium'
-                    : 'bg-white text-gray-700 hover:bg-jeffy-yellow-light'
+                    ? 'bg-gradient-to-b from-jeffy-yellow to-amber-100 text-gray-900 font-medium'
+                    : 'bg-white text-gray-700 hover:bg-gradient-to-b from-jeffy-yellow to-amber-100-light'
                 }`}
               >
                 {range.charAt(0).toUpperCase() + range.slice(1)}
@@ -264,7 +264,7 @@ export default function AnalyticsPage() {
                   </thead>
                   <tbody>
                     {bestSellers.slice(0, 10).map((product, index) => (
-                      <tr key={product.product_id} className="border-b border-gray-100 hover:bg-jeffy-yellow-light">
+                      <tr key={product.product_id} className="border-b border-gray-100 hover:bg-gradient-to-b from-jeffy-yellow to-amber-100-light">
                         <td className="py-3 px-4">
                           <span className="font-bold text-gray-900">#{index + 1}</span>
                         </td>
@@ -325,7 +325,7 @@ export default function AnalyticsPage() {
                   </thead>
                   <tbody>
                     {profitLeaders.slice(0, 10).map((product, index) => (
-                      <tr key={product.product_id} className="border-b border-gray-100 hover:bg-jeffy-yellow-light">
+                      <tr key={product.product_id} className="border-b border-gray-100 hover:bg-gradient-to-b from-jeffy-yellow to-amber-100-light">
                         <td className="py-3 px-4">
                           <span className="font-bold text-gray-900">#{index + 1}</span>
                         </td>
@@ -368,7 +368,7 @@ export default function AnalyticsPage() {
             ) : (
               <div className="space-y-4">
                 {salesTrends.map((trend, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-jeffy-yellow-light rounded-lg">
+                  <div key={index} className="flex items-center justify-between p-4 bg-gradient-to-b from-jeffy-yellow to-amber-100-light rounded-lg">
                     <div>
                       <p className="font-medium text-gray-900">{new Date(trend.date).toLocaleDateString()}</p>
                       <p className="text-sm text-gray-600">{trend.orders} orders</p>

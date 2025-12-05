@@ -199,7 +199,7 @@ export default function OrderDetailPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center">
         <div className="text-center">
           <div className="relative w-12 h-12 mx-auto mb-4">
             <Package className="w-12 h-12 text-green-500 animate-pulse" />
@@ -217,7 +217,7 @@ export default function OrderDetailPage() {
   const total = order.items?.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 0)), 0) || order.total || 0
 
   return (
-    <div className="min-h-screen bg-jeffy-yellow">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100">
       <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
@@ -256,7 +256,7 @@ export default function OrderDetailPage() {
                   {order.items.map((item, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between p-3 sm:p-4 bg-jeffy-yellow-light rounded-lg"
+                      className="flex items-center justify-between p-3 sm:p-4 bg-gradient-to-b from-jeffy-yellow to-amber-100-light rounded-lg"
                     >
                       <div className="flex-1">
                         <p className="font-semibold text-gray-900">{item.product_name || 'Unknown Product'}</p>

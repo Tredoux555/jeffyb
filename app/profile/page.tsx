@@ -6,7 +6,8 @@ import { useAuth } from '@/lib/contexts/AuthContext'
 import { createClient } from '@/lib/supabase'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
-import { Package, ShoppingBag, Heart, MapPin, CreditCard, Settings, ArrowRight, Clock, Bell, User } from 'lucide-react'
+import { ShoppingBag, Heart, MapPin, CreditCard, Settings, ArrowRight, Clock, Bell, User, Package } from 'lucide-react'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { Order, Favorite } from '@/types/database'
 import Link from 'next/link'
 import { getUnreadNotifications } from '@/lib/notifications'
@@ -102,7 +103,7 @@ export default function ProfilePage() {
   }
 
   const tabs: { id: TabType; label: string; icon: React.ComponentType<{ className?: string }>; badge?: number }[] = [
-    { id: 'overview', label: 'Overview', icon: Package },
+    { id: 'overview', label: 'Overview', icon: User },
     { id: 'orders', label: 'Orders', icon: ShoppingBag },
     { id: 'favorites', label: 'Favorites', icon: Heart },
     { id: 'addresses', label: 'Addresses', icon: MapPin },
@@ -112,14 +113,7 @@ export default function ProfilePage() {
   ]
 
   if (authLoading || loading) {
-    return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center px-4">
-        <div className="text-center">
-          <User className="w-12 h-12 sm:w-16 sm:h-16 text-purple-500 animate-bounce mx-auto mb-4" />
-          <p className="text-sm sm:text-base text-gray-700">Loading profile...</p>
-        </div>
-      </div>
-    )
+    return <LoadingSpinner message="Loading your profile..." fullScreen />
   }
 
   if (!user) {
@@ -127,7 +121,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-jeffy-yellow">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100">
       <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">

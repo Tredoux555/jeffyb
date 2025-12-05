@@ -40,7 +40,7 @@ export default function AdminLoginPage() {
   }
   
   return (
-    <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -111,7 +111,7 @@ export default function AdminLoginPage() {
           </form>
           
           {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-jeffy-yellow-light rounded-lg">
+          <div className="mt-6 p-4 bg-gradient-to-b from-jeffy-yellow to-amber-100-light rounded-lg">
             <h3 className="font-medium text-gray-900 mb-2">Demo Credentials (Pre-filled):</h3>
             <p className="text-sm text-gray-700">
               <strong>Email:</strong> admin@jeffy.com<br />

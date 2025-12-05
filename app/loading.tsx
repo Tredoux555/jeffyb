@@ -1,38 +1,33 @@
 "use client"
 import React from 'react'
-import Link from 'next/link'
 import { Package } from 'lucide-react'
 
 export default function Loading() {
   return (
-    <div className="min-h-screen bg-jeffy-yellow">
-      {/* Top bar with animated cube next to Jeffy */}
-      <div className="bg-jeffy-grey shadow-jeffy">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="relative w-8 h-8">
-                <Package className="w-8 h-8 text-green-500 animate-pulse" />
-              </div>
-              <span className="text-xl font-bold text-white">Jeffy</span>
-              <span className="text-sm text-jeffy-yellow-light">in a Jiffy</span>
-            </Link>
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center">
+      <div className="text-center">
+        {/* Animated Logo Container */}
+        <div className="relative mb-6">
+          {/* Pulsing ring */}
+          <div className="absolute inset-0 w-20 h-20 mx-auto rounded-2xl bg-jeffy-yellow/50 animate-pulse-ring" />
+          
+          {/* Logo box */}
+          <div className="relative w-20 h-20 rounded-2xl bg-white shadow-xl flex items-center justify-center mx-auto animate-float">
+            <Package className="w-10 h-10 text-jeffy-yellow" />
           </div>
         </div>
-      </div>
-
-      {/* Centered loading icon */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="flex flex-col items-center justify-center">
-          <div className="relative w-12 h-12 mx-auto mb-4">
-            <Package className="w-12 h-12 text-green-500 animate-bounce" />
-          </div>
-          <p className="text-gray-800 font-medium">Loading…</p>
+        
+        {/* Brand Text */}
+        <h2 className="text-2xl font-bold text-slate-900 mb-1">Jeffy</h2>
+        <p className="text-slate-600 font-medium mb-6">Loading amazing products...</p>
+        
+        {/* Loading dots */}
+        <div className="flex justify-center gap-1.5 loading-dots">
+          <span className="w-2.5 h-2.5 bg-slate-900 rounded-full"></span>
+          <span className="w-2.5 h-2.5 bg-slate-900 rounded-full"></span>
+          <span className="w-2.5 h-2.5 bg-slate-900 rounded-full"></span>
         </div>
       </div>
-
     </div>
   )
 }
-
-

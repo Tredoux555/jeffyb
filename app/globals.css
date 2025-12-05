@@ -1,6 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --background: #fef9c3;
+  --foreground: #1F2937;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: 'Lexend', system-ui, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Lexend', system-ui, sans-serif;
+  min-height: 100vh;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* ===== ANIMATIONS ===== */
 
 @keyframes slide-up {
   from {
@@ -15,88 +38,6 @@
 
 .animate-slide-up {
   animation: slide-up 0.3s ease-out;
-}
-
-:root {
-  --background: #EAB308; /* Jeffy yellow background - darker pure yellow */
-  --foreground: #1F2937; /* Dark grey text */
-}
-
-/* Mobile performance optimizations */
-@media (max-width: 768px) {
-  * {
-    /* Reduce animations on mobile for better performance */
-    animation-duration: 0.2s !important;
-    transition-duration: 0.2s !important;
-  }
-  
-  /* Keep slow spin animation for Package icons (3 seconds) */
-  [class*="spin_3s"] {
-    animation: spin 3s linear infinite !important;
-  }
-  
-  /* Disable hover effects on touch devices */
-  .hover\:scale-105:hover {
-    transform: none !important;
-  }
-  
-  .group:hover .group-hover\:scale-110 {
-    transform: none !important;
-  }
-}
-
-/* Optimize scrolling on mobile */
-html {
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
-}
-
-/* Reduce motion for users who prefer it */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: 'Inter', system-ui, sans-serif;
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: 'Inter', system-ui, sans-serif;
-  min-height: 100vh;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #FEF08A;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #EAB308;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #CA8A04;
-}
-
-/* Mobile-first responsive utilities */
-@media (max-width: 640px) {
-  .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
 }
 
 @keyframes slide-in-right {
@@ -120,7 +61,7 @@ body {
     opacity: 0.5;
   }
   50% {
-    transform: scale(1.2);
+    transform: scale(1.05);
   }
   100% {
     transform: scale(1);
@@ -130,4 +71,198 @@ body {
 
 .animate-bounce-in {
   animation: bounce-in 0.4s ease-out;
+}
+
+@keyframes fade-in {
+  from { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out;
+}
+
+@keyframes fade-in-up {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 1.5s ease-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Staggered children animation */
+.stagger-children > * {
+  animation: fade-in 0.4s ease-out both;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 50ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 75ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 100ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 125ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 150ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 175ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 200ms; }
+
+/* ===== SCROLLBAR ===== */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #fef9c3;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #EAB308 0%, #ca8a04 100%);
+  border-radius: 5px;
+  border: 2px solid #fef9c3;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ca8a04 0%, #a16207 100%);
+}
+
+/* ===== FOCUS STATES ===== */
+
+*:focus-visible {
+  outline: 2px solid #EAB308;
+  outline-offset: 2px;
+}
+
+/* ===== UTILITIES ===== */
+
+.text-shadow {
+  text-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.text-shadow-lg {
+  text-shadow: 0 4px 8px rgba(0,0,0,0.12);
+}
+
+/* Glass morphism */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #92400e 0%, #d97706 50%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===== MOBILE OPTIMIZATIONS ===== */
+
+@media (max-width: 768px) {
+  * {
+    animation-duration: 0.2s !important;
+    transition-duration: 0.2s !important;
+  }
+  
+  .hover\:scale-105:hover {
+    transform: none !important;
+  }
+  
+  .group:hover .group-hover\:scale-110 {
+    transform: none !important;
+  }
+}
+
+html {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Mobile container padding */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* ===== LOADING SPINNER ===== */
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 2s linear infinite;
+}
+
+/* Loading dots */
+.loading-dots > span {
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+.loading-dots > span:nth-child(1) { animation-delay: -0.32s; }
+.loading-dots > span:nth-child(2) { animation-delay: -0.16s; }
+.loading-dots > span:nth-child(3) { animation-delay: 0s; }
+
+@keyframes bounce {
+  0%, 80%, 100% { 
+    transform: scale(0);
+  } 
+  40% { 
+    transform: scale(1.0);
+  }
 }

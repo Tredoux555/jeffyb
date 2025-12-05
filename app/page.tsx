@@ -5,11 +5,20 @@ import Link from 'next/link'
 import { Card } from '@/components/Card'
 import { createClient } from '@/lib/supabase'
 import { Category } from '@/types/database'
-import { ArrowLeftRight } from 'lucide-react'
+import { Package, Sparkles, Zap, ArrowRight, Truck, Shield, Star } from 'lucide-react'
 import { getIconComponent } from '@/lib/utils/icons'
 
-// Color mapping (can be stored in database later if needed)
+// Color mapping for categories
 const colorMap: Record<string, string> = {
+  'gym': 'from-blue-500 to-blue-600',
+  'camping': 'from-green-500 to-green-600',
+  'kitchen': 'from-orange-500 to-orange-600',
+  'beauty': 'from-pink-500 to-pink-600',
+  'baby-toys': 'from-purple-500 to-purple-600',
+  'archery': 'from-red-500 to-red-600',
+}
+
+const solidColorMap: Record<string, string> = {
   'gym': 'bg-blue-500',
   'camping': 'bg-green-500',
   'kitchen': 'bg-orange-500',
@@ -40,80 +49,150 @@ export default function Home() {
       setCategories(data || [])
     } catch (error) {
       console.error('Error fetching categories:', error)
-      // Fallback to empty array - page will show no categories
     } finally {
       setLoading(false)
     }
   }
+
   return (
-    <div className="min-h-screen bg-jeffy-yellow">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow via-yellow-400 to-amber-100 overflow-hidden relative">
+      {/* Decorative Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-yellow-300/40 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 -left-32 w-72 h-72 bg-orange-300/30 rounded-full blur-3xl" />
+        <div className="absolute bottom-40 right-20 w-56 h-56 bg-amber-200/50 rounded-full blur-2xl" />
+        <div className="absolute bottom-20 left-1/4 w-40 h-40 bg-yellow-200/60 rounded-full blur-xl" />
+      </div>
+
       {/* Hero Section */}
-      <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-12">
-        <div className="text-center mb-8 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-gray-900 mb-3 sm:mb-4">
-            Welcome to Jeffy
+      <div className="relative container mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-8">
+        <div className="text-center max-w-3xl mx-auto animate-fade-in-up">
+          {/* Animated Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg mb-6 border border-yellow-200">
+            <Sparkles className="w-4 h-4 text-amber-500" />
+            <span className="text-sm font-semibold text-slate-700">Quality Products, Lightning Fast</span>
+            <Sparkles className="w-4 h-4 text-amber-500" />
+          </div>
+
+          {/* Main Heading */}
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-4 tracking-tight text-shadow">
+            <span className="text-slate-900">Welcome to</span>
+            <br />
+            <span className="gradient-text">Jeffy</span>
           </h1>
-          <p className="text-base sm:text-lg text-gray-600 font-medium">
-            Jeffy in a Jiffy
+
+          {/* Tagline */}
+          <p className="text-2xl sm:text-3xl text-slate-800 font-semibold mb-2 flex items-center justify-center gap-2">
+            In a Jiffy <Zap className="w-7 h-7 text-amber-500 animate-pulse" />
           </p>
-          {/* Send / Receive functionality hidden temporarily - can be restored later by setting SHOW_SEND_RECEIVE to true */}
-          {false && (
-            <div className="mt-4 sm:mt-6">
-              <Card className="max-w-xl sm:max-w-2xl mx-auto p-4 sm:p-6 bg-white">
-                {/* Green box wrapping the Send / Receive text */}
-                <div className="flex justify-center">
-                  <Link href="/delivery" className="inline-block">
-                    <div className="px-4 sm:px-6 py-2 sm:py-3 rounded-md bg-green-500 text-black font-semibold inline-flex items-center gap-2">
-                      <span>Send</span>
-                      <ArrowLeftRight className="w-4 h-4 text-black" />
-                      <span>Receive</span>
+          <p className="text-slate-600 text-lg mb-8 max-w-xl mx-auto leading-relaxed">
+            Premium gym equipment, camping gear, kitchen essentials & more – 
+            all at prices that make sense.
+          </p>
+
+          {/* Trust Badges */}
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-8 mb-10">
+            <div className="flex items-center gap-2 text-slate-700">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-lg">
+                <Truck className="w-5 h-5 text-white" />
+              </div>
+              <span className="font-semibold text-sm sm:text-base">Fast Delivery</span>
+            </div>
+            <div className="flex items-center gap-2 text-slate-700">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg">
+                <Shield className="w-5 h-5 text-white" />
+              </div>
+              <span className="font-semibold text-sm sm:text-base">Quality Guaranteed</span>
+            </div>
+            <div className="flex items-center gap-2 text-slate-700">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg">
+                <Star className="w-5 h-5 text-white" />
+              </div>
+              <span className="font-semibold text-sm sm:text-base">Top Rated</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Categories Section */}
+      <div className="relative container mx-auto px-4 sm:px-6 pb-16">
+        <div className="max-w-6xl mx-auto">
+          {/* Section Header */}
+          <div className="text-center mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
+              Shop by Category
+            </h2>
+            <p className="text-slate-600">Find exactly what you need</p>
+          </div>
+          
+          {/* Categories Grid */}
+          {loading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 sm:gap-6 stagger-children">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="bg-white rounded-2xl p-5 shadow-card animate-pulse">
+                  <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-gray-200"></div>
+                  <div className="h-5 bg-gray-200 rounded mb-2 mx-auto w-3/4"></div>
+                  <div className="h-4 bg-gray-100 rounded mx-auto w-1/2"></div>
+                </div>
+              ))}
+            </div>
+          ) : categories.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 sm:gap-6 stagger-children">
+              {categories.map((category) => {
+                const IconComponent = getIconComponent(category.icon)
+                const gradient = colorMap[category.slug] || 'from-gray-500 to-gray-600'
+                const solidColor = solidColorMap[category.slug] || 'bg-gray-500'
+                
+                return (
+                  <Link key={category.id} href={`/products/category/${category.slug}`}>
+                    <div className="group relative bg-white rounded-2xl p-5 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 border border-gray-100 overflow-hidden">
+                      {/* Hover gradient overlay */}
+                      <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
+                      
+                      <div className="relative text-center">
+                        {/* Icon Container */}
+                        <div className={`w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                          <IconComponent className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+                        </div>
+                        
+                        {/* Category Name */}
+                        <h3 className="font-bold text-slate-900 group-hover:text-slate-700 transition-colors mb-2">
+                          {category.name}
+                        </h3>
+                        
+                        {/* Shop Link */}
+                        <div className="flex items-center justify-center gap-1 text-sm text-slate-500 group-hover:text-amber-600 transition-colors">
+                          <span>Shop now</span>
+                          <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </div>
                     </div>
                   </Link>
-                </div>
-                {/* Promo line under the CTA inside the same white box */}
-                <div className="mt-3 sm:mt-4 text-center">
-                  <p className="text-sm sm:text-base text-gray-700 w-[40ch] mx-auto">
-                    Send or Recieve a package in town for R20
-                  </p>
-                </div>
-              </Card>
+                )
+              })}
+            </div>
+          ) : (
+            <Card className="text-center py-12" padding="lg">
+              <Package className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-slate-900 mb-2">No Categories Available</h3>
+              <p className="text-slate-600">Check back soon for new products!</p>
+            </Card>
+          )}
+
+          {/* View All Products Link */}
+          {categories.length > 0 && (
+            <div className="text-center mt-10">
+              <Link 
+                href="/products"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition-all shadow-button hover:shadow-button-hover"
+              >
+                <Package className="w-5 h-5" />
+                View All Products
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
           )}
         </div>
-        
-        {/* Call to Action moved into hero above */}
-
-        {/* Categories Grid */}
-        {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-6 mb-8 sm:mb-12">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <Card key={i} className="p-3 sm:p-4 animate-pulse">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-gray-300"></div>
-                <div className="h-4 bg-gray-300 rounded mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded"></div>
-              </Card>
-            ))}
-          </div>
-        ) : categories.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-6 mb-8 sm:mb-12">
-            {categories.map((category) => {
-              const IconComponent = getIconComponent(category.icon)
-              const color = colorMap[category.slug] || 'bg-gray-500'
-              return (
-                <Link key={category.id} href={`/products/category/${category.slug}`}>
-                  <Card className="text-center hover:shadow-jeffy-lg transition-all duration-300 sm:hover:scale-105 cursor-pointer group p-3 sm:p-4">
-                    <div className={`w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full ${color} flex items-center justify-center sm:group-hover:scale-110 transition-transform duration-300`}>
-                      <IconComponent className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                    </div>
-                    <h3 className="text-base sm:text-xl font-semibold text-gray-900 mb-1 sm:mb-2">
-                      {category.name}
-                    </h3>
-                  </Card>
-                </Link>
-              )
-            })}
-          </div>
-        ) : null}
       </div>
     </div>
   )

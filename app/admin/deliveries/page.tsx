@@ -154,7 +154,7 @@ export default function AdminDeliveriesPage() {
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center px-4">
         <div className="text-center">
           <Truck className="w-12 h-12 sm:w-16 sm:h-16 text-orange-500 animate-bounce mx-auto mb-4" />
           <p className="text-sm sm:text-base text-gray-700">Loading deliveries...</p>
@@ -164,7 +164,7 @@ export default function AdminDeliveriesPage() {
   }
   
   return (
-    <div className="min-h-screen bg-jeffy-yellow">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100">
       <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
@@ -269,7 +269,7 @@ export default function AdminDeliveriesPage() {
                           <StatusIcon className="w-3 h-3" />
                           {delivery.status.charAt(0).toUpperCase() + delivery.status.slice(1)}
                         </div>
-                        <span className="text-xs bg-jeffy-yellow-light text-gray-700 px-2 py-1 rounded-full">
+                        <span className="text-xs bg-gradient-to-b from-jeffy-yellow to-amber-100-light text-gray-700 px-2 py-1 rounded-full">
                           {delivery.type === 'pickup' ? 'Pickup Request' : 'Send Products'}
                         </span>
                       </div>
@@ -362,7 +362,7 @@ export default function AdminDeliveriesPage() {
                     })()}
                     {selectedDelivery.status.charAt(0).toUpperCase() + selectedDelivery.status.slice(1)}
                   </div>
-                  <span className="text-sm bg-jeffy-yellow-light text-gray-700 px-2 py-1 rounded-full">
+                  <span className="text-sm bg-gradient-to-b from-jeffy-yellow to-amber-100-light text-gray-700 px-2 py-1 rounded-full">
                     {selectedDelivery.type === 'pickup' ? 'Pickup Request' : 'Send Products'}
                   </span>
                 </div>
@@ -426,7 +426,7 @@ export default function AdminDeliveriesPage() {
               {/* Product Description */}
               <div>
                 <h4 className="font-semibold text-gray-900 mb-2">Product Description</h4>
-                <p className="text-sm text-gray-600 bg-jeffy-yellow-light p-3 rounded-lg">
+                <p className="text-sm text-gray-600 bg-gradient-to-b from-jeffy-yellow to-amber-100-light p-3 rounded-lg">
                   {selectedDelivery.product_description}
                 </p>
               </div>

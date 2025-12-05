@@ -206,7 +206,7 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center px-4">
         <div className="text-center">
           <Package className="w-12 h-12 sm:w-16 sm:h-16 text-green-500 animate-bounce mx-auto mb-4" />
           <p className="text-sm sm:text-base text-gray-700">Loading product...</p>
@@ -217,7 +217,7 @@ export default function ProductDetailPage() {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
           <Link href="/products">
@@ -232,7 +232,7 @@ export default function ProductDetailPage() {
   if (product.is_active === false) {
     // Product exists but is hidden - show 404 to prevent direct access
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
           <p className="text-gray-600 mb-4">This product is no longer available.</p>
@@ -248,7 +248,7 @@ export default function ProductDetailPage() {
                  product.image_url ? [product.image_url] : []
 
   return (
-    <div className="min-h-screen bg-jeffy-yellow">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100">
       <ProductMetadata
         title={product.name}
         description={product.description}
@@ -396,7 +396,7 @@ export default function ProductDetailPage() {
                 <span className="text-3xl font-bold text-jeffy-grey">
                   R{product.price.toFixed(2)}
                 </span>
-                <span className="bg-jeffy-yellow-light text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
+                <span className="bg-gradient-to-b from-jeffy-yellow to-amber-100-light text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
                   {product.category}
                 </span>
               </div>
@@ -587,7 +587,7 @@ export default function ProductDetailPage() {
 
       {/* Toast Notification */}
       {showNotification && (
-        <div className="fixed bottom-6 right-6 bg-jeffy-yellow text-gray-900 px-6 py-4 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-slide-up">
+        <div className="fixed bottom-6 right-6 bg-gradient-to-b from-jeffy-yellow to-amber-100 text-gray-900 px-6 py-4 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-slide-up">
           <span className="text-2xl">✓</span>
           <span className="font-medium">{notificationMessage}</span>
         </div>

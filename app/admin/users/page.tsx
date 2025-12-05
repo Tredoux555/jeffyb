@@ -251,17 +251,27 @@ export default function UsersPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center">
         <div className="text-center">
-          <Users className="w-12 h-12 text-gray-500 animate-pulse mx-auto mb-4" />
-          <p className="text-gray-700">Loading users...</p>
+          <div className="relative mb-4">
+            <div className="absolute inset-0 w-16 h-16 mx-auto rounded-2xl bg-jeffy-yellow/40 animate-pulse-ring" />
+            <div className="relative w-16 h-16 rounded-2xl bg-white shadow-lg flex items-center justify-center mx-auto animate-float">
+              <Users className="w-8 h-8 text-jeffy-yellow" />
+            </div>
+          </div>
+          <p className="text-slate-600 font-medium">Loading users...</p>
+          <div className="flex justify-center gap-1.5 mt-4 loading-dots">
+            <span className="w-2 h-2 bg-slate-800 rounded-full"></span>
+            <span className="w-2 h-2 bg-slate-800 rounded-full"></span>
+            <span className="w-2 h-2 bg-slate-800 rounded-full"></span>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-jeffy-yellow py-6 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 py-6 px-4">
       <div className="container mx-auto max-w-7xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">

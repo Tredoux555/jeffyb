@@ -232,7 +232,7 @@ export default function AccountingPage() {
 
   if (loading && activeTab === 'dashboard') {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center px-4">
         <div className="text-center">
           <DollarSign className="w-12 h-12 sm:w-16 sm:h-16 text-green-500 animate-bounce mx-auto mb-4" />
           <p className="text-sm sm:text-base text-gray-700">Loading accounting data...</p>
@@ -242,7 +242,7 @@ export default function AccountingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-jeffy-yellow">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100">
       <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
@@ -274,8 +274,8 @@ export default function AccountingPage() {
                   }}
                   className={`px-3 py-1 rounded-lg text-sm transition-colors ${
                     dateRange === range && !customDateRange
-                      ? 'bg-jeffy-yellow text-gray-900 font-medium'
-                      : 'bg-white text-gray-700 hover:bg-jeffy-yellow-light'
+                      ? 'bg-gradient-to-b from-jeffy-yellow to-amber-100 text-gray-900 font-medium'
+                      : 'bg-white text-gray-700 hover:bg-gradient-to-b from-jeffy-yellow to-amber-100-light'
                   }`}
                 >
                   {range.charAt(0).toUpperCase() + range.slice(1)}
@@ -285,8 +285,8 @@ export default function AccountingPage() {
                 onClick={() => setCustomDateRange(!customDateRange)}
                 className={`px-3 py-1 rounded-lg text-sm transition-colors ${
                   customDateRange
-                    ? 'bg-jeffy-yellow text-gray-900 font-medium'
-                    : 'bg-white text-gray-700 hover:bg-jeffy-yellow-light'
+                    ? 'bg-gradient-to-b from-jeffy-yellow to-amber-100 text-gray-900 font-medium'
+                    : 'bg-white text-gray-700 hover:bg-gradient-to-b from-jeffy-yellow to-amber-100-light'
                 }`}
               >
                 Custom
@@ -425,11 +425,11 @@ export default function AccountingPage() {
             <Card className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Financial Summary</h3>
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-jeffy-yellow-light rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-gradient-to-b from-jeffy-yellow to-amber-100-light rounded-lg">
                   <span className="text-sm text-gray-700">Gross Revenue</span>
                   <span className="font-semibold text-gray-900">{formatCurrency(dashboardStats.totalRevenue)}</span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-jeffy-yellow-light rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-gradient-to-b from-jeffy-yellow to-amber-100-light rounded-lg">
                   <span className="text-sm text-gray-700">Cost of Goods Sold (COGS)</span>
                   <span className="font-semibold text-gray-900">{formatCurrency(dashboardStats.totalCosts)}</span>
                 </div>
@@ -437,11 +437,11 @@ export default function AccountingPage() {
                   <span className="text-sm text-gray-700">Import VAT Reclaimed</span>
                   <span className="font-semibold text-green-600">-{formatCurrency(dashboardStats.importVatReclaimable)}</span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-jeffy-yellow-light rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-gradient-to-b from-jeffy-yellow to-amber-100-light rounded-lg">
                   <span className="text-sm text-gray-700">Effective COGS (After VAT Reclaim)</span>
                   <span className="font-semibold text-gray-900">{formatCurrency(dashboardStats.effectiveCosts)}</span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-jeffy-yellow-light rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-gradient-to-b from-jeffy-yellow to-amber-100-light rounded-lg">
                   <span className="text-sm text-gray-700">VAT on Sales</span>
                   <span className="font-semibold text-gray-900">-{formatCurrency(dashboardStats.taxOwed)}</span>
                 </div>
@@ -500,7 +500,7 @@ export default function AccountingPage() {
                   </thead>
                   <tbody>
                     {productsProfit.map((product) => (
-                      <tr key={product.product_id} className="border-b border-gray-100 hover:bg-jeffy-yellow-light">
+                      <tr key={product.product_id} className="border-b border-gray-100 hover:bg-gradient-to-b from-jeffy-yellow to-amber-100-light">
                         <td className="py-3 px-4">
                           <div>
                             <p className="font-medium text-gray-900">{product.product_name}</p>

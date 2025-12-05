@@ -102,7 +102,7 @@ export default function ComingSoonPage() {
   const whatsappUrl = whatsappNumber ? `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}` : '#'
 
   return (
-    <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center px-4 py-12">
       <div className="max-w-4xl w-full space-y-8">
         {/* Main Coming Soon Card */}
         <Card className="text-center p-8 sm:p-12">

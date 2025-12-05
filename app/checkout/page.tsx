@@ -13,7 +13,8 @@ import { CartItem, SavedAddress, SavedPaymentMethod } from '@/types/database'
 import { createClient } from '@/lib/supabase'
 import { generateOrderQRCode } from '@/lib/qrcode'
 import { loadCart, clearCart as clearCartFromDB } from '@/lib/cart'
-import { CreditCard, ShoppingCart } from 'lucide-react'
+import { CreditCard } from 'lucide-react'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -283,22 +284,15 @@ export default function CheckoutPage() {
   
   // Show loading state while cart is being loaded
   if (authLoading || cartLoading) {
-    return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center px-4">
-        <Card className="text-center py-12 max-w-md w-full">
-          <ShoppingCart className="w-12 h-12 sm:w-16 sm:h-16 text-green-500 animate-bounce mx-auto mb-4" />
-          <p className="text-sm sm:text-base text-gray-700">Loading checkout...</p>
-        </Card>
-      </div>
-    )
+    return <LoadingSpinner message="Loading checkout..." fullScreen />
   }
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center">
-        <Card className="text-center py-12 max-w-md">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Your cart is empty</h2>
-          <p className="text-gray-600 mb-6">Add some products to your cart before checking out.</p>
+      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center px-4">
+        <Card className="text-center py-12 max-w-md" padding="lg">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4">Your cart is empty</h2>
+          <p className="text-slate-600 mb-6">Add some products to your cart before checking out.</p>
           <Button onClick={() => router.push('/products')}>
             Browse Products
           </Button>
@@ -308,7 +302,7 @@ export default function CheckoutPage() {
   }
   
   return (
-    <div className="min-h-screen bg-jeffy-yellow">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}

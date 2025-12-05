@@ -152,10 +152,20 @@ export default function AdminDashboard() {
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-jeffy-yellow flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100 flex items-center justify-center px-4">
         <div className="text-center">
-          <LayoutDashboard className="w-12 h-12 sm:w-16 sm:h-16 text-blue-500 animate-bounce mx-auto mb-4" />
-          <p className="text-sm sm:text-base text-gray-700">Loading dashboard...</p>
+          <div className="relative mb-4">
+            <div className="absolute inset-0 w-16 h-16 mx-auto rounded-2xl bg-jeffy-yellow/40 animate-pulse-ring" />
+            <div className="relative w-16 h-16 rounded-2xl bg-white shadow-lg flex items-center justify-center mx-auto animate-float">
+              <LayoutDashboard className="w-8 h-8 text-jeffy-yellow" />
+            </div>
+          </div>
+          <p className="text-slate-600 font-medium">Loading dashboard...</p>
+          <div className="flex justify-center gap-1.5 mt-4 loading-dots">
+            <span className="w-2 h-2 bg-slate-800 rounded-full"></span>
+            <span className="w-2 h-2 bg-slate-800 rounded-full"></span>
+            <span className="w-2 h-2 bg-slate-800 rounded-full"></span>
+          </div>
         </div>
       </div>
     )
@@ -193,7 +203,7 @@ export default function AdminDashboard() {
   ]
   
   return (
-    <div className="min-h-screen bg-jeffy-yellow">
+    <div className="min-h-screen bg-gradient-to-b from-jeffy-yellow to-amber-100">
       <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
