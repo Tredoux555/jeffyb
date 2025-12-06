@@ -17,7 +17,8 @@ import {
   LayoutDashboard,
   MessageSquare,
   Globe,
-  Users
+  Users,
+  Gift
 } from 'lucide-react'
 
 export default function AdminDashboard() {
@@ -409,6 +410,36 @@ export default function AdminDashboard() {
                   View Requests
                 </Button>
               </Link>
+            </div>
+          </Card>
+        </div>
+
+        {/* Jeffy Free Products Program */}
+        <div className="mb-6 sm:mb-8">
+          <Card className="p-4 sm:p-6 border-2 border-jeffy-yellow bg-yellow-50/50">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-jeffy-yellow rounded-xl flex items-center justify-center">
+                  <Gift className="w-6 h-6 text-gray-900" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Jeffy's Free Product Program</h3>
+                  <p className="text-sm text-gray-600">Viral referral system - customers get FREE products!</p>
+                </div>
+              </div>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Link href="/admin/jeffy-requests" className="flex-1 sm:flex-none">
+                  <Button className="w-full">
+                    <Gift className="w-4 h-4 mr-2" />
+                    Manage Requests
+                  </Button>
+                </Link>
+                <Link href="/free-products" target="_blank" className="flex-1 sm:flex-none">
+                  <Button variant="outline" className="w-full">
+                    View Page
+                  </Button>
+                </Link>
+              </div>
             </div>
           </Card>
         </div>

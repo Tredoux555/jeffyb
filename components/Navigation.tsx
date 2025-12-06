@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { ShoppingCart, Menu, X, User, Package, LogOut, Settings, Heart, ShoppingBag, Bell, Home, Shield } from 'lucide-react'
+import { ShoppingCart, Menu, X, User, Package, LogOut, Settings, Heart, ShoppingBag, Bell, Home, Shield, Gift } from 'lucide-react'
 import { useAuth } from '@/lib/contexts/AuthContext'
 import { createClient } from '@/lib/supabase'
 import { getUnreadNotifications } from '@/lib/notifications'
@@ -63,6 +63,7 @@ export function Navigation({ cartItemCount = 0 }: NavigationProps) {
   
   const navItems = [
     { href: '/', label: 'Home', icon: Home },
+    { href: '/free-products', label: 'FREE Products', icon: Gift },
     { href: '/admin', label: 'Admin', icon: Shield },
   ]
   

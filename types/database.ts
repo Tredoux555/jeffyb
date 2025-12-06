@@ -903,3 +903,106 @@ export interface FranchiseStockTransferItem {
   product?: Product
   variant?: ProductVariant
 }
+
+// ============================================
+// Jeffy's Free Product Program Types
+// ============================================
+
+export interface JeffyRequest {
+  id: string
+  
+  // Request details
+  request_text: string
+  voice_transcript?: string | null
+  image_urls?: string[] | null
+  reference_links?: string[] | null
+  
+  // Parsed product info
+  product_category?: string | null
+  product_keywords?: string[] | null
+  price_concern?: 'too_cheap' | 'too_expensive' | 'quality_concern' | 'cant_find' | null
+  
+  // Requester info
+  requester_name: string
+  requester_email: string
+  requester_phone?: string | null
+  
+  // Referral tracking
+  referral_code: string
+  approvals_needed: number
+  approvals_received: number
+  
+  // Status
+  status: 'active' | 'completed' | 'fulfilled' | 'product_added' | 'cancelled'
+  
+  // Product matching
+  matched_product_id?: string | null
+  matched_product_name?: string | null
+  
+  // Fulfillment
+  is_free_product_earned: boolean
+  free_product_shipped: boolean
+  shipping_address?: {
+    name: string
+    address: string
+    city: string
+    postal_code: string
+    phone: string
+  } | null
+  shipping_tracking?: string | null
+  
+  // Analytics
+  total_link_clicks: number
+  unique_visitors: number
+  
+  // Admin
+  admin_notes?: string | null
+  priority: 'low' | 'normal' | 'high' | 'urgent'
+  
+  created_at: string
+  updated_at: string
+  completed_at?: string | null
+  fulfilled_at?: string | null
+  
+  // Relations
+  approvals?: JeffyApproval[]
+  matched_product?: Product
+}
+
+export interface JeffyApproval {
+  id: string
+  request_id: string
+  
+  // Approver info
+  approver_name?: string | null
+  approver_email: string
+  approver_phone?: string | null
+  
+  // Response
+  approval_type: 'good_idea' | 'want_it_too' | 'already_have'
+  comment?: string | null
+  wants_updates: boolean
+  wants_own_link: boolean
+  
+  // Tracking
+  ip_address?: string | null
+  user_agent?: string | null
+  referral_source?: 'whatsapp' | 'facebook' | 'instagram' | 'tiktok' | 'email' | 'direct' | 'other' | null
+  
+  created_at: string
+  
+  // Relations
+  request?: JeffyRequest
+}
+
+export interface JeffyLinkClick {
+  id: string
+  request_id: string
+  
+  ip_address?: string | null
+  user_agent?: string | null
+  referrer?: string | null
+  referral_source?: string | null
+  
+  created_at: string
+}
