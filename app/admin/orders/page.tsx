@@ -162,7 +162,7 @@ export default function AdminOrdersPage() {
       
       // Close modal if open
       if (selectedOrder?.id === orderId) {
-        setSelectedOrder({ ...selectedOrder, status: newStatus })
+        setSelectedOrder({ ...selectedOrder, status: newStatus as Order['status'] })
       }
     } catch (error) {
       console.error('Error updating order status:', error)
@@ -445,14 +445,17 @@ export default function AdminOrdersPage() {
                   {/* Orders in Stage */}
                   <div className="space-y-2 min-h-[200px]">
                     {stageOrders.slice(0, 5).map((order) => (
-                      <Card 
-                        key={order.id} 
-                        className="p-3 cursor-pointer hover:shadow-lg transition-all"
+                      <button
+                        key={order.id}
                         onClick={() => {
                           setSelectedOrder(order)
                           setIsModalOpen(true)
                         }}
+                        className="w-full text-left"
                       >
+                        <Card 
+                          className="p-3 hover:shadow-lg transition-all"
+                        >
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-xs font-mono text-slate-500">
                             #{order.id?.slice(0, 8)}
@@ -474,6 +477,7 @@ export default function AdminOrdersPage() {
                           </span>
                         </div>
                       </Card>
+                      </button>
                     ))}
                     {stageOrders.length > 5 && (
                       <button 

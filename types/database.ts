@@ -67,7 +67,7 @@ export interface Order {
   user_email: string // Maintained for guest checkout and backward compatibility
   items: OrderItem[]
   total: number
-  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  status: 'pending' | 'confirmed' | 'processing' | 'ready_for_delivery' | 'out_for_delivery' | 'shipped' | 'delivered' | 'cancelled'
   payment_status?: 'pending' | 'paid' | 'failed' | 'refunded'
   delivery_info: DeliveryInfo
   qr_code?: string // QR code data URL for order tracking
@@ -79,6 +79,8 @@ export interface Order {
   shipping_cost?: number // Actual shipping cost (for accounting)
   is_reseller_order?: boolean // Flag for reseller orders
   franchise_location_id?: string | null // Franchise location for this order
+  assigned_driver_id?: string | null // Driver assigned to deliver this order
+  delivered_at?: string // When the order was delivered
   created_at: string
 }
 

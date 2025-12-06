@@ -259,26 +259,30 @@ export default function AdminDeliveriesPage() {
             const Icon = item.icon
             const config = item.status !== 'all' ? statusConfig[item.status as keyof typeof statusConfig] : { color: 'bg-slate-900' }
             return (
-              <Card 
+              <button
                 key={item.status}
-                className={`p-3 cursor-pointer transition-all ${
-                  selectedStatus === item.status ? 'ring-2 ring-slate-900' : ''
-                }`}
-                hover
                 onClick={() => setSelectedStatus(item.status)}
+                className="w-full text-left"
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-slate-600">{item.label}</p>
-                    <p className="text-xl font-bold text-slate-900">
-                      {statusCounts[item.status as keyof typeof statusCounts] || 0}
-                    </p>
+                <Card 
+                  className={`p-3 transition-all ${
+                    selectedStatus === item.status ? 'ring-2 ring-slate-900' : ''
+                  }`}
+                  hover
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-slate-600">{item.label}</p>
+                      <p className="text-xl font-bold text-slate-900">
+                        {statusCounts[item.status as keyof typeof statusCounts] || 0}
+                      </p>
+                    </div>
+                    <div className={`w-8 h-8 ${config.color} rounded-lg flex items-center justify-center`}>
+                      <Icon className="w-4 h-4 text-white" />
+                    </div>
                   </div>
-                  <div className={`w-8 h-8 ${config.color} rounded-lg flex items-center justify-center`}>
-                    <Icon className="w-4 h-4 text-white" />
-                  </div>
-                </div>
-              </Card>
+                </Card>
+              </button>
             )
           })}
         </div>
