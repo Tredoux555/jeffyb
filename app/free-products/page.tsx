@@ -6,7 +6,6 @@ import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { JeffyWantForm } from '@/components/JeffyWantForm'
 import { 
-  Play, 
   Gift, 
   Users, 
   Share2, 
@@ -17,6 +16,7 @@ import {
   Heart,
   Package
 } from 'lucide-react'
+import { JeffyExplainerAnimation } from '@/components/JeffyExplainerAnimation'
 
 interface PopularRequest {
   id: string
@@ -30,7 +30,6 @@ interface PopularRequest {
 }
 
 export default function FreeProductsPage() {
-  const [showVideo, setShowVideo] = useState(false)
   const [popularRequests, setPopularRequests] = useState<PopularRequest[]>([])
 
   useEffect(() => {
@@ -78,65 +77,9 @@ export default function FreeProductsPage() {
             </p>
           </div>
 
-          {/* Video Section */}
+          {/* Animated Explainer */}
           <div className="max-w-3xl mx-auto mb-12">
-            <Card className="overflow-hidden">
-              {showVideo ? (
-                <div className="aspect-video bg-slate-900 flex items-center justify-center">
-                  {/* Video placeholder - replace with actual video */}
-                  <div className="text-center p-8">
-                    <div className="w-24 h-24 bg-jeffy-yellow rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-                      <Package className="w-12 h-12 text-slate-900" />
-                    </div>
-                    <p className="text-white text-xl font-bold mb-2">🎬 Animation Coming Soon!</p>
-                    <p className="text-slate-400">
-                      Jeffy is getting ready to explain everything...
-                    </p>
-                    {/* When you have the video, replace with:
-                    <video 
-                      autoPlay 
-                      controls 
-                      className="w-full h-full"
-                      src="/videos/jeffy-intro.mp4"
-                    /> 
-                    Or embed Lottie/YouTube */}
-                  </div>
-                </div>
-              ) : (
-                <div 
-                  className="aspect-video bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center cursor-pointer group relative"
-                  onClick={() => setShowVideo(true)}
-                >
-                  {/* Thumbnail placeholder */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent" />
-                  
-                  {/* Characters placeholder */}
-                  <div className="absolute bottom-8 left-8 right-8 flex items-end justify-center gap-8">
-                    {/* Jeffy character placeholder */}
-                    <div className="w-32 h-40 bg-jeffy-yellow rounded-t-full flex flex-col items-center justify-end pb-4">
-                      <div className="w-8 h-8 bg-white rounded-full mb-2" /> {/* Eye */}
-                      <div className="w-12 h-4 bg-slate-800 rounded-full" /> {/* Mouth */}
-                    </div>
-                    {/* Friend character placeholder */}
-                    <div className="w-28 h-36 bg-blue-400 rounded-t-full flex flex-col items-center justify-end pb-4">
-                      <div className="w-6 h-6 bg-white rounded-full mb-2" />
-                      <div className="w-10 h-3 bg-slate-800 rounded-full" />
-                    </div>
-                  </div>
-
-                  {/* Play button */}
-                  <div className="relative z-10 w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
-                    <Play className="w-8 h-8 text-slate-900 ml-1" fill="currentColor" />
-                  </div>
-
-                  {/* Text */}
-                  <div className="absolute top-8 left-0 right-0 text-center">
-                    <p className="text-white/80 text-sm">Watch how it works</p>
-                    <p className="text-white text-2xl font-bold">Meet Jeffy! 👋</p>
-                  </div>
-                </div>
-              )}
-            </Card>
+            <JeffyExplainerAnimation />
           </div>
 
           {/* How It Works Steps */}
