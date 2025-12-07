@@ -1,11 +1,11 @@
 'use client'
 
 import React, { useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { FavoriteButton } from '@/components/FavoriteButton'
+import { OptimizedImage } from '@/components/OptimizedImage'
 import { ShoppingCart, Eye, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Product } from '@/types/database'
 
@@ -98,15 +98,15 @@ export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCard
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEnd}
             >
-              <Image
+              <OptimizedImage
                 src={images[currentImageIndex]}
                 alt={product.name}
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 className="object-cover lg:group-hover:scale-105 transition-transform duration-300"
                 priority={false}
-                loading="lazy"
                 quality={75}
+                showLoader={false}
               />
               
               {/* Image Navigation for Multiple Images */}

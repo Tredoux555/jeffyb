@@ -3,10 +3,11 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { ShoppingCart, Menu, X, User, Package, LogOut, Settings, Heart, ShoppingBag, Bell, Home, Shield, Gift } from 'lucide-react'
+import { ShoppingCart, Menu, X, User, Package, LogOut, Settings, Heart, ShoppingBag, Bell, Home, Shield, Gift, Search } from 'lucide-react'
 import { useAuth } from '@/lib/contexts/AuthContext'
 import { createClient } from '@/lib/supabase'
 import { getUnreadNotifications } from '@/lib/notifications'
+import { SmartSearch } from '@/components/SmartSearch'
 
 interface NavigationProps {
   cartItemCount?: number
@@ -15,6 +16,7 @@ interface NavigationProps {
 export function Navigation({ cartItemCount = 0 }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0)
   const pathname = usePathname()
   const router = useRouter()
@@ -107,9 +109,23 @@ export function Navigation({ cartItemCount = 0 }: NavigationProps) {
               )
             })}
           </div>
+
+          {/* Desktop Search - shown on large screens */}
+          <div className="hidden lg:block flex-1 max-w-md mx-4">
+            <SmartSearch />
+          </div>
           
           {/* Cart, Auth & Mobile Menu */}
           <div className="flex items-center space-x-3">
+            {/* Mobile/Tablet Search Button */}
+            <button
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className="lg:hidden p-2 rounded-xl text-white hover:bg-slate-800 transition-colors"
+              aria-label="Search"
+            >
+              <Search className="w-6 h-6" />
+            </button>
+
             {/* Cart */}
             <Link href="/cart" className="relative p-2 rounded-xl text-white hover:bg-slate-800 transition-colors">
               <ShoppingCart className="w-6 h-6" />
@@ -247,6 +263,13 @@ export function Navigation({ cartItemCount = 0 }: NavigationProps) {
           </div>
         </div>
         
+        {/* Mobile/Tablet Search Overlay */}
+        {isSearchOpen && (
+          <div className="lg:hidden py-4 border-t border-slate-800 animate-fade-in">
+            <SmartSearch />
+          </div>
+        )}
+
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-slate-800 animate-fade-in">

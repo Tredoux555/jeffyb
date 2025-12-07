@@ -6,6 +6,7 @@ import { AuthProvider } from "../lib/contexts/AuthContext";
 import { NotificationProvider } from "../lib/providers/NotificationProvider";
 import { Footer } from "../components/Footer";
 import { WhatsAppButton } from "../components/WhatsAppButton";
+import { ServiceWorkerRegistration } from "../components/ServiceWorkerRegistration";
 
 // const inter = Inter({
 //   subsets: ["latin"],
@@ -17,6 +18,15 @@ import { WhatsAppButton } from "../components/WhatsAppButton";
 export const metadata: Metadata = {
   title: "Jeffy - In a Jiffy",
   description: "Your mobile-optimized commerce platform for gym, camping, kitchen, and beauty products",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Jeffy",
+  },
+  formatDetection: {
+    telephone: true,
+  },
   openGraph: {
     title: "Jeffy - In a Jiffy",
     description: "Your mobile-optimized commerce platform for gym, camping, kitchen, and beauty products",
@@ -29,7 +39,16 @@ export const metadata: Metadata = {
     title: "Jeffy - In a Jiffy",
     description: "Your mobile-optimized commerce platform for gym, camping, kitchen, and beauty products",
   },
-  // viewport and themeColor moved to viewport export below
+  icons: {
+    icon: [
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icons/icon-152x152.png', sizes: '152x152', type: 'image/png' },
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+    ],
+  },
 };
 
 export const viewport = {
@@ -49,6 +68,7 @@ export default function RootLayout({
       <body className={`font-sans antialiased`}>
         <AuthProvider>
           <NotificationProvider>
+            <ServiceWorkerRegistration />
             <ClientNavigation />
             <main className="min-h-screen">
               {children}
