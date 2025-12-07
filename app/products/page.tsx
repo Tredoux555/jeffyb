@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ProductCard } from '@/components/ProductCard'
+import { ProductQuickViewModal } from '@/components/ProductQuickViewModal'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
 import { Product, CartItem } from '@/types/database'
@@ -22,6 +23,7 @@ export default function ProductsPage() {
   const { addToCart } = useCart()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [categories, setCategories] = useState<{ value: string; label: string }[]>([])
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null)
   
   useEffect(() => {
     fetchProducts()
@@ -136,8 +138,8 @@ export default function ProductsPage() {
   }
   
   const handleViewDetails = (product: Product) => {
-    // Navigate to product detail page
-    router.push(`/products/${product.id}`)
+    // Open Quick View modal instead of navigating
+    setQuickViewProduct(product)
   }
   
   if (loading) {
@@ -256,6 +258,15 @@ export default function ProductsPage() {
           </div>
         )}
       </div>
+
+      {/* Quick View Modal */}
+      {quickViewProduct && (
+        <ProductQuickViewModal
+          product={quickViewProduct}
+          isOpen={!!quickViewProduct}
+          onClose={() => setQuickViewProduct(null)}
+        />
+      )}
     </div>
   )
 }

@@ -1,7 +1,9 @@
 'use client'
 
 import React, { useState, useEffect, use } from 'react'
+import { useRouter } from 'next/navigation'
 import { ProductCard } from '@/components/ProductCard'
+import { ProductQuickViewModal } from '@/components/ProductQuickViewModal'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
 import { Product, CartItem } from '@/types/database'
@@ -17,10 +19,12 @@ interface CategoryPageProps {
 
 export default function CategoryPage({ params }: CategoryPageProps) {
   const resolvedParams = use(params)
+  const router = useRouter()
   const [products, setProducts] = useState<Product[]>([])
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null)
   const { addToCart } = useCart()
   
   const categoryName = resolvedParams.category.charAt(0).toUpperCase() + resolvedParams.category.slice(1)
@@ -66,13 +70,19 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   }
   
   const handleAddToCart = async (product: Product) => {
+    // If product has variants, open quick view to select
+    if (product.has_variants) {
+      setQuickViewProduct(product)
+      return
+    }
+    
     try {
       const newItem: CartItem = {
         product_id: product.id,
         product_name: product.name,
         price: product.price,
         quantity: 1,
-        image_url: product.image_url || undefined
+        image_url: product.images?.[0] || product.image_url || undefined
       }
       await addToCart(newItem)
     } catch (error) {
@@ -82,8 +92,8 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   }
   
   const handleViewDetails = (product: Product) => {
-    // Navigate to product detail page
-    window.location.href = `/products/${product.id}`
+    // Open Quick View modal instead of navigating
+    setQuickViewProduct(product)
   }
   
   if (loading) {
@@ -152,6 +162,15 @@ export default function CategoryPage({ params }: CategoryPageProps) {
           </div>
         )}
       </div>
+
+      {/* Quick View Modal */}
+      {quickViewProduct && (
+        <ProductQuickViewModal
+          product={quickViewProduct}
+          isOpen={!!quickViewProduct}
+          onClose={() => setQuickViewProduct(null)}
+        />
+      )}
     </div>
   )
 }

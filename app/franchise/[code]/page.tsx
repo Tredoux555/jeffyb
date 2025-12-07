@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ProductCard } from '@/components/ProductCard'
+import { ProductQuickViewModal } from '@/components/ProductQuickViewModal'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
 import { Product, CartItem } from '@/types/database'
@@ -22,6 +23,7 @@ export default function FranchiseProductsPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null)
   const { addToCart } = useCart()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [categories, setCategories] = useState<{ value: string; label: string }[]>([])
@@ -268,6 +270,17 @@ export default function FranchiseProductsPage() {
                 key={product.id}
                 product={product}
                 onAddToCart={(p) => {
+                  // If product has variants, open quick view to select
+                  if (p.has_variants) {
+                    // Store franchise code in localStorage for checkout
+                    if (franchiseCode) {
+                      localStorage.setItem('jeffy-franchise-code', franchiseCode)
+                      localStorage.setItem('jeffy-franchise-id', franchise?.id || '')
+                    }
+                    setQuickViewProduct(p)
+                    return
+                  }
+                  
                   // Store franchise code in localStorage for checkout
                   if (franchiseCode) {
                     localStorage.setItem('jeffy-franchise-code', franchiseCode)
@@ -286,13 +299,27 @@ export default function FranchiseProductsPage() {
                   addToCart(cartItem)
                 }}
                 onViewDetails={(p) => {
-                  router.push(`/franchise/${franchiseCode}/products/${p.id}`)
+                  // Store franchise code in localStorage for checkout
+                  if (franchiseCode) {
+                    localStorage.setItem('jeffy-franchise-code', franchiseCode)
+                    localStorage.setItem('jeffy-franchise-id', franchise?.id || '')
+                  }
+                  setQuickViewProduct(p)
                 }}
               />
             ))}
           </div>
         )}
       </div>
+
+      {/* Quick View Modal */}
+      {quickViewProduct && (
+        <ProductQuickViewModal
+          product={quickViewProduct}
+          isOpen={!!quickViewProduct}
+          onClose={() => setQuickViewProduct(null)}
+        />
+      )}
     </div>
   )
 }
