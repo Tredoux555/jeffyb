@@ -16,6 +16,15 @@ export interface AuthUser {
 
 /**
  * Sign up a new user
+ * 
+ * Note: Email confirmation behavior depends on Supabase settings:
+ * - If email confirmation is DISABLED in Supabase Dashboard → user is auto-confirmed
+ * - If email confirmation is ENABLED → user must verify email before login
+ * 
+ * To disable email confirmation (for development):
+ * 1. Go to Supabase Dashboard → Authentication → Settings
+ * 2. Find "Enable email confirmations"
+ * 3. Turn it OFF
  */
 export async function signUp(email: string, password: string, fullName?: string) {
   const supabase = createClient()

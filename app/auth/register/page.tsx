@@ -45,24 +45,31 @@ export default function RegisterPage() {
     setLoading(true)
 
     try {
-      await signUp(formData.email, formData.password, formData.fullName)
+      const result = await signUp(formData.email, formData.password, formData.fullName)
       
       // Check if email confirmation is required
-      // If user is null, email confirmation is required
+      // If email confirmation is disabled in Supabase, user will have a session immediately
       const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
+      
+      // Wait a moment for session to be created (if auto-confirmed)
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      
+      if (sessionError) {
+        console.error('Session check error:', sessionError)
+      }
       
       if (!session) {
-        // Email confirmation required
+        // Email confirmation required - redirect to verification page
         router.push('/auth/verify-email?email=' + encodeURIComponent(formData.email))
       } else {
-        // Auto-confirmed, go to profile
+        // Auto-confirmed (email confirmation disabled) - go to profile
         router.push('/profile')
       }
     } catch (error: any) {
       console.error('Registration error:', error)
       setError(error.message || 'Registration failed. Please try again.')
-    } finally {
       setLoading(false)
     }
   }
