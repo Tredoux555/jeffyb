@@ -80,15 +80,26 @@ export async function POST(request: NextRequest) {
           // Check if product has variants
           const { data: product } = await supabase
             .from('products')
-            .select('has_variants')
+            .select('has_variants, name')
             .eq('id', item.product_id)
             .single()
 
           if (product?.has_variants) {
-            return NextResponse.json(
-              { success: false, error: `Product requires variant selection` },
-              { status: 400 }
-            )
+            // Check if variants actually exist for this product
+            const { data: existingVariants, error: variantsCheckError } = await supabase
+              .from('product_variants')
+              .select('id')
+              .eq('product_id', item.product_id)
+              .limit(1)
+
+            // If variants exist but no variant_id provided, error
+            if (!variantsCheckError && existingVariants && existingVariants.length > 0) {
+              return NextResponse.json(
+                { success: false, error: `Product "${product.name || item.product_name || item.product_id}" requires variant selection. Please remove this item from your cart and add it again with a variant selected.` },
+                { status: 400 }
+              )
+            }
+            // If has_variants is true but no variants exist, allow the order (product might be in transition)
           }
 
           if (locationStock.stock_quantity < item.quantity) {
@@ -139,7 +150,7 @@ export async function POST(request: NextRequest) {
         } else {
           const { data: product, error: productError } = await supabase
             .from('products')
-            .select('stock, has_variants')
+            .select('stock, has_variants, name')
             .eq('id', item.product_id)
             .single()
 
@@ -151,10 +162,21 @@ export async function POST(request: NextRequest) {
           }
 
           if (product.has_variants) {
-            return NextResponse.json(
-              { success: false, error: `Product requires variant selection` },
-              { status: 400 }
-            )
+            // Check if variants actually exist for this product
+            const { data: existingVariants, error: variantsCheckError } = await supabase
+              .from('product_variants')
+              .select('id')
+              .eq('product_id', item.product_id)
+              .limit(1)
+
+            // If variants exist but no variant_id provided, error
+            if (!variantsCheckError && existingVariants && existingVariants.length > 0) {
+              return NextResponse.json(
+                { success: false, error: `Product "${product.name || item.product_name || item.product_id}" requires variant selection. Please remove this item from your cart and add it again with a variant selected.` },
+                { status: 400 }
+              )
+            }
+            // If has_variants is true but no variants exist, allow the order (product might be in transition)
           }
 
           if (product.stock < item.quantity) {

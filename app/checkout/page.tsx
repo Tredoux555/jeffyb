@@ -134,6 +134,13 @@ export default function CheckoutPage() {
         ? localStorage.getItem('jeffy-franchise-id') 
         : null
 
+      // Debug: Log cart items before submission
+      console.log('[Checkout] Cart items being sent:', itemsWithCosts)
+      const itemsWithoutVariantId = itemsWithCosts.filter(item => !item.variant_id)
+      if (itemsWithoutVariantId.length > 0) {
+        console.warn('[Checkout] Items without variant_id:', itemsWithoutVariantId)
+      }
+
       // Create order via API route (handles stock decrement and financial transactions)
       const orderResponse = await fetch('/api/orders', {
         method: 'POST',
