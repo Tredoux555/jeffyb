@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    const supabase = createAdminClient()
+    const supabase = createServerClient()
 
     // Build the base query
     let dbQuery = supabase
