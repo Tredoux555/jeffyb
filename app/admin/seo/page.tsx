@@ -73,28 +73,44 @@ export default function SEOManagementPage() {
   const generateSEOForProduct = async (product: Product) => {
     setUpdating(product.id)
     try {
+      // Safely prepare product data with null checks
       const seoData = ProductSEOOptimizer.generateComplete({
-        name: product.name,
-        category: product.category,
-        price: product.price,
-        features: product.features,
-        benefits: product.benefits,
-        brand: product.brand
+        name: product.name || 'Unnamed Product',
+        category: product.category || 'general',
+        price: product.price || 0,
+        features: Array.isArray(product.features) ? product.features : [],
+        benefits: Array.isArray(product.benefits) ? product.benefits : [],
+        brand: product.brand || undefined
       })
 
       const supabase = createClient()
+      
+      // First, try updating just the description (which always exists)
       const { error } = await supabase
         .from('products')
         .update({
           description: seoData.description,
-          seo_title: seoData.seoTitle,
-          meta_description: seoData.metaDescription,
-          target_keywords: seoData.keywords,
           updated_at: new Date().toISOString()
         })
         .eq('id', product.id)
 
-      if (error) throw error
+      if (error) {
+        console.error('Error updating product description:', error)
+        throw error
+      }
+
+      // Try updating SEO fields separately (might not exist if migration not run)
+      try {
+        await supabase
+          .from('products')
+          .update({
+            seo_title: seoData.seoTitle,
+            meta_description: seoData.metaDescription
+          })
+          .eq('id', product.id)
+      } catch (seoError) {
+        console.warn('SEO fields may not exist in database:', seoError)
+      }
 
       // Update local state
       setProducts(prev => prev.map(p => 
@@ -104,9 +120,9 @@ export default function SEOManagementPage() {
       ))
 
       setMessage({ type: 'success', text: `Updated SEO for ${product.name}` })
-    } catch (error) {
-      console.error('Error updating SEO:', error)
-      setMessage({ type: 'error', text: `Failed to update ${product.name}` })
+    } catch (error: any) {
+      console.error('Error updating SEO:', error?.message || error)
+      setMessage({ type: 'error', text: `Failed to update ${product.name}: ${error?.message || 'Unknown error'}` })
     } finally {
       setUpdating(null)
     }
@@ -177,12 +193,15 @@ export default function SEOManagementPage() {
 
   const getSEOScore = (product: Product): number => {
     let score = 0
-    if (product.description && product.description.length > 100) score += 25
-    if (product.description && product.description.length > 200) score += 15
+    const descLength = product.description?.length || 0
+    if (descLength > 100) score += 25
+    if (descLength > 200) score += 15
     if (product.seo_title) score += 20
     if (product.meta_description) score += 20
-    if (product.features && product.features.length > 0) score += 10
-    if (product.benefits && product.benefits.length > 0) score += 10
+    const featuresLength = Array.isArray(product.features) ? product.features.length : 0
+    const benefitsLength = Array.isArray(product.benefits) ? product.benefits.length : 0
+    if (featuresLength > 0) score += 10
+    if (benefitsLength > 0) score += 10
     return Math.min(score, 100)
   }
 

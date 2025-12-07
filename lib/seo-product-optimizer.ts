@@ -70,8 +70,11 @@ export class ProductSEOOptimizer {
    * Generate a complete SEO-optimized description for a product
    */
   static generateDescription(product: ProductSEOData): string {
-    const { name, category, price, features = [], benefits = [], brand } = product
-    const categoryLower = category.toLowerCase()
+    const { name, category, price, brand } = product
+    // Handle null/undefined arrays safely
+    const features = product.features || []
+    const benefits = product.benefits || []
+    const categoryLower = (category || 'general').toLowerCase()
     const template = CATEGORY_TEMPLATES[categoryLower] || CATEGORY_TEMPLATES.gym
     
     const sections: string[] = []
@@ -119,15 +122,20 @@ export class ProductSEOOptimizer {
    * Generate an SEO-optimized page title
    */
   static generateSEOTitle(productName: string, category: string): string {
-    const categoryCapitalized = category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()
-    return `${productName} - Premium ${categoryCapitalized} | Jeffy Store South Africa`
+    const safeName = productName || 'Product'
+    const safeCategory = category || 'General'
+    const categoryCapitalized = safeCategory.charAt(0).toUpperCase() + safeCategory.slice(1).toLowerCase()
+    return `${safeName} - Premium ${categoryCapitalized} | Jeffy Store South Africa`
   }
 
   /**
    * Generate a meta description (max 160 characters recommended)
    */
   static generateMetaDescription(productName: string, category: string, price: number): string {
-    const desc = `Shop ${productName} ${category.toLowerCase()} for R${price.toFixed(2)}. Free shipping on orders over R500. Premium quality, fast SA delivery!`
+    const safeName = productName || 'Product'
+    const safeCategory = category || 'item'
+    const safePrice = price || 0
+    const desc = `Shop ${safeName} ${safeCategory.toLowerCase()} for R${safePrice.toFixed(2)}. Free shipping on orders over R500. Premium quality, fast SA delivery!`
     // Truncate if too long
     if (desc.length > 160) {
       return desc.substring(0, 157) + '...'
@@ -153,29 +161,39 @@ export class ProductSEOOptimizer {
   static extractKeywords(product: ProductSEOData): string[] {
     const keywords: Set<string> = new Set()
     
-    // Add product name words
-    product.name.toLowerCase().split(/\s+/).forEach(word => {
-      if (word.length > 2) keywords.add(word)
-    })
+    // Add product name words (handle null safely)
+    if (product.name) {
+      product.name.toLowerCase().split(/\s+/).forEach(word => {
+        if (word.length > 2) keywords.add(word)
+      })
+    }
     
-    // Add category
-    keywords.add(product.category.toLowerCase())
+    // Add category (handle null safely)
+    if (product.category) {
+      keywords.add(product.category.toLowerCase())
+    }
     
     // Add brand if present
     if (product.brand) {
       keywords.add(product.brand.toLowerCase())
     }
     
-    // Add features as keywords
-    product.features?.forEach(feature => {
-      feature.toLowerCase().split(/\s+/).forEach(word => {
-        if (word.length > 3) keywords.add(word)
-      })
+    // Add features as keywords (handle null safely)
+    const features = product.features || []
+    features.forEach(feature => {
+      if (feature) {
+        feature.toLowerCase().split(/\s+/).forEach(word => {
+          if (word.length > 3) keywords.add(word)
+        })
+      }
     })
     
-    // Add target keywords
-    product.targetKeywords?.forEach(keyword => {
-      keywords.add(keyword.toLowerCase())
+    // Add target keywords (handle null safely)
+    const targetKeywords = product.targetKeywords || []
+    targetKeywords.forEach(keyword => {
+      if (keyword) {
+        keywords.add(keyword.toLowerCase())
+      }
     })
     
     // Add common e-commerce keywords
