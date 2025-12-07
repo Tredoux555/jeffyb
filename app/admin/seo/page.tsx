@@ -83,33 +83,22 @@ export default function SEOManagementPage() {
         brand: product.brand || undefined
       })
 
-      const supabase = createClient()
-      
-      // First, try updating just the description (which always exists)
-      const { error } = await supabase
-        .from('products')
-        .update({
+      // Use API route for server-side update (bypasses RLS)
+      const response = await fetch('/api/admin/seo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: product.id,
           description: seoData.description,
-          updated_at: new Date().toISOString()
+          seo_title: seoData.seoTitle,
+          meta_description: seoData.metaDescription
         })
-        .eq('id', product.id)
+      })
 
-      if (error) {
-        console.error('Error updating product description:', error)
-        throw error
-      }
+      const result = await response.json()
 
-      // Try updating SEO fields separately (might not exist if migration not run)
-      try {
-        await supabase
-          .from('products')
-          .update({
-            seo_title: seoData.seoTitle,
-            meta_description: seoData.metaDescription
-          })
-          .eq('id', product.id)
-      } catch (seoError) {
-        console.warn('SEO fields may not exist in database:', seoError)
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update')
       }
 
       // Update local state
@@ -155,25 +144,27 @@ export default function SEOManagementPage() {
   const saveCustomDescription = async (productId: string) => {
     setUpdating(productId)
     try {
-      const supabase = createClient()
-      const { error } = await supabase
-        .from('products')
-        .update({
-          description: editedDescription,
-          updated_at: new Date().toISOString()
+      // Use API route for server-side update (bypasses RLS)
+      const response = await fetch('/api/admin/seo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId,
+          description: editedDescription
         })
-        .eq('id', productId)
+      })
 
-      if (error) throw error
+      const result = await response.json()
+      if (!result.success) throw new Error(result.error)
 
       setProducts(prev => prev.map(p => 
         p.id === productId ? { ...p, description: editedDescription } : p
       ))
       setEditingProduct(null)
       setMessage({ type: 'success', text: 'Description saved!' })
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving description:', error)
-      setMessage({ type: 'error', text: 'Failed to save description' })
+      setMessage({ type: 'error', text: `Failed to save: ${error?.message || 'Unknown error'}` })
     } finally {
       setUpdating(null)
     }

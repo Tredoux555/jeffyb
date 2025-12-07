@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
@@ -63,6 +64,7 @@ export default function AIToolsPage() {
   const tools = [
     { id: 'advisor' as const, name: 'Site Advisor', icon: Wrench, description: 'Get improvement suggestions' },
     { id: 'description' as const, name: 'Product Descriptions', icon: FileText, description: 'Generate product copy' },
+    { id: 'seo' as const, name: 'SEO Manager', icon: Sparkles, description: 'Optimize all products', href: '/admin/seo' },
     { id: 'analytics' as const, name: 'Analytics Summary', icon: BarChart3, description: 'AI insights on sales' },
     { id: 'reorder' as const, name: 'Reorder Suggestions', icon: Package, description: 'Smart inventory alerts' },
     { id: 'requests' as const, name: 'Request Analyzer', icon: MessageSquare, description: 'Analyze Jeffy Wants' },
@@ -86,10 +88,28 @@ export default function AIToolsPage() {
         </div>
 
         {/* Tool Selector */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 mb-6">
           {tools.map((tool) => {
             const Icon = tool.icon
             const isActive = activeTool === tool.id
+            
+            // If tool has href, render as Link
+            if ('href' in tool && tool.href) {
+              return (
+                <Link
+                  key={tool.id}
+                  href={tool.href}
+                  className="p-4 rounded-xl transition-all text-left bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-lg hover:scale-[1.02]"
+                >
+                  <Icon className="w-6 h-6 mb-2 text-yellow-300" />
+                  <p className="font-semibold text-sm">{tool.name}</p>
+                  <p className="text-xs text-purple-200">
+                    {tool.description}
+                  </p>
+                </Link>
+              )
+            }
+            
             return (
               <button
                 key={tool.id}
