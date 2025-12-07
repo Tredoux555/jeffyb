@@ -361,8 +361,8 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        {/* Analytics & Insights - 3 Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        {/* Analytics & Insights - 4 Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* 5. User Management */}
           <Card className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
@@ -409,6 +409,23 @@ export default function AdminDashboard() {
                 <Button className="w-full text-sm sm:text-base">
                   <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                   View Requests
+                </Button>
+              </Link>
+            </div>
+          </Card>
+
+          {/* 8. SEO Management */}
+          <Card className="p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">SEO Management</h3>
+              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+            </div>
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Optimize product descriptions for search engines</p>
+            <div className="space-y-2">
+              <Link href="/admin/seo">
+                <Button className="w-full text-sm sm:text-base">
+                  <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                  Manage SEO
                 </Button>
               </Link>
             </div>
