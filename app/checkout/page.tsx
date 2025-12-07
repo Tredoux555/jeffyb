@@ -229,7 +229,7 @@ export default function CheckoutPage() {
       // Save address if user is logged in and checkbox is checked
       if (user && saveAddressForFuture && !selectedAddressId) {
         try {
-          const { error: addressError } = await supabase
+          const { data: savedAddress, error: addressError } = await supabase
             .from('saved_addresses')
             .insert({
               user_id: user.id,
@@ -242,12 +242,22 @@ export default function CheckoutPage() {
               longitude: deliveryInfo.longitude || null,
               is_default: false,
             })
+            .select()
+            .single()
           
           if (addressError) {
             console.error('Error saving address:', addressError)
+            // Show error to user
+            alert(`Failed to save address: ${addressError.message || 'Unknown error'}. Your order was still placed successfully.`)
+          } else if (savedAddress) {
+            // Success - address saved
+            console.log('Address saved successfully:', savedAddress)
+            // Note: We don't show success alert here to avoid interrupting the order flow
+            // The order success page will confirm everything worked
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error saving address:', error)
+          alert(`Failed to save address: ${error.message || 'Unknown error'}. Your order was still placed successfully.`)
         }
       }
       

@@ -19,14 +19,28 @@ export async function isFavorited(userId: string, productId: string): Promise<bo
       .eq('product_id', productId)
       .single()
 
-    if (error && error.code !== 'PGRST116') {
-      // PGRST116 = no rows returned (not favorited)
+    // PGRST116 = no rows returned (not favorited) - this is OK
+    if (error && error.code === 'PGRST116') {
+      return false
+    }
+
+    // Handle RLS/authentication errors (406, 401, etc.) - return false silently
+    // These occur when user authentication state is uncertain or RLS blocks access
+    if (error) {
+      const status = (error as any).status || (error as any).code
+      if (status === 406 || status === 401 || error.code === 'PGRST301') {
+        // RLS or authentication error - silently return false
+        console.warn('Cannot check favorite status (auth/RLS issue):', error.message)
+        return false
+      }
+      // Other errors - log but still return false
       console.error('Error checking favorite:', error)
       return false
     }
 
     return !!data
   } catch (error) {
+    // Handle unexpected errors gracefully
     console.error('Error checking favorite:', error)
     return false
   }
