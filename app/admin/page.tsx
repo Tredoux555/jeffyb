@@ -18,7 +18,8 @@ import {
   MessageSquare,
   Globe,
   Users,
-  Gift
+  Gift,
+  Sparkles
 } from 'lucide-react'
 
 export default function AdminDashboard() {
@@ -408,6 +409,29 @@ export default function AdminDashboard() {
                 <Button className="w-full text-sm sm:text-base">
                   <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                   View Requests
+                </Button>
+              </Link>
+            </div>
+          </Card>
+        </div>
+
+        {/* AI Tools Section */}
+        <div className="mb-6 sm:mb-8">
+          <Card className="p-4 sm:p-6 border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Sparkles className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">AI Tools</h3>
+                  <p className="text-sm text-gray-600">Powered by Claude AI - Generate descriptions, analyze data, get improvement suggestions</p>
+                </div>
+              </div>
+              <Link href="/admin/ai-tools" className="w-full sm:w-auto">
+                <Button className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Open AI Tools
                 </Button>
               </Link>
             </div>

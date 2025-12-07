@@ -81,6 +81,9 @@ A mobile-optimized commerce platform built with Next.js 14+, Supabase, and Tailw
    # QuickBooks Integration (optional)
    QUICKBOOKS_CLIENT_ID=your_quickbooks_client_id
    QUICKBOOKS_CLIENT_SECRET=your_quickbooks_client_secret
+   
+   # Anthropic Claude AI (optional - for AI tools)
+   ANTHROPIC_API_KEY=your_anthropic_api_key
    ```
 
 5. **Run the development server**
@@ -225,6 +228,22 @@ Access the admin panel at `/admin/login`
 - Responsive design for all screen sizes
 - Optimized images and loading
 - Mobile-first navigation
+
+### AI Tools (Powered by Claude)
+Access AI-powered features at `/admin/ai-tools`:
+- **Product Description Generator**: Create compelling product copy with SEO keywords
+- **Smart Analytics Summary**: Get AI insights on your sales data and trends
+- **Inventory Reorder Suggestions**: Smart recommendations for restocking
+- **Product Request Analyzer**: Identify trends from "Jeffy Wants" customer requests
+- **Marketing Copy Generator**: Create social posts, emails, and promo content
+- **Site Improvement Advisor**: Get code-level suggestions for site improvements
+
+To enable AI features, add your Anthropic API key to `.env.local`:
+```env
+ANTHROPIC_API_KEY=your_anthropic_api_key
+```
+
+Get your API key at: https://console.anthropic.com/
 
 ## Customization
 
