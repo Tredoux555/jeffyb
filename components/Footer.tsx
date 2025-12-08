@@ -50,6 +50,12 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/free-product" className="text-slate-400 hover:text-jeffy-yellow transition-colors flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-amber-400 rounded-full"></span>
+                  🎁 FREE Product
+                </Link>
+              </li>
+              <li>
                 <Link href="/coming-soon" className="text-slate-400 hover:text-jeffy-yellow transition-colors flex items-center gap-2">
                   <span className="w-1.5 h-1.5 bg-jeffy-yellow rounded-full"></span>
                   Coming Soon

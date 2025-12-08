@@ -13,7 +13,7 @@ import { CartItem, SavedAddress, SavedPaymentMethod } from '@/types/database'
 import { createClient } from '@/lib/supabase'
 import { generateOrderQRCode } from '@/lib/qrcode'
 import { loadCart, clearCart as clearCartFromDB } from '@/lib/cart'
-import { CreditCard } from 'lucide-react'
+import { CreditCard, Tag, X, Check, Loader2, Gift } from 'lucide-react'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 
 export default function CheckoutPage() {
@@ -47,6 +47,15 @@ export default function CheckoutPage() {
   
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'paypal' | 'mock'>('mock')
   
+  // Promo code state
+  const [promoCode, setPromoCode] = useState('')
+  const [promoCodeInput, setPromoCodeInput] = useState('')
+  const [promoLoading, setPromoLoading] = useState(false)
+  const [promoError, setPromoError] = useState('')
+  const [promoDiscount, setPromoDiscount] = useState(0)
+  const [promoType, setPromoType] = useState<'percentage' | 'fixed' | 'free_product' | null>(null)
+  const [promoMessage, setPromoMessage] = useState('')
+  
   // Load cart when auth state is ready
   useEffect(() => {
     if (authLoading) return // Wait for auth to finish loading
@@ -79,8 +88,48 @@ export default function CheckoutPage() {
     }
   }, [user, profile, authLoading])
   
-  const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0)
+  const total = Math.max(0, subtotal - promoDiscount)
+  
+  // Apply promo code
+  const applyPromoCode = async () => {
+    if (!promoCodeInput.trim()) return
+    
+    setPromoLoading(true)
+    setPromoError('')
+    
+    try {
+      const response = await fetch(`/api/promo-codes?code=${encodeURIComponent(promoCodeInput)}&subtotal=${subtotal}`)
+      const data = await response.json()
+      
+      if (data.success && data.isValid) {
+        setPromoCode(promoCodeInput.toUpperCase())
+        setPromoDiscount(data.discountAmount)
+        setPromoType(data.promoCode.type)
+        setPromoMessage(data.message)
+        setPromoError('')
+      } else {
+        setPromoError(data.error || data.message || 'Invalid promo code')
+        setPromoDiscount(0)
+        setPromoType(null)
+        setPromoMessage('')
+      }
+    } catch (error) {
+      setPromoError('Failed to validate promo code')
+    } finally {
+      setPromoLoading(false)
+    }
+  }
+  
+  const removePromoCode = () => {
+    setPromoCode('')
+    setPromoCodeInput('')
+    setPromoDiscount(0)
+    setPromoType(null)
+    setPromoMessage('')
+    setPromoError('')
+  }
   
   const handleSubmitOrder = async () => {
     if (!customerInfo.name || !customerInfo.email || !deliveryInfo.address) {
@@ -151,7 +200,10 @@ export default function CheckoutPage() {
           user_id: user?.id || null,
           user_email: customerInfo.email,
           items: itemsWithCosts,
+          subtotal: subtotal,
           total: total,
+          discount: promoDiscount,
+          promo_code: promoCode || null,
           franchise_location_id: franchiseLocationId || null,
           delivery_info: {
             name: customerInfo.name,
@@ -282,6 +334,24 @@ export default function CheckoutPage() {
           }
         } catch (error) {
           console.error('Error saving payment method:', error)
+        }
+      }
+      
+      // Apply promo code if used
+      if (promoCode && promoDiscount > 0) {
+        try {
+          await fetch('/api/promo-codes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              code: promoCode,
+              orderId: order.id,
+              userId: user?.id
+            })
+          })
+        } catch (promoError) {
+          console.error('Error applying promo code:', promoError)
+          // Continue even if promo tracking fails
         }
       }
       
@@ -572,10 +642,74 @@ export default function CheckoutPage() {
                   ))}
                 </div>
                 
-                {/* Total */}
-                <div className="border-t border-gray-200 pt-4">
-                  <div className="flex justify-between text-lg font-semibold">
-                    <span>Total ({itemCount} items)</span>
+                {/* Promo Code */}
+                <div className="border-t border-gray-200 pt-4 mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Tag className="w-4 h-4 inline mr-1" />
+                    Promo Code
+                  </label>
+                  
+                  {promoCode ? (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {promoType === 'free_product' ? (
+                            <Gift className="w-5 h-5 text-green-600" />
+                          ) : (
+                            <Check className="w-5 h-5 text-green-600" />
+                          )}
+                          <span className="font-mono font-medium text-green-800">{promoCode}</span>
+                        </div>
+                        <button
+                          onClick={removePromoCode}
+                          className="text-gray-400 hover:text-gray-600"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <p className="text-sm text-green-600 mt-1">{promoMessage}</p>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Input
+                        value={promoCodeInput}
+                        onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
+                        placeholder="Enter code"
+                        className="flex-1"
+                        onKeyDown={(e) => e.key === 'Enter' && applyPromoCode()}
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={applyPromoCode}
+                        disabled={promoLoading || !promoCodeInput}
+                        className="px-4"
+                      >
+                        {promoLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {promoError && (
+                    <p className="text-sm text-red-600 mt-2">{promoError}</p>
+                  )}
+                </div>
+                
+                {/* Subtotal & Discount */}
+                <div className="border-t border-gray-200 pt-4 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Subtotal ({itemCount} items)</span>
+                    <span>R{subtotal.toFixed(2)}</span>
+                  </div>
+                  
+                  {promoDiscount > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>Discount</span>
+                      <span>-R{promoDiscount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-between text-lg font-semibold pt-2 border-t border-gray-100">
+                    <span>Total</span>
                     <span className="text-jeffy-yellow">R{total.toFixed(2)}</span>
                   </div>
                 </div>
