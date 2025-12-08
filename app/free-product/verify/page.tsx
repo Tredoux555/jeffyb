@@ -159,7 +159,7 @@ export default function VerifyPage() {
             <Link href="/free-product" className="block">
               <Button variant="outline" className="w-full">
                 <Gift className="w-4 h-4 mr-2" />
-                Get Your Own FREE Product
+                Earn 50% Off - Share & Save!
               </Button>
             </Link>
           </div>

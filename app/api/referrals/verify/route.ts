@@ -130,17 +130,17 @@ export async function POST(request: NextRequest) {
         updatedCampaign.referral_count >= requiredReferrals && 
         !updatedCampaign.is_completed) {
       
-      const rewardCode = generatePromoCode('FREE')
+      const rewardCode = generatePromoCode('HALF')
       
-      // Create the free product promo code
+      // Create the 50% off promo code (percentage type instead of free_product)
       await supabase
         .from('promo_codes')
         .insert({
           code: rewardCode,
-          type: 'free_product',
-          value: maxFreeProductValue,
+          type: 'percentage',
+          value: 50, // 50% off
           max_uses: 1,
-          max_discount_value: maxFreeProductValue,
+          max_discount_value: null, // No cap - 50% off any product
           user_id: updatedCampaign.user_id,
           campaign_id: referral.campaign_id
         })

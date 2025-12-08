@@ -157,10 +157,10 @@ export function calculateDiscount(
 export function generateShareUrls(referralCode: string, baseUrl: string) {
   const referralUrl = `${baseUrl}/free-product?ref=${referralCode}`
   const shareText = encodeURIComponent(
-    `🎁 Get a FREE product from Jeffy! Sign up and you could get a free product too. Use my link:`
+    `🎉 Get 30% OFF at Jeffy! Sign up and you could get 50% off too. Use my link:`
   )
   const shareTextWhatsApp = encodeURIComponent(
-    `🎁 Hey! I found this awesome deal - you can get a FREE product from Jeffy! Just sign up with my link and verify your email to get 30% off. Plus, you can get your own free product by sharing too!\n\n${referralUrl}`
+    `🎉 Hey! I found this awesome deal at Jeffy! Just sign up with my link and verify your email to get 30% off your first order. Plus, you can earn 50% off ANY product by sharing with friends!\n\n${referralUrl}`
   )
 
   return {

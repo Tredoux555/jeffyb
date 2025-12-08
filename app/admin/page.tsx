@@ -386,7 +386,7 @@ export default function AdminDashboard() {
               <h3 className="text-base sm:text-lg font-semibold text-gray-900">Referral Program</h3>
               <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
             </div>
-            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Manage free product referral campaigns and promo codes</p>
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Manage 50% off referral campaigns and promo codes</p>
             <div className="space-y-2">
               <Link href="/admin/referrals">
                 <Button className="w-full text-sm sm:text-base bg-amber-500 hover:bg-amber-600">

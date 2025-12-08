@@ -65,7 +65,7 @@ export function Navigation({ cartItemCount = 0 }: NavigationProps) {
   
   const navItems = [
     { href: '/', label: 'Home', icon: Home },
-    { href: '/free-product', label: 'FREE Product', icon: Gift },
+    { href: '/free-product', label: '50% Off!', icon: Gift },
     { href: '/admin', label: 'Admin', icon: Shield },
   ]
   

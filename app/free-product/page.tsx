@@ -32,7 +32,7 @@ const TikTokIcon = ({ className }: { className?: string }) => (
   </svg>
 )
 
-export default function FreeProductPage() {
+export default function HalfPriceRewardPage() {
   const { user } = useAuth()
   const searchParams = useSearchParams()
   const referralCode = searchParams.get('ref')
@@ -242,7 +242,7 @@ export default function FreeProductPage() {
                 <Gift className="w-10 h-10 text-white" />
               </div>
               <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                You've Been Invited! 🎁
+                You've Been Invited! 🎉
               </h1>
               <p className="text-gray-600">
                 Get <span className="font-bold text-amber-600">{settings?.referral_discount_percent || 30}% OFF</span> your first order!
@@ -287,7 +287,7 @@ export default function FreeProductPage() {
 
             <div className="mt-6 pt-6 border-t border-gray-200 text-center">
               <p className="text-sm text-gray-600 mb-2">
-                Want to earn a <strong>FREE product</strong>?
+                Want to earn <strong>50% OFF</strong> any product?
               </p>
               <Link href="/auth/register" className="text-amber-600 hover:text-amber-700 font-medium text-sm">
                 Create an account and start sharing →
@@ -324,11 +324,11 @@ export default function FreeProductPage() {
                   🎉 Congratulations! You did it!
                 </h3>
                 {campaign.reward_claimed ? (
-                  <p className="text-green-700">You've already claimed your free product!</p>
+                  <p className="text-green-700">You've already used your 50% discount!</p>
                 ) : (
                   <>
                     <p className="text-green-700 mb-4">
-                      Your FREE product code is ready:
+                      Your 50% OFF code is ready:
                     </p>
                     <div className="bg-white border-2 border-green-300 rounded-lg p-3 inline-block">
                       <span className="text-xl font-bold font-mono text-green-800">
@@ -342,11 +342,11 @@ export default function FreeProductPage() {
                       </button>
                     </div>
                     <p className="text-sm text-green-600 mt-3">
-                      Use at checkout for any product under R{settings?.max_free_product_value || 300}
+                      Use at checkout for 50% off ANY product!
                     </p>
                     <Link href="/products" className="mt-4 inline-block">
                       <Button>
-                        Choose Your Free Product <ArrowRight className="w-4 h-4 ml-2" />
+                        Shop Now - 50% Off! <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>
                   </>
@@ -369,7 +369,7 @@ export default function FreeProductPage() {
                   </div>
                 </div>
                 <p className="text-gray-600 text-sm">
-                  {settings?.referrals_required - verifiedReferrals} more friends needed for your FREE product!
+                  {settings?.referrals_required - verifiedReferrals} more friends needed for your 50% OFF reward!
                 </p>
               </>
             )}
@@ -494,11 +494,11 @@ export default function FreeProductPage() {
             <Gift className="w-12 h-12 text-white" />
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Get a FREE Product! 🎁
+            Get 50% OFF Any Product! 🎉
           </h1>
           <p className="text-xl text-gray-600 max-w-xl mx-auto">
-            Share Jeffy with {settings?.referrals_required || 10} friends and get any product 
-            under R{settings?.max_free_product_value || 300} completely FREE!
+            Share Jeffy with {settings?.referrals_required || 10} friends and get 
+            50% OFF any product you want!
           </p>
         </div>
 
@@ -529,9 +529,9 @@ export default function FreeProductPage() {
               <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Gift className="w-8 h-8 text-amber-600" />
               </div>
-              <h3 className="font-bold text-gray-900 mb-2">3. Claim Your Free Product</h3>
+              <h3 className="font-bold text-gray-900 mb-2">3. Get 50% Off!</h3>
               <p className="text-gray-600 text-sm">
-                Choose any product under R{settings?.max_free_product_value || 300} and it's yours completely FREE!
+                Choose ANY product and get 50% off! Can't find what you want? Request it and still get 50% off!
               </p>
             </div>
           </div>
@@ -544,7 +544,7 @@ export default function FreeProductPage() {
               <CheckCircle2 className="w-12 h-12 mx-auto mb-4 opacity-90" />
               <h2 className="text-2xl font-bold mb-2">You've Already Claimed!</h2>
               <p className="opacity-90 mb-4">
-                You've already received your free product. Thanks for being part of the Jeffy family!
+                You've already used your 50% discount. Thanks for being part of the Jeffy family!
               </p>
               <Link href="/products">
                 <Button variant="outline" className="bg-white text-amber-600 border-white hover:bg-amber-50">
@@ -607,7 +607,13 @@ export default function FreeProductPage() {
             <Card className="p-4">
               <h3 className="font-bold text-gray-900 mb-1">Can I do this more than once?</h3>
               <p className="text-gray-600 text-sm">
-                The free product is a one-time special offer. Make it count!
+                The 50% discount reward is a one-time special offer. Make it count!
+              </p>
+            </Card>
+            <Card className="p-4">
+              <h3 className="font-bold text-gray-900 mb-1">What if I can't find what I want?</h3>
+              <p className="text-gray-600 text-sm">
+                No problem! Request any product through "Jeffy Wants" and you'll still get 50% off when we stock it!
               </p>
             </Card>
           </div>

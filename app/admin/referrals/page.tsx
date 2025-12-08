@@ -201,20 +201,16 @@ export default function AdminReferralsPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <DollarSign className="w-4 h-4 inline mr-1" />
-                  Max Free Product Value (R)
+                  Reward Discount (%)
                 </label>
                 <Input
                   type="number"
-                  value={settings.max_free_product_value}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    max_free_product_value: parseFloat(e.target.value) || 300
-                  })}
-                  min={0}
-                  step={50}
+                  value={50}
+                  disabled
+                  className="bg-gray-100"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Maximum product value that can be claimed for free
+                  Referrers get 50% off any product (fixed to protect margins)
                 </p>
               </div>
 
@@ -306,7 +302,7 @@ export default function AdminReferralsPage() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="bg-amber-100 text-amber-700 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs font-bold">4</span>
-                <span>After {settings?.referrals_required || 10} verified referrals → free product unlocked!</span>
+                <span>After {settings?.referrals_required || 10} verified referrals → 50% off unlocked!</span>
               </li>
             </ol>
           </Card>
@@ -315,23 +311,22 @@ export default function AdminReferralsPage() {
             <h3 className="font-bold text-gray-900 mb-4">Cost Analysis</h3>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600">Max cost per free product:</span>
-                <span className="font-medium">R{settings?.max_free_product_value || 300}</span>
+                <span className="text-gray-600">Reward discount:</span>
+                <span className="font-medium text-green-600">50% off (you cover costs)</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Referrals needed:</span>
                 <span className="font-medium">{settings?.referrals_required || 10}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Cost per referral:</span>
-                <span className="font-medium">
-                  R{((settings?.max_free_product_value || 300) / (settings?.referrals_required || 10)).toFixed(2)}
-                </span>
+                <span className="text-gray-600">Referral discount:</span>
+                <span className="font-medium">{settings?.referral_discount_percent || 30}% off</span>
               </div>
               <div className="pt-3 border-t border-gray-200">
                 <p className="text-gray-500 text-xs">
-                  Each referral gets {settings?.referral_discount_percent || 30}% off their first order, 
-                  potentially driving additional revenue to offset costs.
+                  With 50% off (instead of free), you always cover your product costs. 
+                  Each of the 10 referrals gets {settings?.referral_discount_percent || 30}% off, 
+                  driving revenue while growing your customer base.
                 </p>
               </div>
             </div>

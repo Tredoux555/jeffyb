@@ -19,9 +19,13 @@ CREATE TABLE IF NOT EXISTS referral_settings (
 );
 
 -- Insert default settings
+-- Note: max_free_product_value is kept for legacy but reward is now 50% off (percentage type)
 INSERT INTO referral_settings (referrals_required, referral_discount_percent, max_free_product_value, referral_expiry_days)
 VALUES (10, 30, 300.00, 30)
 ON CONFLICT DO NOTHING;
+
+-- The reward system now gives 50% off any product (percentage type) instead of free product
+-- This ensures you always cover your costs while still offering a great incentive
 
 -- =============================================
 -- 2. REFERRAL CAMPAIGNS TABLE (One per user)
