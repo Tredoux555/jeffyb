@@ -29,14 +29,23 @@ export function FavoriteButton({ productId, size = 'md', showText = false, onTog
   }, [user, productId])
 
   const checkFavoriteStatus = async () => {
-    if (!user) return
+    if (!user) {
+      setIsFavorited(false)
+      setChecking(false)
+      return
+    }
 
     try {
       setChecking(true)
       const favorited = await checkFavorited(user.id, productId)
       setIsFavorited(favorited)
-    } catch (error) {
-      console.error('Error checking favorite status:', error)
+    } catch (error: any) {
+      // Silently handle auth/RLS errors - these are expected when not logged in
+      const status = error?.status || error?.code
+      if (status !== 406 && status !== 401 && error?.code !== 'PGRST301') {
+        console.error('Error checking favorite status:', error)
+      }
+      setIsFavorited(false)
     } finally {
       setChecking(false)
     }
