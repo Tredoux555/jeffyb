@@ -16,7 +16,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = createAdminClient()
+    let supabase
+    try {
+      supabase = createAdminClient()
+    } catch (clientError: any) {
+      console.error('[SEO API] Failed to create admin client:', clientError)
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Server configuration error. Please check SUPABASE_SERVICE_ROLE_KEY environment variable.',
+          details: clientError?.message 
+        },
+        { status: 500 }
+      )
+    }
 
     // Build update object - only include fields that were provided
     const updateData: Record<string, any> = {
@@ -91,7 +104,21 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const supabase = createAdminClient()
+    let supabase
+    try {
+      supabase = createAdminClient()
+    } catch (clientError: any) {
+      console.error('[SEO API Bulk] Failed to create admin client:', clientError)
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Server configuration error. Please check SUPABASE_SERVICE_ROLE_KEY environment variable.',
+          details: clientError?.message 
+        },
+        { status: 500 }
+      )
+    }
+    
     const results = []
     const errors = []
     const categories = new Set<string>()
@@ -143,6 +170,48 @@ export async function PUT(request: NextRequest) {
     console.error('[SEO API Bulk] Error:', error)
     return NextResponse.json(
       { success: false, error: error?.message || 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+// Test endpoint to verify environment variable is set correctly
+// Visit: https://www.jeffy.co.za/api/admin/seo (GET request)
+export async function GET() {
+  try {
+    const hasServiceKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY
+    const hasUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL
+    const serviceKeyLength = process.env.SUPABASE_SERVICE_ROLE_KEY?.length || 0
+    
+    // Try to create admin client
+    let canCreateClient = false
+    let clientError = null
+    try {
+      const supabase = createAdminClient()
+      canCreateClient = !!supabase
+    } catch (error: any) {
+      clientError = error.message
+    }
+    
+    return NextResponse.json({
+      success: true,
+      environment: {
+        hasServiceKey,
+        hasUrl,
+        serviceKeyLength,
+        canCreateClient,
+        clientError
+      },
+      message: canCreateClient 
+        ? '✅ Environment variables are configured correctly'
+        : '❌ Environment variables are missing or incorrect. Check Vercel settings.'
+    })
+  } catch (error: any) {
+    return NextResponse.json(
+      { 
+        success: false, 
+        error: error?.message || 'Failed to check environment variables' 
+      },
       { status: 500 }
     )
   }
