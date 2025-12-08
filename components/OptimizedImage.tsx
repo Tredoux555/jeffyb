@@ -147,10 +147,10 @@ export function OptimizedImage({
     </>
   )
 
-  // If using fill, wrap in a container
+  // If using fill, wrap in a container with full dimensions
   if (fill) {
     return (
-      <div className={`relative overflow-hidden ${containerClassName}`}>
+      <div className={`relative overflow-hidden w-full h-full ${containerClassName}`}>
         {imageElement}
       </div>
     )
