@@ -26,6 +26,9 @@ export async function GET(
         approvals_received,
         status,
         is_free_product_earned,
+        is_discount_earned,
+        reward_promo_code,
+        reward_used,
         matched_product_name,
         created_at,
         approvals:jeffy_approvals(
@@ -196,7 +199,7 @@ export async function POST(
     // Get updated request status
     const { data: updatedRequest } = await supabase
       .from('jeffy_requests')
-      .select('approvals_received, approvals_needed, status, is_free_product_earned')
+      .select('approvals_received, approvals_needed, status, is_free_product_earned, is_discount_earned, reward_promo_code')
       .eq('id', requestData.id)
       .single()
 
@@ -205,8 +208,8 @@ export async function POST(
       data: {
         approval: data,
         request: updatedRequest,
-        message: updatedRequest?.is_free_product_earned 
-          ? '🎉 Congratulations! This request has earned a FREE product!'
+        message: updatedRequest?.is_discount_earned || updatedRequest?.is_free_product_earned
+          ? '🎉 Congratulations! This request has earned 50% OFF any product!'
           : `Thanks for your approval! ${updatedRequest?.approvals_received}/${updatedRequest?.approvals_needed} approvals received.`
       }
     })
@@ -261,10 +264,10 @@ export async function PUT(
       )
     }
 
-    // Check if eligible for free product
+    // Check if eligible for discount
     if (!requestData.is_free_product_earned) {
       return NextResponse.json(
-        { success: false, error: 'This request has not yet earned a free product' },
+        { success: false, error: 'This request has not yet earned the 50% discount' },
         { status: 400 }
       )
     }
@@ -288,7 +291,7 @@ export async function PUT(
 
     return NextResponse.json({
       success: true,
-      message: 'Shipping address saved! We will process your free product soon.'
+      message: 'Details saved! Use your 50% off promo code at checkout for any product.'
     })
 
   } catch (error) {

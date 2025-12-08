@@ -189,7 +189,7 @@ export function JeffyWantForm({ onSuccess, className }: JeffyWantFormProps) {
             🎉 Your Link is Ready!
           </h3>
           <p className="text-slate-600 mb-6">
-            Share this link with 10 friends to get your product FREE!
+            Share this link with 10 friends to get <span className="font-bold text-amber-600">50% OFF</span> any product!
           </p>
 
           {/* Shareable Link */}
@@ -219,7 +219,7 @@ export function JeffyWantForm({ onSuccess, className }: JeffyWantFormProps) {
             <p className="text-sm font-medium text-slate-700">Share on:</p>
             <div className="flex flex-wrap justify-center gap-3">
               <a
-                href={`https://wa.me/?text=${encodeURIComponent(`Hey! I found something cool and want to get it FREE! Check it out and let me know what you think: ${result.shareable_link}`)}`}
+                href={`https://wa.me/?text=${encodeURIComponent(`Hey! I found something I want to get at 50% OFF! If you think it's a good idea, click my link - you'll also get 30% off your first order! ${result.shareable_link}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-4 py-2 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors"
@@ -235,7 +235,7 @@ export function JeffyWantForm({ onSuccess, className }: JeffyWantFormProps) {
                 Facebook
               </a>
               <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out this product I want! Help me get it FREE: ${result.shareable_link}`)}`}
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Found something cool! Help me get 50% off - you'll get 30% off too: ${result.shareable_link}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-4 py-2 bg-sky-500 text-white rounded-xl font-medium hover:bg-sky-600 transition-colors"
@@ -243,7 +243,7 @@ export function JeffyWantForm({ onSuccess, className }: JeffyWantFormProps) {
                 X/Twitter
               </a>
               <a
-                href={`mailto:?subject=${encodeURIComponent('Check this out!')}&body=${encodeURIComponent(`Hey! I found something cool and want to get it FREE. Can you check it out and let me know what you think? ${result.shareable_link}`)}`}
+                href={`mailto:?subject=${encodeURIComponent('Check this out - 50% off!')}&body=${encodeURIComponent(`Hey! I found something cool at Jeffy. If you think it's a good idea, click my link - I'll get 50% off and you'll get 30% off your first order! ${result.shareable_link}`)}`}
                 className="px-4 py-2 bg-slate-700 text-white rounded-xl font-medium hover:bg-slate-800 transition-colors"
               >
                 Email
@@ -441,13 +441,13 @@ export function JeffyWantForm({ onSuccess, className }: JeffyWantFormProps) {
           ) : (
             <>
               <Sparkles className="w-5 h-5 mr-2" />
-              Get My FREE Product Link
+              Get My 50% OFF Link
             </>
           )}
         </Button>
 
         <p className="text-xs text-center text-slate-500">
-          Share your link with 10 friends who agree it's a good idea, and get the product FREE!
+          Share your link with 10 friends who agree it's a good idea, and get 50% OFF any product!
         </p>
       </form>
     </Card>

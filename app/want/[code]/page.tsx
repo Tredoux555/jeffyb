@@ -129,7 +129,7 @@ export default function ApprovalPage({ params }: { params: Promise<{ code: strin
           </div>
           <h2 className="text-xl font-bold text-slate-900 mb-2">Request Not Found</h2>
           <p className="text-slate-600 mb-4">This link may have expired or is invalid.</p>
-          <Link href="/free-products">
+          <Link href="/free-product">
             <Button>Create Your Own Request</Button>
           </Link>
         </Card>
@@ -151,7 +151,7 @@ export default function ApprovalPage({ params }: { params: Promise<{ code: strin
               Thanks for Your Support! 🎉
             </h2>
             <p className="text-slate-600 mb-6">
-              You've helped {request?.requester_name} get closer to their FREE product!
+              You've helped {request?.requester_name} get closer to their 50% OFF reward!
             </p>
 
             <div className="bg-slate-100 rounded-xl p-4 mb-6">
@@ -170,16 +170,16 @@ export default function ApprovalPage({ params }: { params: Promise<{ code: strin
             {request?.is_free_product_earned && (
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
                 <p className="text-green-700 font-semibold">
-                  🎊 This request has earned a FREE product!
+                  🎊 This request has earned 50% OFF any product!
                 </p>
               </div>
             )}
 
             <div className="space-y-4">
               <p className="text-slate-700 font-medium">
-                Want your own FREE product?
+                Want to earn 50% OFF too?
               </p>
-              <Link href="/free-products">
+              <Link href="/free-product">
                 <Button className="w-full" size="lg">
                   <Sparkles className="w-5 h-5 mr-2" />
                   Tell Jeffy What YOU Want
@@ -201,7 +201,7 @@ export default function ApprovalPage({ params }: { params: Promise<{ code: strin
             <Package className="w-8 h-8 text-jeffy-yellow" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
-            Help Your Friend Get This FREE! 🎁
+            Help Your Friend Get 50% Off! 🎉
           </h1>
           <p className="text-slate-600">
             {request?.requester_name} wants your opinion on this product idea
@@ -242,7 +242,7 @@ export default function ApprovalPage({ params }: { params: Promise<{ code: strin
               />
             </div>
             <p className="text-xs text-slate-500 mt-2">
-              {(request?.approvals_needed || 10) - (request?.approvals_received || 0)} more approvals needed for FREE product!
+              {(request?.approvals_needed || 10) - (request?.approvals_received || 0)} more approvals needed for 50% OFF!
             </p>
           </div>
         </Card>
@@ -348,7 +348,7 @@ export default function ApprovalPage({ params }: { params: Promise<{ code: strin
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-slate-400" />
                   <span className="text-sm text-slate-700">
-                    I want my own link to get this FREE too!
+                    I want my own link to get 50% OFF too!
                   </span>
                 </div>
               </label>
@@ -410,8 +410,8 @@ export default function ApprovalPage({ params }: { params: Promise<{ code: strin
 
         {/* CTA to create own request */}
         <div className="text-center mt-8">
-          <p className="text-slate-600 mb-3">Want your own FREE product?</p>
-          <Link href="/free-products">
+          <p className="text-slate-600 mb-3">Want 50% OFF any product?</p>
+          <Link href="/free-product">
             <Button variant="outline">
               Tell Jeffy What You Want
               <ArrowRight className="w-4 h-4 ml-2" />

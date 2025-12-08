@@ -4,11 +4,9 @@ import React, { useState, useEffect, use } from 'react'
 import Link from 'next/link'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
-import { Input } from '@/components/Input'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { 
   CheckCircle, 
-  Clock,
   ThumbsUp, 
   Heart,
   Package,
@@ -16,7 +14,6 @@ import {
   Share2,
   RefreshCw,
   PartyPopper,
-  Truck,
   Copy,
   X
 } from 'lucide-react'
@@ -31,6 +28,9 @@ interface JeffyRequestData {
   approvals_received: number
   status: string
   is_free_product_earned: boolean
+  is_discount_earned?: boolean
+  reward_promo_code?: string
+  reward_used?: boolean
   free_product_shipped: boolean
   shipping_tracking?: string
   shipping_address?: {
@@ -59,16 +59,6 @@ export default function StatusPage({ params }: { params: Promise<{ code: string 
   const [request, setRequest] = useState<JeffyRequestData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [showShippingForm, setShowShippingForm] = useState(false)
-  const [verifyEmail, setVerifyEmail] = useState('')
-  const [shippingData, setShippingData] = useState({
-    name: '',
-    address: '',
-    city: '',
-    postal_code: '',
-    phone: ''
-  })
-  const [savingShipping, setSavingShipping] = useState(false)
 
   const shareableLink = typeof window !== 'undefined' 
     ? `${window.location.origin}/want/${resolvedParams.code}` 
@@ -85,9 +75,6 @@ export default function StatusPage({ params }: { params: Promise<{ code: string 
       
       if (data.success) {
         setRequest(data.data)
-        if (data.data.shipping_address) {
-          setShippingData(data.data.shipping_address)
-        }
       } else {
         setError(data.error || 'Request not found')
       }
@@ -96,37 +83,6 @@ export default function StatusPage({ params }: { params: Promise<{ code: string 
       setError('Failed to load request')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleSaveShipping = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSavingShipping(true)
-
-    try {
-      const response = await fetch(`/api/jeffy-wants/${resolvedParams.code}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          shipping_address: shippingData,
-          requester_email: verifyEmail
-        })
-      })
-
-      const data = await response.json()
-
-      if (!data.success) {
-        throw new Error(data.error)
-      }
-
-      setShowShippingForm(false)
-      fetchRequest()
-      alert('Shipping address saved!')
-
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to save address')
-    } finally {
-      setSavingShipping(false)
     }
   }
 
@@ -148,7 +104,7 @@ export default function StatusPage({ params }: { params: Promise<{ code: string 
           </div>
           <h2 className="text-xl font-bold text-slate-900 mb-2">Request Not Found</h2>
           <p className="text-slate-600 mb-4">This link may have expired or is invalid.</p>
-          <Link href="/free-products">
+          <Link href="/free-product">
             <Button>Create a New Request</Button>
           </Link>
         </Card>
@@ -169,7 +125,7 @@ export default function StatusPage({ params }: { params: Promise<{ code: string 
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
             Your Request Status
           </h1>
-          <p className="text-slate-600">Track your progress to a FREE product!</p>
+          <p className="text-slate-600">Track your progress to 50% OFF any product!</p>
         </div>
 
         {/* Main Status Card */}
@@ -211,7 +167,7 @@ export default function StatusPage({ params }: { params: Promise<{ code: string 
             {request?.is_free_product_earned ? (
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full font-semibold">
                 <PartyPopper className="w-5 h-5" />
-                FREE Product Earned!
+                50% OFF Earned!
               </div>
             ) : (
               <p className="text-slate-600">
@@ -259,7 +215,7 @@ export default function StatusPage({ params }: { params: Promise<{ code: string 
             </div>
             <div className="flex flex-wrap gap-2 justify-center">
               <a
-                href={`https://wa.me/?text=${encodeURIComponent(`Help me get this FREE! ${shareableLink}?source=whatsapp`)}`}
+                href={`https://wa.me/?text=${encodeURIComponent(`Help me get 50% OFF! ${shareableLink}?source=whatsapp`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-3 py-1.5 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600"
@@ -275,7 +231,7 @@ export default function StatusPage({ params }: { params: Promise<{ code: string 
                 Facebook
               </a>
               <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Help me get this FREE! ${shareableLink}?source=twitter`)}`}
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Help me get 50% OFF! ${shareableLink}?source=twitter`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-3 py-1.5 bg-sky-500 text-white rounded-lg text-sm font-medium hover:bg-sky-600"
@@ -283,7 +239,7 @@ export default function StatusPage({ params }: { params: Promise<{ code: string 
                 X/Twitter
               </a>
               <a
-                href={`mailto:?subject=Help me get this FREE!&body=${encodeURIComponent(`Hey! I found something cool. Can you check it out? ${shareableLink}?source=email`)}`}
+                href={`mailto:?subject=Help me get 50% OFF!&body=${encodeURIComponent(`Hey! I found something cool at Jeffy. Can you check it out? ${shareableLink}?source=email`)}`}
                 className="px-3 py-1.5 bg-slate-700 text-white rounded-lg text-sm font-medium hover:bg-slate-800"
               >
                 Email
@@ -292,109 +248,67 @@ export default function StatusPage({ params }: { params: Promise<{ code: string 
           </div>
         </Card>
 
-        {/* Shipping Address Form (when eligible) */}
-        {request?.is_free_product_earned && !request?.shipping_address && (
+        {/* Promo Code Display (when eligible) */}
+        {request?.is_free_product_earned && (
           <Card className="p-6 mb-6 border-2 border-green-300 bg-green-50">
             <div className="flex items-center gap-3 mb-4">
-              <Truck className="w-6 h-6 text-green-600" />
-              <h3 className="font-bold text-green-800">Add Your Shipping Address!</h3>
+              <PartyPopper className="w-6 h-6 text-green-600" />
+              <h3 className="font-bold text-green-800">🎉 Your 50% OFF Code is Ready!</h3>
             </div>
-            <p className="text-green-700 text-sm mb-4">
-              Congratulations! You've earned your FREE product. Enter your shipping details below.
-            </p>
             
-            {!showShippingForm ? (
-              <Button onClick={() => setShowShippingForm(true)} className="w-full">
-                Enter Shipping Address
-              </Button>
+            {request?.reward_promo_code ? (
+              <>
+                <div className="bg-white border-2 border-green-400 rounded-xl p-4 mb-4 text-center">
+                  <p className="text-sm text-green-600 mb-2">Your Promo Code:</p>
+                  <div className="flex items-center justify-center gap-3">
+                    <span className="text-2xl font-bold font-mono text-green-800 tracking-wider">
+                      {request.reward_promo_code}
+                    </span>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(request.reward_promo_code || '')
+                        alert('Code copied!')
+                      }}
+                      className="p-2 bg-green-100 hover:bg-green-200 rounded-lg transition-colors"
+                    >
+                      <Copy className="w-5 h-5 text-green-600" />
+                    </button>
+                  </div>
+                </div>
+                <p className="text-green-700 text-sm mb-4">
+                  Use this code at checkout for 50% off ANY product - including the one you requested when we stock it!
+                </p>
+                {request.reward_used ? (
+                  <p className="text-amber-600 text-sm font-medium">✓ This code has been used</p>
+                ) : (
+                  <Link href="/products">
+                    <Button className="w-full bg-green-600 hover:bg-green-700">
+                      Shop Now - Use Your 50% Off!
+                    </Button>
+                  </Link>
+                )}
+              </>
             ) : (
-              <form onSubmit={handleSaveShipping} className="space-y-4">
-                <Input
-                  label="Verify Your Email *"
-                  type="email"
-                  value={verifyEmail}
-                  onChange={(e) => setVerifyEmail(e.target.value)}
-                  placeholder="Enter the email you used"
-                  required
-                />
-                <Input
-                  label="Full Name *"
-                  value={shippingData.name}
-                  onChange={(e) => setShippingData({ ...shippingData, name: e.target.value })}
-                  required
-                />
-                <Input
-                  label="Street Address *"
-                  value={shippingData.address}
-                  onChange={(e) => setShippingData({ ...shippingData, address: e.target.value })}
-                  required
-                />
-                <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    label="City *"
-                    value={shippingData.city}
-                    onChange={(e) => setShippingData({ ...shippingData, city: e.target.value })}
-                    required
-                  />
-                  <Input
-                    label="Postal Code *"
-                    value={shippingData.postal_code}
-                    onChange={(e) => setShippingData({ ...shippingData, postal_code: e.target.value })}
-                    required
-                  />
-                </div>
-                <Input
-                  label="Phone Number *"
-                  value={shippingData.phone}
-                  onChange={(e) => setShippingData({ ...shippingData, phone: e.target.value })}
-                  required
-                />
-                <div className="flex gap-2">
-                  <Button type="button" variant="outline" onClick={() => setShowShippingForm(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={savingShipping} className="flex-1">
-                    {savingShipping ? 'Saving...' : 'Save Address'}
-                  </Button>
-                </div>
-              </form>
+              <p className="text-green-700 text-sm">
+                Congratulations! Your promo code is being generated. Refresh to see it!
+              </p>
             )}
           </Card>
         )}
 
-        {/* Shipping Status */}
-        {request?.shipping_address && (
+        {/* Product Request Info */}
+        {request?.matched_product_name && (
           <Card className="p-6 mb-6">
             <div className="flex items-center gap-3 mb-4">
-              <Truck className="w-6 h-6 text-slate-600" />
-              <h3 className="font-bold text-slate-900">Shipping Details</h3>
+              <Package className="w-6 h-6 text-slate-600" />
+              <h3 className="font-bold text-slate-900">Product Status</h3>
             </div>
-            <div className="bg-slate-50 rounded-xl p-4 space-y-2 text-sm">
-              <p><strong>Name:</strong> {request.shipping_address.name}</p>
-              <p><strong>Address:</strong> {request.shipping_address.address}</p>
-              <p><strong>City:</strong> {request.shipping_address.city}, {request.shipping_address.postal_code}</p>
-              <p><strong>Phone:</strong> {request.shipping_address.phone}</p>
+            <div className="bg-slate-50 rounded-xl p-4">
+              <p className="text-slate-900 font-medium">{request.matched_product_name}</p>
+              <p className="text-sm text-slate-600 mt-1">
+                This product has been added to our store! Use your 50% off code at checkout.
+              </p>
             </div>
-            {request.free_product_shipped ? (
-              <div className="mt-4 p-4 bg-green-50 rounded-xl">
-                <p className="text-green-700 font-semibold flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5" />
-                  Product Shipped!
-                </p>
-                {request.shipping_tracking && (
-                  <p className="text-sm text-green-600 mt-1">
-                    Tracking: {request.shipping_tracking}
-                  </p>
-                )}
-              </div>
-            ) : (
-              <div className="mt-4 p-4 bg-yellow-50 rounded-xl">
-                <p className="text-yellow-700 flex items-center gap-2">
-                  <Clock className="w-5 h-5" />
-                  Processing your free product...
-                </p>
-              </div>
-            )}
           </Card>
         )}
 
