@@ -14,7 +14,10 @@ import {
   Sparkles,
   TrendingUp,
   Heart,
-  Package
+  Package,
+  Search,
+  Target,
+  Percent
 } from 'lucide-react'
 import { JeffyExplainerAnimation } from '@/components/JeffyExplainerAnimation'
 
@@ -29,7 +32,7 @@ interface PopularRequest {
   created_at: string
 }
 
-export default function FreeProductsPage() {
+export default function JeffyWantsPage() {
   const [popularRequests, setPopularRequests] = useState<PopularRequest[]>([])
 
   useEffect(() => {
@@ -61,8 +64,8 @@ export default function FreeProductsPage() {
           <div className="text-center mb-8">
             {/* Animated Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-lg mb-6 animate-bounce">
-              <Gift className="w-5 h-5 text-red-500" />
-              <span className="font-semibold text-slate-900">Get Products FREE!</span>
+              <Search className="w-5 h-5 text-amber-600" />
+              <span className="font-semibold text-slate-900">We Only Stock What YOU Want!</span>
             </div>
 
             <h1 className="text-4xl sm:text-6xl font-bold text-slate-900 mb-4">
@@ -71,9 +74,14 @@ export default function FreeProductsPage() {
                 WANT
               </span>
             </h1>
-            <p className="text-xl text-slate-700 max-w-2xl mx-auto mb-8">
-              Share your link with 10 friends who agree it's a good idea,
-              and Jeffy will give you the product <strong>completely FREE!</strong>
+            <p className="text-xl text-slate-700 max-w-2xl mx-auto mb-4">
+              Can't find what you're looking for at a fair price?
+              <br />
+              <strong>Tell me.</strong> I'll source it for you.
+            </p>
+            <p className="text-lg text-slate-600 max-w-xl mx-auto">
+              If 10 people agree it's a good idea, I'll stock it and 
+              <span className="text-amber-600 font-bold"> YOU get it at 50% off</span> (my cost price)!
             </p>
           </div>
 
@@ -89,38 +97,41 @@ export default function FreeProductsPage() {
         </div>
       </section>
 
-      {/* How It Works */}
+      {/* How It Works - Reframed */}
       <section className="py-12 px-4 bg-white/50">
         <div className="container mx-auto max-w-5xl">
-          <h2 className="text-3xl font-bold text-center text-slate-900 mb-12">
+          <h2 className="text-3xl font-bold text-center text-slate-900 mb-4">
             How It Works
           </h2>
+          <p className="text-center text-slate-600 mb-12 max-w-2xl mx-auto">
+            I don't guess what to sell. <strong>You tell me what you need</strong>, and if there's demand, I stock it.
+          </p>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {[
               {
                 step: 1,
-                icon: Package,
-                title: 'Tell Jeffy',
-                description: 'Describe the product you want - speak or type!'
+                icon: Search,
+                title: 'Tell Me What You Want',
+                description: 'Describe the product you\'ve been looking for'
               },
               {
                 step: 2,
                 icon: Share2,
-                title: 'Get Your Link',
-                description: 'Receive a unique link to share with friends'
+                title: 'Share Your Link',
+                description: 'Send it to friends who might want it too'
               },
               {
                 step: 3,
-                icon: Users,
-                title: 'Share & Collect',
-                description: 'Get 10 friends to approve your idea'
+                icon: Target,
+                title: 'Prove The Demand',
+                description: '10 people agree = I\'ll source & stock it'
               },
               {
                 step: 4,
-                icon: Gift,
-                title: 'Get It FREE!',
-                description: 'Your product ships to you at no cost!'
+                icon: Percent,
+                title: 'Get 50% Off!',
+                description: 'As thanks, you get it at my cost price'
               }
             ].map((item) => {
               const Icon = item.icon
@@ -143,19 +154,67 @@ export default function FreeProductsPage() {
         </div>
       </section>
 
+      {/* Why This Works - Business Model Explanation */}
+      <section className="py-12 px-4 bg-slate-900 text-white">
+        <div className="container mx-auto max-w-4xl">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <h2 className="text-3xl font-bold mb-4">
+                Why 50% Off?
+              </h2>
+              <p className="text-slate-300 mb-4">
+                Most shops guess what you want, buy stock, and hope it sells.
+                <strong className="text-white"> I do the opposite.</strong>
+              </p>
+              <p className="text-slate-300 mb-4">
+                You tell me what you want. When 10 people agree, I KNOW there's demand. 
+                That's valuable market research you're giving me for free.
+              </p>
+              <p className="text-amber-400 font-semibold">
+                50% off (my cost price) is my thank you for helping me build 
+                a store that sells what people actually want.
+              </p>
+            </div>
+            <div className="space-y-4">
+              <div className="bg-white/10 rounded-xl p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <CheckCircle className="w-5 h-5 text-green-400" />
+                  <span className="font-semibold">No wasted inventory</span>
+                </div>
+                <p className="text-slate-400 text-sm">I only stock what people want</p>
+              </div>
+              <div className="bg-white/10 rounded-xl p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <CheckCircle className="w-5 h-5 text-green-400" />
+                  <span className="font-semibold">Lower prices for everyone</span>
+                </div>
+                <p className="text-slate-400 text-sm">No guesswork = better deals</p>
+              </div>
+              <div className="bg-white/10 rounded-xl p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <CheckCircle className="w-5 h-5 text-green-400" />
+                  <span className="font-semibold">You shape the store</span>
+                </div>
+                <p className="text-slate-400 text-sm">Every request helps me serve you better</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Main Form Section */}
       <section className="py-16 px-4" id="form">
         <div className="container mx-auto max-w-2xl">
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-full mb-4">
               <Sparkles className="w-5 h-5 text-jeffy-yellow" />
-              <span className="font-semibold">Start Here</span>
+              <span className="font-semibold">Tell Me What You Want</span>
             </div>
             <h2 className="text-3xl font-bold text-slate-900 mb-2">
-              What Product Do You Want?
+              What Have You Been Looking For?
             </h2>
             <p className="text-slate-600">
-              Type or speak your request below. Be specific about what you're looking for!
+              Type or speak your request. Be specific - what's the product? What's wrong with what's out there?
             </p>
           </div>
 
@@ -170,13 +229,13 @@ export default function FreeProductsPage() {
             <div className="text-center mb-12">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-full mb-4">
                 <TrendingUp className="w-5 h-5" />
-                <span className="font-semibold">Trending Requests</span>
+                <span className="font-semibold">What People Are Looking For</span>
               </div>
               <h2 className="text-3xl font-bold text-slate-900 mb-2">
-                What Others Are Looking For
+                Products In Demand
               </h2>
               <p className="text-slate-600">
-                Join in and help others get their products FREE!
+                These are real requests from real people. Vote if you want it too!
               </p>
             </div>
 
@@ -222,7 +281,7 @@ export default function FreeProductsPage() {
         </section>
       )}
 
-      {/* FAQ Section */}
+      {/* FAQ Section - Reframed */}
       <section className="py-16 px-4">
         <div className="container mx-auto max-w-3xl">
           <h2 className="text-3xl font-bold text-center text-slate-900 mb-12">
@@ -232,24 +291,24 @@ export default function FreeProductsPage() {
           <div className="space-y-4">
             {[
               {
-                q: "Is this really free?",
-                a: "Yes! If 10 of your friends approve your request, you get the product completely free. We ship it to you at no cost."
+                q: "Why only 50% off and not free?",
+                a: "50% off is my cost price - I make no profit, but I don't lose money either. This way I can keep doing this sustainably. If 1000 people want something, I can actually afford to stock it!"
               },
               {
-                q: "How does Jeffy afford this?",
-                a: "When enough people show interest in a product, we source it directly and add it to our store. The viral exposure helps us grow, and we reward early supporters with free products!"
+                q: "Why do I need 10 people to agree?",
+                a: "10 approvals proves there's real demand. I'm not guessing what to sell - I'm only stocking products people actually want. Your 10 friends validate that it's worth sourcing."
               },
               {
-                q: "What happens after I get 10 approvals?",
-                a: "We'll email you to collect your shipping address. Your free product will be shipped within 2-4 weeks depending on sourcing."
+                q: "What happens after 10 people approve?",
+                a: "I'll source the product and add it to the store. You'll get a 50% off code to use at checkout. Your friends who approved can also buy it (they get 30% off for helping!)."
               },
               {
-                q: "Can my friends also get free products?",
-                a: "Absolutely! When they approve your request, they can choose to create their own link and get the same product free too."
+                q: "What if the product I want is already in stock?",
+                a: "Even better! If we have it, you still get 50% off when your request hits 10 approvals. The system rewards demand validation regardless."
               },
               {
-                q: "What products can I request?",
-                a: "Almost anything! Describe what you're looking for - the more specific, the better. We specialize in quality products at fair prices."
+                q: "Can I request anything?",
+                a: "Almost! Describe what you're looking for - the more specific, the better. I specialize in quality products at fair prices. If I can source it, I will."
               }
             ].map((item, index) => (
               <Card key={index} className="p-6">
@@ -268,10 +327,11 @@ export default function FreeProductsPage() {
       <section className="py-16 px-4 bg-slate-900">
         <div className="container mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to Get Your FREE Product?
+            What Have You Been Looking For?
           </h2>
           <p className="text-slate-300 mb-8">
-            It takes less than a minute to create your request. What are you waiting for?
+            Help me build a store that sells what people actually want. 
+            Tell me what you need - if 10 people agree, you get it at half price.
           </p>
           <a href="#form">
             <Button size="lg" className="bg-jeffy-yellow text-slate-900 hover:bg-yellow-400">
@@ -284,4 +344,3 @@ export default function FreeProductsPage() {
     </div>
   )
 }
-
