@@ -28,7 +28,7 @@ import {
   Bot
 } from 'lucide-react'
 
-type ActiveTool = 'description' | 'analytics' | 'reorder' | 'requests' | 'marketing' | 'advisor'
+type ActiveTool = 'description' | 'analytics' | 'reorder' | 'requests' | 'marketing' | 'advisor' | 'seo'
 
 export default function AIToolsPage() {
   const router = useRouter()
