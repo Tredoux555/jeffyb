@@ -108,22 +108,31 @@ CREATE INDEX IF NOT EXISTS idx_promo_codes_user ON promo_codes(user_id);
 
 -- Referral Settings (read-only for all, write for admins via service role)
 ALTER TABLE referral_settings ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can read referral settings" ON referral_settings;
 CREATE POLICY "Anyone can read referral settings" ON referral_settings FOR SELECT USING (true);
 
 -- Referral Campaigns
 ALTER TABLE referral_campaigns ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view their own campaigns" ON referral_campaigns;
+DROP POLICY IF EXISTS "Users can create their own campaigns" ON referral_campaigns;
+DROP POLICY IF EXISTS "Users can update their own campaigns" ON referral_campaigns;
 CREATE POLICY "Users can view their own campaigns" ON referral_campaigns FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can create their own campaigns" ON referral_campaigns FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update their own campaigns" ON referral_campaigns FOR UPDATE USING (auth.uid() = user_id);
 
 -- Referrals (public insert for email signup, restricted read)
 ALTER TABLE referrals ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can create referrals" ON referrals;
+DROP POLICY IF EXISTS "Anyone can view referrals by verification token" ON referrals;
+DROP POLICY IF EXISTS "Anyone can update referrals for verification" ON referrals;
 CREATE POLICY "Anyone can create referrals" ON referrals FOR INSERT WITH CHECK (true);
 CREATE POLICY "Anyone can view referrals by verification token" ON referrals FOR SELECT USING (true);
 CREATE POLICY "Anyone can update referrals for verification" ON referrals FOR UPDATE USING (true);
 
 -- Promo Codes
 ALTER TABLE promo_codes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can read active promo codes" ON promo_codes;
+DROP POLICY IF EXISTS "Users can view their own promo codes" ON promo_codes;
 CREATE POLICY "Anyone can read active promo codes" ON promo_codes FOR SELECT USING (is_active = true);
 CREATE POLICY "Users can view their own promo codes" ON promo_codes FOR SELECT USING (auth.uid() = user_id);
 
